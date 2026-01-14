@@ -65,19 +65,18 @@ function calculateTimeSavings(
 
 /**
  * Revenue impact calculation:
- * quantity = deals/month or occurrences/month
+ * quantity = number of deals/occurrences per year
  * unitValue = value per deal/occurrence
  * rate = improvement percentage (e.g., 0.1 for 10% improvement)
  *
- * Formula: quantity * 12 * unitValue * rate
- * OR if rate is not set: quantity * 12 * unitValue (direct value)
+ * Formula: quantity * unitValue * rate
  */
 function calculateRevenueImpact(item: ValueItem): number {
   const quantity = item.quantity;
   const unitValue = item.unitValue;
   const rate = item.rate ?? 1; // Default to 100% if no rate specified
 
-  return quantity * 12 * unitValue * rate;
+  return quantity * unitValue * rate;
 }
 
 /**

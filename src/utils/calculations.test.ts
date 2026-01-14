@@ -112,9 +112,9 @@ describe("calculateItemAnnualValue", () => {
         rate: 1, // 100%
       });
 
-      // 1 * 12 * $10,000 * 1 = $120,000
+      // 1 * $10,000 * 1 = $10,000
       const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(120000);
+      expect(result).toBe(10000);
     });
 
     test("applies partial rate correctly", () => {
@@ -125,9 +125,9 @@ describe("calculateItemAnnualValue", () => {
         rate: 0.1, // 10% improvement
       });
 
-      // 10 * 12 * $5,000 * 0.1 = $60,000
+      // 10 * $5,000 * 0.1 = $5,000
       const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(60000);
+      expect(result).toBe(5000);
     });
 
     test("defaults to 100% rate when not specified", () => {
@@ -137,9 +137,9 @@ describe("calculateItemAnnualValue", () => {
         unitValue: 1000,
       });
 
-      // 2 * 12 * $1,000 * 1 = $24,000
+      // 2 * $1,000 * 1 = $2,000
       const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(24000);
+      expect(result).toBe(2000);
     });
   });
 
@@ -266,8 +266,8 @@ describe("calculateCategoryTotals", () => {
 
     // time_savings: (100 * 8/60 * 12 * 50) + (50 * 2/60 * 12 * 25) = 8000 + 500 = 8500
     expect(totals.time_savings).toBe(8500);
-    // revenue_impact: 1 * 12 * 5000 * 1 = 60000
-    expect(totals.revenue_impact).toBe(60000);
+    // revenue_impact: 1 * 5000 * 1 = 5000
+    expect(totals.revenue_impact).toBe(5000);
     // cost_reduction: 10000 * 0.5 = 5000
     expect(totals.cost_reduction).toBe(5000);
     // Others should be 0
@@ -295,9 +295,9 @@ describe("calculateTotalAnnualValue", () => {
       createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 10000, rate: 1 }),
     ];
 
-    // time_savings: 80000, revenue_impact: 120000
+    // time_savings: 80000, revenue_impact: 10000
     const total = calculateTotalAnnualValue(items, defaultAssumptions);
-    expect(total).toBe(200000);
+    expect(total).toBe(90000);
   });
 
   test("returns 0 for empty items", () => {
@@ -406,16 +406,16 @@ describe("getCategoryBreakdown", () => {
   test("returns breakdown sorted by value descending", () => {
     const items: ValueItem[] = [
       createValueItem({ category: "time_savings", quantity: 1000, complexity: "medium", rateTier: "operations" }), // 80000
-      createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 10000, rate: 1 }), // 120000
+      createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 10000, rate: 1 }), // 10000
     ];
 
     const breakdown = getCategoryBreakdown(items, defaultAssumptions);
 
     expect(breakdown.length).toBe(2);
-    expect(breakdown[0]!.category).toBe("revenue_impact");
-    expect(breakdown[0]!.value).toBe(120000);
-    expect(breakdown[1]!.category).toBe("time_savings");
-    expect(breakdown[1]!.value).toBe(80000);
+    expect(breakdown[0]!.category).toBe("time_savings");
+    expect(breakdown[0]!.value).toBe(80000);
+    expect(breakdown[1]!.category).toBe("revenue_impact");
+    expect(breakdown[1]!.value).toBe(10000);
   });
 
   test("calculates percentages correctly", () => {
