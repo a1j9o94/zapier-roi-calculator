@@ -113,17 +113,18 @@ export function ExecutiveSummary({
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header with actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">{calculation.name}</h2>
           <p className="text-muted-foreground">ROI Analysis</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCopyToClipboard}>
+          <Button variant="outline" size="sm" onClick={handleCopyToClipboard}>
             {copied ? "Copied!" : "Copy Summary"}
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => generateExecutiveSummaryPDF(calculation, valueItems)}
           >
             Export PDF
@@ -132,11 +133,11 @@ export function ExecutiveSummary({
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-[#FF4A00] to-[#FF6B33] text-white">
           <CardContent className="pt-6">
             <p className="text-white/80 text-sm font-medium">Annual Value</p>
-            <p className="text-3xl font-bold font-mono">
+            <p className="text-2xl sm:text-3xl font-bold font-mono">
               {formatCurrencyCompact(totalValue)}
             </p>
           </CardContent>
@@ -147,7 +148,7 @@ export function ExecutiveSummary({
             <p className="text-muted-foreground text-sm font-medium">
               Incremental Investment
             </p>
-            <p className="text-3xl font-bold font-mono">
+            <p className="text-2xl sm:text-3xl font-bold font-mono">
               {incrementalInvestment > 0
                 ? formatCurrencyCompact(incrementalInvestment)
                 : "—"}
@@ -160,7 +161,7 @@ export function ExecutiveSummary({
             <p className="text-muted-foreground text-sm font-medium">
               ROI Multiple
             </p>
-            <p className="text-3xl font-bold font-mono text-[#FF4A00]">
+            <p className="text-2xl sm:text-3xl font-bold font-mono text-[#FF4A00]">
               {roiMultiple ? formatMultiple(roiMultiple) : "—"}
             </p>
           </CardContent>
