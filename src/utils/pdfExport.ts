@@ -72,7 +72,7 @@ export function generateExecutiveSummaryPDF(
     format: "a4",
   });
 
-  let y = 20; // Starting Y position
+  let y = 12; // Starting Y position
 
   // Header
   y = drawHeader(doc, data, y);
@@ -107,91 +107,91 @@ function drawHeader(doc: jsPDF, data: PDFData, y: number): number {
 
   // Zapier orange accent bar
   doc.setFillColor(COLORS.orange);
-  doc.rect(0, 0, pageWidth, 8, "F");
+  doc.rect(0, 0, pageWidth, 6, "F");
 
   // Title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(24);
+  doc.setFontSize(18);
   doc.setTextColor(COLORS.darkGray);
-  doc.text(data.calculation.name, 20, y + 15);
+  doc.text(data.calculation.name, 15, y + 10);
 
   // Subtitle
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(14);
+  doc.setFontSize(10);
   doc.setTextColor(COLORS.mediumGray);
-  doc.text("ROI Analysis", 20, y + 23);
+  doc.text("ROI Analysis", 15, y + 16);
 
   // Date
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   doc.text(new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric"
-  }), pageWidth - 20, y + 15, { align: "right" });
+  }), pageWidth - 15, y + 10, { align: "right" });
 
-  return y + 35;
+  return y + 22;
 }
 
 function drawKPISummary(doc: jsPDF, data: PDFData, y: number): number {
   const pageWidth = doc.internal.pageSize.getWidth();
-  const boxWidth = (pageWidth - 60) / 3;
-  const boxHeight = 30;
-  const startX = 20;
+  const boxWidth = (pageWidth - 50) / 3;
+  const boxHeight = 22;
+  const startX = 15;
 
   // Annual Value box (with orange background)
   doc.setFillColor(COLORS.orange);
-  doc.roundedRect(startX, y, boxWidth, boxHeight, 3, 3, "F");
+  doc.roundedRect(startX, y, boxWidth, boxHeight, 2, 2, "F");
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(7);
   doc.setTextColor("#FFFFFF");
-  doc.text("Annual Value", startX + boxWidth / 2, y + 10, { align: "center" });
+  doc.text("Annual Value", startX + boxWidth / 2, y + 7, { align: "center" });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text(formatCurrencyCompact(data.totalValue), startX + boxWidth / 2, y + 22, { align: "center" });
+  doc.setFontSize(14);
+  doc.text(formatCurrencyCompact(data.totalValue), startX + boxWidth / 2, y + 16, { align: "center" });
 
   // Incremental Investment box
   const box2X = startX + boxWidth + 10;
   doc.setFillColor(COLORS.background);
-  doc.roundedRect(box2X, y, boxWidth, boxHeight, 3, 3, "F");
+  doc.roundedRect(box2X, y, boxWidth, boxHeight, 2, 2, "F");
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(7);
   doc.setTextColor(COLORS.mediumGray);
-  doc.text("Incremental Investment", box2X + boxWidth / 2, y + 10, { align: "center" });
+  doc.text("Incremental Investment", box2X + boxWidth / 2, y + 7, { align: "center" });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(14);
   doc.setTextColor(COLORS.darkGray);
   doc.text(
     data.incrementalInvestment > 0 ? formatCurrencyCompact(data.incrementalInvestment) : "—",
     box2X + boxWidth / 2,
-    y + 22,
+    y + 16,
     { align: "center" }
   );
 
   // ROI Multiple box
   const box3X = box2X + boxWidth + 10;
   doc.setFillColor(COLORS.background);
-  doc.roundedRect(box3X, y, boxWidth, boxHeight, 3, 3, "F");
+  doc.roundedRect(box3X, y, boxWidth, boxHeight, 2, 2, "F");
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(7);
   doc.setTextColor(COLORS.mediumGray);
-  doc.text("ROI Multiple", box3X + boxWidth / 2, y + 10, { align: "center" });
+  doc.text("ROI Multiple", box3X + boxWidth / 2, y + 7, { align: "center" });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(14);
   doc.setTextColor(COLORS.orange);
   doc.text(
     data.roiMultiple ? formatMultiple(data.roiMultiple) : "—",
     box3X + boxWidth / 2,
-    y + 22,
+    y + 16,
     { align: "center" }
   );
 
-  return y + boxHeight + 15;
+  return y + boxHeight + 8;
 }
 
 function drawValueBreakdown(doc: jsPDF, data: PDFData, y: number): number {
@@ -201,47 +201,47 @@ function drawValueBreakdown(doc: jsPDF, data: PDFData, y: number): number {
 
   // Section title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(11);
   doc.setTextColor(COLORS.darkGray);
-  doc.text("Value Breakdown by Category", 20, y);
-  y += 8;
+  doc.text("Value Breakdown by Category", 15, y);
+  y += 6;
 
   // Draw each category bar
   for (const item of data.breakdown) {
     // Label and value
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(8);
     doc.setTextColor(COLORS.darkGray);
-    doc.text(item.label, 20, y + 4);
+    doc.text(item.label, 15, y + 3);
 
     doc.setFont("helvetica", "normal");
     doc.setTextColor(COLORS.mediumGray);
     doc.text(
       `${formatCurrency(item.value)} (${formatPercent(item.percentage / 100)})`,
-      pageWidth - 20,
-      y + 4,
+      pageWidth - 15,
+      y + 3,
       { align: "right" }
     );
 
     // Background bar
-    const barY = y + 6;
-    const barWidth = pageWidth - 40;
-    const barHeight = 6;
+    const barY = y + 5;
+    const barWidth = pageWidth - 30;
+    const barHeight = 4;
 
     doc.setFillColor(COLORS.background);
-    doc.roundedRect(20, barY, barWidth, barHeight, 2, 2, "F");
+    doc.roundedRect(15, barY, barWidth, barHeight, 1, 1, "F");
 
     // Filled bar
     doc.setFillColor(item.color);
     const filledWidth = (item.percentage / 100) * barWidth;
     if (filledWidth > 0) {
-      doc.roundedRect(20, barY, filledWidth, barHeight, 2, 2, "F");
+      doc.roundedRect(15, barY, filledWidth, barHeight, 1, 1, "F");
     }
 
-    y += 16;
+    y += 11;
   }
 
-  return y + 5;
+  return y + 3;
 }
 
 function drawProjectionTable(doc: jsPDF, data: PDFData, y: number): number {
@@ -251,48 +251,48 @@ function drawProjectionTable(doc: jsPDF, data: PDFData, y: number): number {
 
   // Section title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(11);
   doc.setTextColor(COLORS.darkGray);
-  doc.text("Multi-Year Projection", 20, y);
-  y += 10;
+  doc.text("Multi-Year Projection", 15, y);
+  y += 7;
 
   // Table setup
-  const colWidth = (pageWidth - 40) / (projections.length + 2);
-  const rowHeight = 10;
-  let x = 20;
+  const colWidth = (pageWidth - 30) / (projections.length + 2);
+  const rowHeight = 8;
+  let x = 15;
 
   // Header row
   doc.setFillColor(COLORS.background);
-  doc.rect(20, y, pageWidth - 40, rowHeight, "F");
+  doc.rect(15, y, pageWidth - 30, rowHeight, "F");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(COLORS.mediumGray);
 
-  x = 20 + colWidth; // Skip first column
+  x = 15 + colWidth; // Skip first column
   for (const p of projections) {
-    doc.text(`Year ${p.year}`, x + colWidth / 2, y + 7, { align: "center" });
+    doc.text(`Year ${p.year}`, x + colWidth / 2, y + 5.5, { align: "center" });
     x += colWidth;
   }
   doc.setTextColor(COLORS.orange);
-  doc.text(`${years}-Year Total`, x + colWidth / 2, y + 7, { align: "center" });
+  doc.text(`${years}-Year Total`, x + colWidth / 2, y + 5.5, { align: "center" });
 
   y += rowHeight;
 
   // Value row
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(COLORS.darkGray);
-  doc.text("Value", 25, y + 7);
+  doc.text("Value", 18, y + 5.5);
 
-  x = 20 + colWidth;
+  x = 15 + colWidth;
   for (const p of projections) {
-    doc.text(formatCurrencyCompact(p.value), x + colWidth / 2, y + 7, { align: "center" });
+    doc.text(formatCurrencyCompact(p.value), x + colWidth / 2, y + 5.5, { align: "center" });
     x += colWidth;
   }
   const totalValue = projections.reduce((sum, p) => sum + p.value, 0);
   doc.setFont("helvetica", "bold");
-  doc.text(formatCurrencyCompact(totalValue), x + colWidth / 2, y + 7, { align: "center" });
+  doc.text(formatCurrencyCompact(totalValue), x + colWidth / 2, y + 5.5, { align: "center" });
 
   y += rowHeight;
 
@@ -301,79 +301,79 @@ function drawProjectionTable(doc: jsPDF, data: PDFData, y: number): number {
     // Investment row
     doc.setFont("helvetica", "normal");
     doc.setTextColor(COLORS.mediumGray);
-    doc.text("Investment", 25, y + 7);
+    doc.text("Investment", 18, y + 5.5);
 
-    x = 20 + colWidth;
+    x = 15 + colWidth;
     for (const p of projections) {
-      doc.text(formatCurrencyCompact(p.investment), x + colWidth / 2, y + 7, { align: "center" });
+      doc.text(formatCurrencyCompact(p.investment), x + colWidth / 2, y + 5.5, { align: "center" });
       x += colWidth;
     }
     const totalInvestment = projections.reduce((sum, p) => sum + p.investment, 0);
-    doc.text(formatCurrencyCompact(totalInvestment), x + colWidth / 2, y + 7, { align: "center" });
+    doc.text(formatCurrencyCompact(totalInvestment), x + colWidth / 2, y + 5.5, { align: "center" });
 
     y += rowHeight;
 
     // Net Value row
     doc.setTextColor(COLORS.orange);
     doc.setFont("helvetica", "bold");
-    doc.text("Net Value", 25, y + 7);
+    doc.text("Net Value", 18, y + 5.5);
 
-    x = 20 + colWidth;
+    x = 15 + colWidth;
     for (const p of projections) {
-      doc.text(formatCurrencyCompact(p.netValue), x + colWidth / 2, y + 7, { align: "center" });
+      doc.text(formatCurrencyCompact(p.netValue), x + colWidth / 2, y + 5.5, { align: "center" });
       x += colWidth;
     }
     const totalNetValue = projections.reduce((sum, p) => sum + p.netValue, 0);
-    doc.text(formatCurrencyCompact(totalNetValue), x + colWidth / 2, y + 7, { align: "center" });
+    doc.text(formatCurrencyCompact(totalNetValue), x + colWidth / 2, y + 5.5, { align: "center" });
 
     y += rowHeight;
   }
 
-  return y + 10;
+  return y + 6;
 }
 
 function drawKeyMetrics(doc: jsPDF, data: PDFData, y: number): number {
   const pageWidth = doc.internal.pageSize.getWidth();
-  const boxWidth = (pageWidth - 50) / 2;
-  const boxHeight = 25;
+  const boxWidth = (pageWidth - 40) / 2;
+  const boxHeight = 18;
 
   // Section title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(11);
   doc.setTextColor(COLORS.darkGray);
-  doc.text("Key Metrics", 20, y);
-  y += 8;
+  doc.text("Key Metrics", 15, y);
+  y += 6;
 
   // Hours saved box
   doc.setFillColor(COLORS.background);
-  doc.roundedRect(20, y, boxWidth, boxHeight, 3, 3, "F");
+  doc.roundedRect(15, y, boxWidth, boxHeight, 2, 2, "F");
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(7);
   doc.setTextColor(COLORS.mediumGray);
-  doc.text("Hours Saved per Month", 25, y + 10);
+  doc.text("Hours Saved per Month", 18, y + 6);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(12);
   doc.setTextColor(COLORS.darkGray);
-  doc.text(formatNumber(Math.round(data.totalHoursSaved)), 25, y + 20);
+  doc.text(formatNumber(Math.round(data.totalHoursSaved)), 18, y + 14);
 
   // FTE box
-  const box2X = 30 + boxWidth;
+  const box2X = 20 + boxWidth;
   doc.setFillColor(COLORS.background);
-  doc.roundedRect(box2X, y, boxWidth, boxHeight, 3, 3, "F");
+  doc.roundedRect(box2X, y, boxWidth, boxHeight, 2, 2, "F");
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(7);
   doc.setTextColor(COLORS.mediumGray);
-  doc.text("FTE Equivalent per Year", box2X + 5, y + 10);
+  doc.text("FTE Equivalent per Year", box2X + 3, y + 6);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(12);
   doc.setTextColor(COLORS.darkGray);
-  doc.text(((data.totalHoursSaved * 12) / 2080).toFixed(1), box2X + 5, y + 20);
+  doc.text(((data.totalHoursSaved * 12) / 2080).toFixed(1), box2X + 3, y + 14);
 
-  return y + boxHeight + 10;
+  return y + boxHeight + 6;
 }
 
 function drawTalkingPoints(doc: jsPDF, data: PDFData, y: number): number {
@@ -382,39 +382,27 @@ function drawTalkingPoints(doc: jsPDF, data: PDFData, y: number): number {
 
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Check if we need a new page
-  if (y > 250) {
-    doc.addPage();
-    y = 20;
-  }
-
   // Section title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(11);
   doc.setTextColor(COLORS.darkGray);
-  doc.text("Key Talking Points", 20, y);
-  y += 10;
+  doc.text("Key Talking Points", 15, y);
+  y += 6;
 
   // Talking points
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   doc.setTextColor(COLORS.darkGray);
 
   for (const point of talkingPoints) {
     // Bullet point
     doc.setFillColor(COLORS.orange);
-    doc.circle(24, y - 1, 1.5, "F");
+    doc.circle(18, y - 0.5, 1, "F");
 
     // Text (with word wrap)
-    const lines = doc.splitTextToSize(point, pageWidth - 50);
-    doc.text(lines, 30, y);
-    y += lines.length * 5 + 3;
-
-    // Check for page break
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
-    }
+    const lines = doc.splitTextToSize(point, pageWidth - 40);
+    doc.text(lines, 22, y);
+    y += lines.length * 4 + 2;
   }
 
   return y;
@@ -426,17 +414,17 @@ function drawFooter(doc: jsPDF): void {
 
   // Footer line
   doc.setDrawColor(COLORS.lightGray);
-  doc.line(20, pageHeight - 15, pageWidth - 20, pageHeight - 15);
+  doc.line(15, pageHeight - 10, pageWidth - 15, pageHeight - 10);
 
   // Footer text
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setTextColor(COLORS.lightGray);
-  doc.text("Generated by Zapier ROI Calculator", 20, pageHeight - 10);
+  doc.text("Generated by Zapier ROI Calculator", 15, pageHeight - 6);
   doc.text(
     new Date().toLocaleDateString(),
-    pageWidth - 20,
-    pageHeight - 10,
+    pageWidth - 15,
+    pageHeight - 6,
     { align: "right" }
   );
 }
