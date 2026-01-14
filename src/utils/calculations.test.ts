@@ -152,7 +152,7 @@ describe("calculateItemAnnualValue", () => {
         rate: 1, // 100% reduction
       });
 
-      // $50,000 * 1 = $50,000
+      // 1 * $50,000 * 1 = $50,000
       const result = calculateItemAnnualValue(item, defaultAssumptions);
       expect(result).toBe(50000);
     });
@@ -165,9 +165,22 @@ describe("calculateItemAnnualValue", () => {
         rate: 0.3, // 30% reduction
       });
 
-      // $100,000 * 0.3 = $30,000
+      // 1 * $100,000 * 0.3 = $30,000
       const result = calculateItemAnnualValue(item, defaultAssumptions);
       expect(result).toBe(30000);
+    });
+
+    test("calculates cost reduction with quantity", () => {
+      const item = createValueItem({
+        category: "cost_reduction",
+        quantity: 500,
+        unitValue: 10000,
+        rate: 1, // 100% reduction
+      });
+
+      // 500 * $10,000 * 1 = $5,000,000
+      const result = calculateItemAnnualValue(item, defaultAssumptions);
+      expect(result).toBe(5000000);
     });
   });
 

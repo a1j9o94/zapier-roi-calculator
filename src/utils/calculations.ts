@@ -82,17 +82,18 @@ function calculateRevenueImpact(item: ValueItem): number {
 
 /**
  * Cost reduction calculation:
- * quantity = 1 (typically)
- * unitValue = annual cost being reduced
- * rate = reduction percentage (e.g., 0.8 for 80% reduction)
+ * quantity = number of items (e.g., licenses, subscriptions)
+ * unitValue = cost per item
+ * rate = reduction percentage (e.g., 1.0 for 100% reduction)
  *
- * Formula: unitValue * rate
+ * Formula: quantity * unitValue * rate
  */
 function calculateCostReduction(item: ValueItem): number {
+  const quantity = item.quantity;
   const unitValue = item.unitValue;
   const rate = item.rate ?? 1; // Default to 100% reduction
 
-  return unitValue * rate;
+  return quantity * unitValue * rate;
 }
 
 /**
