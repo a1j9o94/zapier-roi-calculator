@@ -16,6 +16,7 @@ import {
   formatNumber,
   formatPercent,
 } from "../utils/formatting";
+import { generateExecutiveSummaryPDF } from "../utils/pdfExport";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -123,7 +124,7 @@ export function ExecutiveSummary({
           </Button>
           <Button
             variant="outline"
-            onClick={() => alert("PDF export coming soon!")}
+            onClick={() => generateExecutiveSummaryPDF(calculation, valueItems)}
           >
             Export PDF
           </Button>
