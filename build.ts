@@ -134,6 +134,7 @@ const result = await Bun.build({
   minify: true,
   target: "browser",
   sourcemap: "linked",
+  publicPath: "/", // Use absolute paths for assets (required for client-side routing)
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
     "__CONVEX_URL__": JSON.stringify(process.env.VITE_CONVEX_URL || ""),
