@@ -82,12 +82,27 @@ function CategorySection({ category, calculation, items }: CategorySectionProps)
   );
 
   const handleAddItem = async () => {
+    // Determine default values based on category
+    let quantity = 1;
+    let unitValue = 10000;
+
+    if (category === "time_savings") {
+      quantity = 1000;
+      unitValue = 0; // Calculated from complexity + rateTier
+    } else if (category === "security_governance") {
+      quantity = 0.08; // 8% probability
+      unitValue = calculation.assumptions.avgDataBreachCost;
+    } else if (category === "uptime") {
+      quantity = 0.1; // 10% probability
+      unitValue = calculation.assumptions.avgSupportTicketCost;
+    }
+
     await createItem({
       calculationId: calculation._id,
       category,
       name: "New Item",
-      quantity: category === "time_savings" ? 1000 : 1,
-      unitValue: category === "time_savings" ? 0 : 10000,
+      quantity,
+      unitValue,
       complexity: category === "time_savings" ? "medium" : undefined,
       rateTier: category === "time_savings" ? "operations" : undefined,
       rate: ["revenue_impact", "cost_reduction"].includes(category) ? 1 : undefined,
