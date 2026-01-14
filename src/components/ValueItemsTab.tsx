@@ -90,7 +90,7 @@ function CategorySection({ category, calculation, items }: CategorySectionProps)
       quantity = 1000;
       unitValue = 0; // Calculated from complexity + rateTier
     } else if (category === "security_governance") {
-      quantity = 0.08; // 8% probability
+      quantity = 0.1; // 10% probability
       unitValue = calculation.assumptions.avgDataBreachCost;
     } else if (category === "uptime") {
       quantity = 0.1; // 10% probability
