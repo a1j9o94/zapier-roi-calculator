@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AssumptionsTab } from "../components/AssumptionsTab";
@@ -16,7 +15,7 @@ interface CalculatorPageProps {
 type TabId = "assumptions" | "values" | "summary";
 
 export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
-  const { id } = useParams<{ id: string }>();
+  const { id: shortId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>(
     summaryOnly ? "summary" : "values"
@@ -25,16 +24,16 @@ export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
   const [editedName, setEditedName] = useState("");
 
   const calculation = useQuery(
-    api.calculations.get,
-    id ? { id: id as Id<"calculations"> } : "skip"
+    api.calculations.getByShortId,
+    shortId ? { shortId } : "skip"
   );
   const valueItems = useQuery(
     api.valueItems.listByCalculation,
-    id ? { calculationId: id as Id<"calculations"> } : "skip"
+    calculation ? { calculationId: calculation._id } : "skip"
   );
   const updateName = useMutation(api.calculations.updateName);
 
-  if (!id) {
+  if (!shortId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Invalid calculation ID</p>
@@ -141,7 +140,7 @@ export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
             {!summaryOnly && (
               <Button
                 variant="outline"
-                onClick={() => navigate(`/c/${id}/summary`)}
+                onClick={() => navigate(`/c/${shortId}/summary`)}
               >
                 Share Summary
               </Button>

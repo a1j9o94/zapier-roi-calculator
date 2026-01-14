@@ -1,6 +1,16 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
+// Generate a short alphanumeric ID (6 chars = 2 billion combinations)
+function generateShortId(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 // Default assumptions for new calculations
 const DEFAULT_ASSUMPTIONS = {
   hourlyRates: {
@@ -40,6 +50,17 @@ export const get = query({
   },
 });
 
+// Get single calculation by short ID
+export const getByShortId = query({
+  args: { shortId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("calculations")
+      .withIndex("by_shortId", (q) => q.eq("shortId", args.shortId))
+      .unique();
+  },
+});
+
 // Create new calculation with default assumptions
 export const create = mutation({
   args: {
@@ -47,8 +68,25 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    return await ctx.db.insert("calculations", {
+
+    // Generate unique short ID (retry if collision)
+    let shortId = generateShortId();
+    let existing = await ctx.db
+      .query("calculations")
+      .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+      .unique();
+
+    while (existing) {
+      shortId = generateShortId();
+      existing = await ctx.db
+        .query("calculations")
+        .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+        .unique();
+    }
+
+    await ctx.db.insert("calculations", {
       name: args.name,
+      shortId,
       createdAt: now,
       updatedAt: now,
       assumptions: DEFAULT_ASSUMPTIONS,
@@ -58,6 +96,8 @@ export const create = mutation({
         "SSO/SCIM addresses your security requirements",
       ],
     });
+
+    return shortId;
   },
 });
 
@@ -157,5 +197,38 @@ export const remove = mutation({
     // Delete the calculation
     await ctx.db.delete(args.id);
     return args.id;
+  },
+});
+
+// Migration: Add shortId to existing calculations
+export const migrateAddShortIds = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const calculations = await ctx.db.query("calculations").collect();
+    let migrated = 0;
+
+    for (const calc of calculations) {
+      if (!calc.shortId) {
+        // Generate unique short ID
+        let shortId = generateShortId();
+        let existing = await ctx.db
+          .query("calculations")
+          .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+          .unique();
+
+        while (existing) {
+          shortId = generateShortId();
+          existing = await ctx.db
+            .query("calculations")
+            .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+            .unique();
+        }
+
+        await ctx.db.patch(calc._id, { shortId });
+        migrated++;
+      }
+    }
+
+    return { migrated, total: calculations.length };
   },
 });

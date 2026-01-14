@@ -17,8 +17,8 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const handleNewCalculation = async () => {
-    const id = await createCalculation({ name: "New ROI Calculation" });
-    navigate(`/c/${id}`);
+    const shortId = await createCalculation({ name: "New ROI Calculation" });
+    navigate(`/c/${shortId}`);
   };
 
   return (
@@ -79,34 +79,36 @@ export function HomePage() {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {calculations.map((calc) => (
-                <Card
-                  key={calc._id}
-                  className="cursor-pointer hover:border-[#FF4A00]/50 transition-colors"
-                  onClick={() => navigate(`/c/${calc._id}`)}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{calc.name}</CardTitle>
-                        <CardDescription>
-                          Updated {formatRelativeTime(calc.updatedAt)}
-                        </CardDescription>
+              {calculations
+                .filter((calc) => calc.shortId) // Only show calculations with shortId
+                .map((calc) => (
+                  <Card
+                    key={calc._id}
+                    className="cursor-pointer hover:border-[#FF4A00]/50 transition-colors"
+                    onClick={() => navigate(`/c/${calc.shortId}`)}
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{calc.name}</CardTitle>
+                          <CardDescription>
+                            Updated {formatRelativeTime(calc.updatedAt)}
+                          </CardDescription>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/c/${calc.shortId}/summary`);
+                          }}
+                        >
+                          View Summary
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/c/${calc._id}/summary`);
-                        }}
-                      >
-                        View Summary
-                      </Button>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
+                    </CardHeader>
+                  </Card>
+                ))}
             </div>
           )}
         </div>

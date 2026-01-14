@@ -39,6 +39,7 @@ export interface Calculation {
   _id: Id<"calculations">;
   _creationTime: number;
   name: string;
+  shortId?: string;
   createdAt: number;
   updatedAt: number;
   assumptions: Assumptions;

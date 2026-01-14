@@ -5,6 +5,7 @@ export default defineSchema({
   // ROI Calculation (shareable document)
   calculations: defineTable({
     name: v.string(), // Customer/project name
+    shortId: v.optional(v.string()), // Short URL-friendly ID (e.g., "abc123")
     createdAt: v.number(),
     updatedAt: v.number(),
 
@@ -41,7 +42,7 @@ export default defineSchema({
 
     // Editable talking points for the executive summary
     talkingPoints: v.optional(v.array(v.string())),
-  }),
+  }).index("by_shortId", ["shortId"]),
 
   // Value Line Items (categorized by type)
   valueItems: defineTable({
