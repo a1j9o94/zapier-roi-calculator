@@ -6,7 +6,7 @@ import { CATEGORY_INFO, CATEGORY_ORDER } from "../types/roi";
 import { calculateItemAnnualValue, calculateTotalAnnualValue } from "../utils/calculations";
 import { formatCurrency, formatCurrencyCompact } from "../utils/formatting";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DebouncedInput } from "@/components/ui/debounced-input";
 import {
   Select,
   SelectContent,
@@ -225,9 +225,9 @@ function ValueItemRow({ item, category, assumptions }: ValueItemRowProps) {
     <div className="grid grid-cols-12 gap-2 items-center px-2 py-2 rounded-lg hover:bg-muted/50 group">
       {/* Name */}
       <div className="col-span-3">
-        <Input
+        <DebouncedInput
           value={item.name}
-          onChange={(e) => handleUpdate("name", e.target.value)}
+          onChange={(value) => handleUpdate("name", value)}
           className="h-8 text-sm"
         />
       </div>
@@ -236,12 +236,10 @@ function ValueItemRow({ item, category, assumptions }: ValueItemRowProps) {
         <>
           {/* Tasks/Month */}
           <div className="col-span-2">
-            <Input
+            <DebouncedInput
               type="number"
               value={item.quantity}
-              onChange={(e) =>
-                handleUpdate("quantity", parseFloat(e.target.value) || 0)
-              }
+              onChange={(value) => handleUpdate("quantity", value)}
               className="h-8 text-sm font-mono"
             />
           </div>
@@ -286,13 +284,11 @@ function ValueItemRow({ item, category, assumptions }: ValueItemRowProps) {
           {/* Probability */}
           <div className="col-span-2">
             <div className="flex items-center gap-1">
-              <Input
+              <DebouncedInput
                 type="number"
-                min="0"
-                max="100"
                 value={Math.round(item.quantity * 100)}
-                onChange={(e) =>
-                  handleUpdate("quantity", (parseFloat(e.target.value) || 0) / 100)
+                onChange={(value) =>
+                  handleUpdate("quantity", (Number(value) || 0) / 100)
                 }
                 className="h-8 text-sm font-mono"
               />
@@ -304,12 +300,10 @@ function ValueItemRow({ item, category, assumptions }: ValueItemRowProps) {
           <div className="col-span-2">
             <div className="flex items-center gap-1">
               <span className="text-sm text-muted-foreground">$</span>
-              <Input
+              <DebouncedInput
                 type="number"
                 value={item.unitValue}
-                onChange={(e) =>
-                  handleUpdate("unitValue", parseFloat(e.target.value) || 0)
-                }
+                onChange={(value) => handleUpdate("unitValue", value)}
                 className="h-8 text-sm font-mono"
               />
             </div>
@@ -322,12 +316,10 @@ function ValueItemRow({ item, category, assumptions }: ValueItemRowProps) {
         <>
           {/* Quantity */}
           <div className="col-span-2">
-            <Input
+            <DebouncedInput
               type="number"
               value={item.quantity}
-              onChange={(e) =>
-                handleUpdate("quantity", parseFloat(e.target.value) || 0)
-              }
+              onChange={(value) => handleUpdate("quantity", value)}
               className="h-8 text-sm font-mono"
             />
           </div>
@@ -336,12 +328,10 @@ function ValueItemRow({ item, category, assumptions }: ValueItemRowProps) {
           <div className="col-span-2">
             <div className="flex items-center gap-1">
               <span className="text-sm text-muted-foreground">$</span>
-              <Input
+              <DebouncedInput
                 type="number"
                 value={item.unitValue}
-                onChange={(e) =>
-                  handleUpdate("unitValue", parseFloat(e.target.value) || 0)
-                }
+                onChange={(value) => handleUpdate("unitValue", value)}
                 className="h-8 text-sm font-mono"
               />
             </div>
@@ -351,13 +341,11 @@ function ValueItemRow({ item, category, assumptions }: ValueItemRowProps) {
           <div className="col-span-2">
             {["revenue_impact", "cost_reduction"].includes(category) ? (
               <div className="flex items-center gap-1">
-                <Input
+                <DebouncedInput
                   type="number"
-                  min="0"
-                  max="100"
                   value={Math.round((item.rate ?? 1) * 100)}
-                  onChange={(e) =>
-                    handleUpdate("rate", (parseFloat(e.target.value) || 0) / 100)
+                  onChange={(value) =>
+                    handleUpdate("rate", (Number(value) || 0) / 100)
                   }
                   className="h-8 text-sm font-mono"
                 />
