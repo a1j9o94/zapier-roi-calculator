@@ -469,12 +469,13 @@ export function UseCaseCard({
               <label className="text-xs font-medium text-muted-foreground">
                 Linked Value Items ({linkedValueItems.length})
               </label>
-              {!readOnly && unlinkedItems.length > 0 && (
+              {!readOnly && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsLinking(!isLinking)}
                   className="h-7 text-xs"
+                  disabled={unlinkedItems.length === 0 && !isLinking}
                 >
                   {isLinking ? "Cancel" : "+ Link Item"}
                 </Button>
@@ -485,14 +486,20 @@ export function UseCaseCard({
             {isLinking && (
               <Select onValueChange={handleLinkValueItem}>
                 <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Select a value item to link..." />
+                  <SelectValue placeholder={unlinkedItems.length === 0 ? "No value items available" : "Select a value item to link..."} />
                 </SelectTrigger>
                 <SelectContent>
-                  {unlinkedItems.map((item) => (
-                    <SelectItem key={item._id} value={item._id}>
-                      {item.name} ({formatCurrency(calculateItemAnnualValue(item, assumptions))})
+                  {unlinkedItems.length === 0 ? (
+                    <SelectItem value="_none" disabled>
+                      Add value items in the Value Items tab first
                     </SelectItem>
-                  ))}
+                  ) : (
+                    unlinkedItems.map((item) => (
+                      <SelectItem key={item._id} value={item._id}>
+                        {item.name} ({formatCurrency(calculateItemAnnualValue(item, assumptions))})
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             )}
