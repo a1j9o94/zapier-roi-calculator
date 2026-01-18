@@ -391,7 +391,9 @@ export function ExecutiveSummary({
       )}
 
       {/* Non-Financial Metrics from Use Cases */}
-      {useCases && useCases.some((uc) => uc.metrics && uc.metrics.length > 0) && (
+      {useCases && useCases.some((uc) =>
+        uc.metrics?.some((m) => m.name && (m.before || m.after))
+      ) && (
         <Card>
           <CardHeader>
             <CardTitle>Impact Metrics</CardTitle>
@@ -399,7 +401,7 @@ export function ExecutiveSummary({
           <CardContent>
             <div className="space-y-4">
               {useCases
-                .filter((uc) => uc.metrics && uc.metrics.length > 0)
+                .filter((uc) => uc.metrics?.some((m) => m.name && (m.before || m.after)))
                 .map((uc) => (
                   <div key={uc._id} className="space-y-2">
                     <p className="text-sm font-medium text-muted-foreground">
