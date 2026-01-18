@@ -9,6 +9,7 @@
  */
 
 import type * as calculations from "../calculations.js";
+import type * as useCases from "../useCases.js";
 import type * as valueItems from "../valueItems.js";
 
 import type {
@@ -19,6 +20,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   calculations: typeof calculations;
+  useCases: typeof useCases;
   valueItems: typeof valueItems;
 }>;
 

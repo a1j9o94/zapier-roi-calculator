@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AssumptionsTab } from "../components/AssumptionsTab";
 import { ValueItemsTab } from "../components/ValueItemsTab";
+import { UseCasesTab } from "../components/UseCasesTab";
 import { ExecutiveSummary } from "../components/ExecutiveSummary";
 
 interface CalculatorPageProps {
   summaryOnly?: boolean;
 }
 
-type TabId = "assumptions" | "values" | "summary";
+type TabId = "assumptions" | "values" | "usecases" | "summary";
 
 export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
   const { id: shortId } = useParams<{ id: string }>();
@@ -78,13 +79,18 @@ export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
     }
   };
 
-  const tabs: { id: TabId; label: string }[] = summaryOnly
-    ? [{ id: "summary", label: "Executive Summary" }]
-    : [
-        { id: "assumptions", label: "Assumptions" },
-        { id: "values", label: "Value Items" },
-        { id: "summary", label: "Executive Summary" },
-      ];
+  const tabs: { id: TabId; label: string }[] = [
+    { id: "assumptions", label: "Assumptions" },
+    { id: "values", label: "Value Items" },
+    { id: "usecases", label: "Use Cases" },
+    { id: "summary", label: "Executive Summary" },
+  ];
+
+  // Cross-navigation handler for value items
+  const handleNavigateToValueItem = (valueItemId: string) => {
+    setActiveTab("values");
+    // Could add highlighting logic here in the future
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -118,7 +124,7 @@ export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
-              {isEditingName ? (
+              {isEditingName && !summaryOnly ? (
                 <Input
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
@@ -129,9 +135,13 @@ export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
                 />
               ) : (
                 <h1
-                  className="text-xl font-semibold cursor-pointer hover:text-[#FF4A00] transition-colors"
-                  onClick={handleStartEditName}
-                  title="Click to edit name"
+                  className={`text-xl font-semibold ${
+                    summaryOnly
+                      ? ""
+                      : "cursor-pointer hover:text-[#FF4A00] transition-colors"
+                  }`}
+                  onClick={summaryOnly ? undefined : handleStartEditName}
+                  title={summaryOnly ? undefined : "Click to edit name"}
                 >
                   {calculation.name}
                 </h1>
@@ -169,18 +179,28 @@ export function CalculatorPage({ summaryOnly = false }: CalculatorPageProps) {
       {/* Main content */}
       <main className="container mx-auto px-4 py-6">
         {activeTab === "assumptions" && (
-          <AssumptionsTab calculation={calculation} />
+          <AssumptionsTab calculation={calculation} readOnly={summaryOnly} />
         )}
         {activeTab === "values" && (
           <ValueItemsTab
             calculation={calculation}
             valueItems={valueItems}
+            readOnly={summaryOnly}
+          />
+        )}
+        {activeTab === "usecases" && (
+          <UseCasesTab
+            calculation={calculation}
+            valueItems={valueItems}
+            readOnly={summaryOnly}
+            onNavigateToValueItem={handleNavigateToValueItem}
           />
         )}
         {activeTab === "summary" && (
           <ExecutiveSummary
             calculation={calculation}
             valueItems={valueItems}
+            readOnly={summaryOnly}
           />
         )}
       </main>

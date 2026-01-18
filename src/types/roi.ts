@@ -63,7 +63,81 @@ export interface ValueItem {
   manualAnnualValue?: number;
   notes?: string;
   order: number;
+  useCaseId?: Id<"useCases">;
 }
+
+// Use Case types
+export type UseCaseStatus = "identified" | "in_progress" | "deployed" | "future";
+export type UseCaseDifficulty = "low" | "medium" | "high";
+
+export interface UseCaseMetric {
+  name: string;
+  before?: string;
+  after?: string;
+  improvement?: string;
+}
+
+export interface UseCase {
+  _id: Id<"useCases">;
+  _creationTime: number;
+  calculationId: Id<"calculations">;
+  name: string;
+  department?: string;
+  status: UseCaseStatus;
+  difficulty: UseCaseDifficulty;
+  description?: string;
+  notes?: string;
+  metrics?: UseCaseMetric[];
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// Use Case status display metadata
+export const USE_CASE_STATUS_INFO: Record<
+  UseCaseStatus,
+  { label: string; color: string; bgColor: string }
+> = {
+  identified: {
+    label: "Identified",
+    color: "#6B7280", // Gray
+    bgColor: "#F3F4F6",
+  },
+  in_progress: {
+    label: "In Progress",
+    color: "#D97706", // Amber
+    bgColor: "#FEF3C7",
+  },
+  deployed: {
+    label: "Deployed",
+    color: "#059669", // Green
+    bgColor: "#D1FAE5",
+  },
+  future: {
+    label: "Future",
+    color: "#2563EB", // Blue
+    bgColor: "#DBEAFE",
+  },
+};
+
+// Use Case difficulty display metadata
+export const USE_CASE_DIFFICULTY_INFO: Record<
+  UseCaseDifficulty,
+  { label: string; color: string }
+> = {
+  low: {
+    label: "Low",
+    color: "#10B981", // Green
+  },
+  medium: {
+    label: "Medium",
+    color: "#F59E0B", // Amber
+  },
+  high: {
+    label: "High",
+    color: "#EF4444", // Red
+  },
+};
 
 // Category display metadata
 export const CATEGORY_INFO: Record<

@@ -95,5 +95,38 @@ export default defineSchema({
 
     // Ordering within category
     order: v.number(),
+
+    // Optional link to a use case
+    useCaseId: v.optional(v.id("useCases")),
+  }).index("by_calculation", ["calculationId"]),
+
+  // Use Cases (documentation-focused view of automation use cases)
+  useCases: defineTable({
+    calculationId: v.id("calculations"),
+    name: v.string(),
+    department: v.optional(v.string()), // Free text field
+    status: v.union(
+      v.literal("identified"), // Just discovered
+      v.literal("in_progress"), // Being worked on (trial/discovery/building)
+      v.literal("deployed"), // Live in production
+      v.literal("future") // Planned for later
+    ),
+    difficulty: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    description: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    // Custom metrics for non-financial value (hiring time, attrition, ROAS, etc.)
+    metrics: v.optional(
+      v.array(
+        v.object({
+          name: v.string(), // e.g., "Hiring Time", "Employee Retention", "ROAS"
+          before: v.optional(v.string()), // e.g., "45 days", "85%", "2.1x"
+          after: v.optional(v.string()), // e.g., "30 days", "92%", "3.5x"
+          improvement: v.optional(v.string()), // e.g., "33% faster", "+7%", "+67%"
+        })
+      )
+    ),
+    order: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
   }).index("by_calculation", ["calculationId"]),
 });
