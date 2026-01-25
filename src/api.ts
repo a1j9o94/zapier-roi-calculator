@@ -239,10 +239,32 @@ export function validateUseCaseCreate(data: UseCaseInput): ValidationError[] {
       errors.push({ field: "valueItems", message: "Must be an array" });
     } else {
       data.valueItems.forEach((item: unknown, i: number) => {
-        const itemErrors = validateValueItemCreate(item as ValueItemInput);
-        itemErrors.forEach((e) => {
-          errors.push({ field: `valueItems[${i}].${e.field}`, message: e.message });
-        });
+        if (typeof item !== "object" || item === null) {
+          errors.push({ field: `valueItems[${i}]`, message: "Must be an object" });
+          return;
+        }
+        const itemObj = item as Record<string, unknown>;
+
+        // Check if this is an existing item reference (has shortId but no category)
+        const hasShortId = isNonEmptyString(itemObj.shortId);
+        const hasCategory = "category" in itemObj;
+
+        if (hasShortId && !hasCategory) {
+          // Linking existing item - shortId is valid, nothing else to validate
+          return;
+        } else if (hasCategory) {
+          // Creating new item - validate all required fields
+          const itemErrors = validateValueItemCreate(item as ValueItemInput);
+          itemErrors.forEach((e) => {
+            errors.push({ field: `valueItems[${i}].${e.field}`, message: e.message });
+          });
+        } else {
+          // Invalid: no shortId and no category
+          errors.push({
+            field: `valueItems[${i}]`,
+            message: "Must have either 'shortId' (to link existing) or 'category' (to create new)",
+          });
+        }
       });
     }
   }

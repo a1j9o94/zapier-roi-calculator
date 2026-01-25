@@ -362,6 +362,58 @@ describe("Use Case Validation", () => {
       });
       expect(errors.some((e) => e.field === "valueItems")).toBe(true);
     });
+
+    test("accepts existing value item reference (shortId only)", () => {
+      const errors = validateUseCaseCreate({
+        name: "Test Use Case",
+        status: "identified",
+        difficulty: "low",
+        valueItems: [{ shortId: "abc123" }],
+      });
+      expect(errors).toEqual([]);
+    });
+
+    test("accepts mix of new and existing value items", () => {
+      const errors = validateUseCaseCreate({
+        name: "Test Use Case",
+        status: "identified",
+        difficulty: "low",
+        valueItems: [
+          { shortId: "abc123" }, // existing item
+          {
+            // new item
+            category: "time_savings",
+            name: "New Item",
+            quantity: 5,
+            unitValue: 50,
+          },
+        ],
+      });
+      expect(errors).toEqual([]);
+    });
+
+    test("rejects valueItem without shortId or category", () => {
+      const errors = validateUseCaseCreate({
+        name: "Test",
+        status: "identified",
+        difficulty: "low",
+        valueItems: [{ name: "Invalid" }],
+      });
+      expect(errors.some((e) => e.field === "valueItems[0]")).toBe(true);
+      expect(errors.some((e) => e.message.includes("shortId") && e.message.includes("category"))).toBe(
+        true
+      );
+    });
+
+    test("rejects empty shortId", () => {
+      const errors = validateUseCaseCreate({
+        name: "Test",
+        status: "identified",
+        difficulty: "low",
+        valueItems: [{ shortId: "" }],
+      });
+      expect(errors.length).toBeGreaterThan(0);
+    });
   });
 
   describe("validateUseCaseUpdate", () => {

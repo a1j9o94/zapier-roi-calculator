@@ -53,7 +53,8 @@ const complexityValidator = v.union(
   v.literal("complex")
 );
 
-const valueItemInputValidator = v.object({
+// Validator for new value items (all required fields)
+const newValueItemInputValidator = v.object({
   category: categoryValidator,
   name: v.string(),
   description: v.optional(v.string()),
@@ -64,6 +65,17 @@ const valueItemInputValidator = v.object({
   complexity: v.optional(complexityValidator),
   notes: v.optional(v.string()),
 });
+
+// Validator for linking existing value items (only shortId required)
+const existingValueItemInputValidator = v.object({
+  shortId: v.string(),
+});
+
+// Union validator: either new item data OR existing item shortId
+const valueItemInputValidator = v.union(
+  newValueItemInputValidator,
+  existingValueItemInputValidator
+);
 
 // Helper to check if metrics array has at least one valid metric
 function hasValidMetrics(metrics: { name: string }[] | undefined): boolean {
@@ -161,41 +173,64 @@ export const create = mutation({
       updatedAt: now,
     });
 
-    // Create inline value items if provided
+    // Process value items: either link existing or create new
     if (valueItems && valueItems.length > 0) {
       for (let i = 0; i < valueItems.length; i++) {
         const item = valueItems[i]!;
 
-        // Generate unique short ID for value item
-        let itemShortId = generateShortId();
-        let existingItem = await ctx.db
-          .query("valueItems")
-          .withIndex("by_shortId", (q) => q.eq("shortId", itemShortId))
-          .unique();
+        // Check if this is an existing item to link (has shortId but no category)
+        if ("shortId" in item && !("category" in item)) {
+          // Link existing value item
+          const existingItem = await ctx.db
+            .query("valueItems")
+            .withIndex("by_shortId", (q) => q.eq("shortId", item.shortId))
+            .unique();
 
-        while (existingItem) {
-          itemShortId = generateShortId();
-          existingItem = await ctx.db
+          if (!existingItem) {
+            throw new Error(`Value item with shortId "${item.shortId}" not found`);
+          }
+
+          if (existingItem.calculationId !== args.calculationId) {
+            throw new Error(
+              `Value item with shortId "${item.shortId}" belongs to a different calculation`
+            );
+          }
+
+          // Link the existing item to this use case
+          await ctx.db.patch(existingItem._id, { useCaseId });
+        } else if ("category" in item) {
+          // Create new value item
+          // Generate unique short ID for value item
+          let itemShortId = generateShortId();
+          let existingItemWithId = await ctx.db
             .query("valueItems")
             .withIndex("by_shortId", (q) => q.eq("shortId", itemShortId))
             .unique();
-        }
 
-        await ctx.db.insert("valueItems", {
-          calculationId: args.calculationId,
-          shortId: itemShortId,
-          category: item.category,
-          name: item.name,
-          description: item.description,
-          quantity: item.quantity,
-          unitValue: item.unitValue,
-          rate: item.rate,
-          rateTier: item.rateTier,
-          complexity: item.complexity,
-          notes: item.notes,
-          order: i,
-          useCaseId,
-        });
+          while (existingItemWithId) {
+            itemShortId = generateShortId();
+            existingItemWithId = await ctx.db
+              .query("valueItems")
+              .withIndex("by_shortId", (q) => q.eq("shortId", itemShortId))
+              .unique();
+          }
+
+          await ctx.db.insert("valueItems", {
+            calculationId: args.calculationId,
+            shortId: itemShortId,
+            category: item.category,
+            name: item.name,
+            description: item.description,
+            quantity: item.quantity,
+            unitValue: item.unitValue,
+            rate: item.rate,
+            rateTier: item.rateTier,
+            complexity: item.complexity,
+            notes: item.notes,
+            order: i,
+            useCaseId,
+          });
+        }
       }
     }
 
