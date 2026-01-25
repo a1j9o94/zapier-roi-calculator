@@ -1,6 +1,16 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
+// Generate a short alphanumeric ID (6 chars = 2 billion combinations)
+function generateShortId(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 const categoryValidator = v.union(
   v.literal("time_savings"),
   v.literal("revenue_impact"),
@@ -42,6 +52,17 @@ export const get = query({
   },
 });
 
+// Get value item by short ID
+export const getByShortId = query({
+  args: { shortId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("valueItems")
+      .withIndex("by_shortId", (q) => q.eq("shortId", args.shortId))
+      .unique();
+  },
+});
+
 // Create new value item
 export const create = mutation({
   args: {
@@ -71,8 +92,24 @@ export const create = mutation({
       updatedAt: Date.now(),
     });
 
+    // Generate unique short ID (retry if collision)
+    let shortId = generateShortId();
+    let existing = await ctx.db
+      .query("valueItems")
+      .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+      .unique();
+
+    while (existing) {
+      shortId = generateShortId();
+      existing = await ctx.db
+        .query("valueItems")
+        .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+        .unique();
+    }
+
     return await ctx.db.insert("valueItems", {
       ...args,
+      shortId,
       order: maxOrder + 1,
     });
   },
@@ -163,7 +200,30 @@ export const unlinkUseCase = mutation({
   args: { id: v.id("valueItems") },
   handler: async (ctx, args) => {
     const item = await ctx.db.get(args.id);
-    if (item) {
+    if (item && item.useCaseId) {
+      // Before unlinking, check if this would leave use case without items or metrics
+      const useCase = await ctx.db.get(item.useCaseId);
+      if (useCase) {
+        // Check if use case has valid metrics
+        const hasMetrics =
+          useCase.metrics !== undefined &&
+          useCase.metrics.length > 0 &&
+          useCase.metrics.some((m) => m.name.trim() !== "");
+
+        // Check if there are other linked value items
+        const otherLinked = await ctx.db
+          .query("valueItems")
+          .withIndex("by_calculation", (q) => q.eq("calculationId", item.calculationId))
+          .filter((q) =>
+            q.and(q.eq(q.field("useCaseId"), item.useCaseId), q.neq(q.field("_id"), args.id))
+          )
+          .first();
+
+        if (!otherLinked && !hasMetrics) {
+          throw new Error("Cannot unlink: use case must have at least one metric or value item");
+        }
+      }
+
       await ctx.db.patch(args.id, { useCaseId: undefined });
 
       // Update the calculation's updatedAt timestamp
@@ -172,5 +232,38 @@ export const unlinkUseCase = mutation({
       });
     }
     return args.id;
+  },
+});
+
+// Migration: Add shortId to existing value items
+export const migrateAddShortIds = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const items = await ctx.db.query("valueItems").collect();
+    let migrated = 0;
+
+    for (const item of items) {
+      if (!item.shortId) {
+        // Generate unique short ID
+        let shortId = generateShortId();
+        let existing = await ctx.db
+          .query("valueItems")
+          .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+          .unique();
+
+        while (existing) {
+          shortId = generateShortId();
+          existing = await ctx.db
+            .query("valueItems")
+            .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
+            .unique();
+        }
+
+        await ctx.db.patch(item._id, { shortId });
+        migrated++;
+      }
+    }
+
+    return { migrated, total: items.length };
   },
 });
