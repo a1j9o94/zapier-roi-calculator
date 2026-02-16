@@ -47,6 +47,7 @@ export default defineSchema({
   // Value Line Items (categorized by type)
   valueItems: defineTable({
     calculationId: v.id("calculations"),
+    shortId: v.optional(v.string()), // Short URL-friendly ID for API access
 
     // Categorization
     category: v.union(
@@ -98,11 +99,14 @@ export default defineSchema({
 
     // Optional link to a use case
     useCaseId: v.optional(v.id("useCases")),
-  }).index("by_calculation", ["calculationId"]),
+  })
+    .index("by_calculation", ["calculationId"])
+    .index("by_shortId", ["shortId"]),
 
   // Use Cases (documentation-focused view of automation use cases)
   useCases: defineTable({
     calculationId: v.id("calculations"),
+    shortId: v.optional(v.string()), // Short URL-friendly ID for API access
     name: v.string(),
     department: v.optional(v.string()), // Free text field
     status: v.union(
@@ -128,5 +132,7 @@ export default defineSchema({
     order: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_calculation", ["calculationId"]),
+  })
+    .index("by_calculation", ["calculationId"])
+    .index("by_shortId", ["shortId"]),
 });

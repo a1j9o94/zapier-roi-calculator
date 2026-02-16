@@ -1,5 +1,6 @@
-import { serve } from "bun";
+import { serve, type Server } from "bun";
 import index from "./index.html";
+import { handleApiRequest } from "./api";
 
 const server = serve({
   routes: {
@@ -11,6 +12,16 @@ const server = serve({
       return Response.json({
         convexUrl: process.env.VITE_CONVEX_URL,
       });
+    },
+
+    // API routes - handle all /api/* paths except /api/config
+    "/api/*": async (req: Request) => {
+      const apiResponse = await handleApiRequest(req);
+      if (apiResponse) {
+        return apiResponse;
+      }
+      // Should not reach here, but return 404 if it does
+      return Response.json({ error: "Not found" }, { status: 404 });
     },
   },
 

@@ -143,14 +143,14 @@ export function UseCaseCard({
       : null;
 
   return (
-    <Card className={isExpanded ? "ring-2 ring-[#FF4A00]/20" : ""}>
+    <Card className={`overflow-hidden ${isExpanded ? "ring-2 ring-[#FF4A00]/20" : ""}`}>
       <CardHeader
         className="cursor-pointer hover:bg-muted/50 transition-colors"
         onClick={onToggleExpand}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 overflow-hidden">
           {/* Left side: Status badge, name, department */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               {/* Status badge */}
               <span

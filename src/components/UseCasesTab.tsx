@@ -63,11 +63,19 @@ export function UseCasesTab({
   }, {} as Record<string, number>);
 
   const handleAddUseCase = async () => {
+    // Find the first unlinked value item to satisfy the "at least one metric or value item" requirement
+    const unlinkedItem = valueItems.find(
+      (item) => !item.useCaseId && item.shortId
+    );
+
     const newId = await createUseCase({
       calculationId: calculation._id,
       name: "New Use Case",
       status: "identified",
       difficulty: "medium",
+      ...(unlinkedItem
+        ? { valueItems: [{ shortId: unlinkedItem.shortId }] }
+        : { metrics: [{ name: "New Metric" }] }),
     });
     setExpandedId(newId);
   };
