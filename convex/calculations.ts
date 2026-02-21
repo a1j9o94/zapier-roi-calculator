@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
-// Generate a short alphanumeric ID (6 chars = 2 billion combinations)
 function generateShortId(): string {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -11,38 +10,27 @@ function generateShortId(): string {
   return result;
 }
 
-// Default assumptions for new calculations
 const DEFAULT_ASSUMPTIONS = {
-  hourlyRates: {
-    basic: 25,
-    operations: 50,
-    engineering: 100,
-    executive: 200,
-  },
-  taskMinutes: {
-    simple: 2,
-    medium: 8,
-    complex: 20,
-  },
   projectionYears: 3,
   realizationRamp: [0.5, 1, 1],
   annualGrowthRate: 0.1,
-  avgDataBreachCost: 150000,
-  avgSupportTicketCost: 150,
+  defaultRates: {
+    admin: 35,
+    operations: 50,
+    salesOps: 60,
+    engineering: 88,
+    manager: 80,
+    executive: 105,
+  },
 };
 
-// Get all calculations (for homepage listing)
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
-      .query("calculations")
-      .order("desc")
-      .collect();
+    return await ctx.db.query("calculations").order("desc").collect();
   },
 });
 
-// Get single calculation by ID
 export const get = query({
   args: { id: v.id("calculations") },
   handler: async (ctx, args) => {
@@ -50,7 +38,6 @@ export const get = query({
   },
 });
 
-// Get single calculation by short ID
 export const getByShortId = query({
   args: { shortId: v.string() },
   handler: async (ctx, args) => {
@@ -61,21 +48,37 @@ export const getByShortId = query({
   },
 });
 
-// Create new calculation with default assumptions
 export const create = mutation({
   args: {
     name: v.string(),
+    role: v.optional(v.string()),
+    priorityOrder: v.optional(v.array(v.string())),
+    currentSpend: v.optional(v.number()),
+    proposedSpend: v.optional(v.number()),
+    assumptions: v.optional(
+      v.object({
+        projectionYears: v.number(),
+        realizationRamp: v.array(v.number()),
+        annualGrowthRate: v.number(),
+        defaultRates: v.object({
+          admin: v.number(),
+          operations: v.number(),
+          salesOps: v.number(),
+          engineering: v.number(),
+          manager: v.number(),
+          executive: v.number(),
+        }),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
 
-    // Generate unique short ID (retry if collision)
     let shortId = generateShortId();
     let existing = await ctx.db
       .query("calculations")
       .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
       .unique();
-
     while (existing) {
       shortId = generateShortId();
       existing = await ctx.db
@@ -84,59 +87,49 @@ export const create = mutation({
         .unique();
     }
 
-    await ctx.db.insert("calculations", {
+    const id = await ctx.db.insert("calculations", {
       name: args.name,
       shortId,
       createdAt: now,
       updatedAt: now,
-      assumptions: DEFAULT_ASSUMPTIONS,
+      assumptions: args.assumptions ?? DEFAULT_ASSUMPTIONS,
+      role: args.role,
+      priorityOrder: args.priorityOrder,
+      currentSpend: args.currentSpend,
+      proposedSpend: args.proposedSpend,
       talkingPoints: [
-        "Your automation saves X hours per month",
-        "Enterprise eliminates billing disruption risk",
-        "SSO/SCIM addresses your security requirements",
+        "Automation delivers measurable value across 5 dimensions",
+        "ROI projections use conservative realization estimates",
+        "Implementation follows a phased rollout approach",
       ],
     });
 
-    return shortId;
+    return { id, shortId };
   },
 });
 
-// Update calculation name
 export const updateName = mutation({
-  args: {
-    id: v.id("calculations"),
-    name: v.string(),
-  },
+  args: { id: v.id("calculations"), name: v.string() },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, {
-      name: args.name,
-      updatedAt: Date.now(),
-    });
-    return args.id;
+    await ctx.db.patch(args.id, { name: args.name, updatedAt: Date.now() });
   },
 });
 
-// Update assumptions
 export const updateAssumptions = mutation({
   args: {
     id: v.id("calculations"),
     assumptions: v.object({
-      hourlyRates: v.object({
-        basic: v.number(),
-        operations: v.number(),
-        engineering: v.number(),
-        executive: v.number(),
-      }),
-      taskMinutes: v.object({
-        simple: v.number(),
-        medium: v.number(),
-        complex: v.number(),
-      }),
       projectionYears: v.number(),
       realizationRamp: v.array(v.number()),
       annualGrowthRate: v.number(),
-      avgDataBreachCost: v.number(),
-      avgSupportTicketCost: v.number(),
+      defaultRates: v.object({
+        admin: v.number(),
+        operations: v.number(),
+        salesOps: v.number(),
+        engineering: v.number(),
+        manager: v.number(),
+        executive: v.number(),
+      }),
     }),
   },
   handler: async (ctx, args) => {
@@ -144,11 +137,9 @@ export const updateAssumptions = mutation({
       assumptions: args.assumptions,
       updatedAt: Date.now(),
     });
-    return args.id;
   },
 });
 
-// Update investment comparison
 export const updateInvestment = mutation({
   args: {
     id: v.id("calculations"),
@@ -157,15 +148,10 @@ export const updateInvestment = mutation({
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
-    await ctx.db.patch(id, {
-      ...updates,
-      updatedAt: Date.now(),
-    });
-    return id;
+    await ctx.db.patch(id, { ...updates, updatedAt: Date.now() });
   },
 });
 
-// Update talking points
 export const updateTalkingPoints = mutation({
   args: {
     id: v.id("calculations"),
@@ -176,59 +162,71 @@ export const updateTalkingPoints = mutation({
       talkingPoints: args.talkingPoints,
       updatedAt: Date.now(),
     });
-    return args.id;
   },
 });
 
-// Delete calculation and all its value items
+export const updateObfuscation = mutation({
+  args: {
+    id: v.id("calculations"),
+    obfuscation: v.object({
+      companyDescriptor: v.optional(v.string()),
+      hideNotes: v.optional(v.boolean()),
+      roundValues: v.optional(v.boolean()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      obfuscation: args.obfuscation,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateRole = mutation({
+  args: {
+    id: v.id("calculations"),
+    role: v.optional(v.string()),
+    priorityOrder: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      role: args.role,
+      priorityOrder: args.priorityOrder,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const remove = mutation({
   args: { id: v.id("calculations") },
   handler: async (ctx, args) => {
-    // Delete all value items for this calculation
-    const items = await ctx.db
+    // Delete all value items
+    const valueItems = await ctx.db
       .query("valueItems")
-      .withIndex("by_calculation", (q) => q.eq("calculationId", args.id))
+      .withIndex("by_calculationId", (q) => q.eq("calculationId", args.id))
       .collect();
-
-    for (const item of items) {
+    for (const item of valueItems) {
       await ctx.db.delete(item._id);
     }
 
-    // Delete the calculation
-    await ctx.db.delete(args.id);
-    return args.id;
-  },
-});
-
-// Migration: Add shortId to existing calculations
-export const migrateAddShortIds = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const calculations = await ctx.db.query("calculations").collect();
-    let migrated = 0;
-
-    for (const calc of calculations) {
-      if (!calc.shortId) {
-        // Generate unique short ID
-        let shortId = generateShortId();
-        let existing = await ctx.db
-          .query("calculations")
-          .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
-          .unique();
-
-        while (existing) {
-          shortId = generateShortId();
-          existing = await ctx.db
-            .query("calculations")
-            .withIndex("by_shortId", (q) => q.eq("shortId", shortId))
-            .unique();
-        }
-
-        await ctx.db.patch(calc._id, { shortId });
-        migrated++;
-      }
+    // Delete all use cases
+    const useCases = await ctx.db
+      .query("useCases")
+      .withIndex("by_calculationId", (q) => q.eq("calculationId", args.id))
+      .collect();
+    for (const uc of useCases) {
+      await ctx.db.delete(uc._id);
     }
 
-    return { migrated, total: calculations.length };
+    // Delete all zap run cache entries
+    const zapRunCaches = await ctx.db
+      .query("zapRunCache")
+      .withIndex("by_calculationId", (q) => q.eq("calculationId", args.id))
+      .collect();
+    for (const cache of zapRunCaches) {
+      await ctx.db.delete(cache._id);
+    }
+
+    await ctx.db.delete(args.id);
   },
 });

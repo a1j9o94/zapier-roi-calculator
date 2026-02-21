@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://polished-whale-78.convex.site/api/$1"
+      "destination": "https://grandiose-heron-836.convex.site/api/$1"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ]

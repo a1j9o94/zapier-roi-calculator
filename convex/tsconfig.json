@@ -7,10 +7,13 @@
     /* These settings are not required by Convex and can be modified. */
     "allowJs": true,
     "strict": true,
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+
+    /* Prevent auto-discovery of @types/bun which uses unsupported TS features */
+    "types": [],
 
     /* These compiler options are required by Convex */
     "target": "ESNext",

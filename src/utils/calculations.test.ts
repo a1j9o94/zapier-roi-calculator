@@ -1,459 +1,430 @@
 import { test, expect, describe } from "bun:test";
 import {
   calculateItemAnnualValue,
-  calculateCategoryTotals,
+  calculateComputedValue,
+  calculateDimensionTotals,
+  getDimensionBreakdown,
   calculateTotalAnnualValue,
   calculateProjection,
   calculateROIMultiple,
   calculateTotalHoursSaved,
-  getCategoryBreakdown,
+  calculateFTEEquivalent,
+  calculateSummary,
 } from "./calculations";
-import type { Assumptions, ValueItem, Category } from "../types/roi";
+import type { Archetype, ValueItem, Assumptions } from "../types/roi";
 
-// Helper to create a mock value item
-function createValueItem(
-  overrides: Partial<ValueItem> & { category: Category }
-): ValueItem {
+function createItem(archetype: Archetype, inputs: Record<string, { value: number; confidence?: string }>, overrides?: Partial<ValueItem>): ValueItem {
+  const DIMS: Record<string, string> = {
+    pipeline_velocity: "revenue_impact", revenue_capture: "revenue_impact",
+    revenue_expansion: "revenue_impact", time_to_revenue: "revenue_impact",
+    process_acceleration: "speed_cycle_time", handoff_elimination: "speed_cycle_time",
+    task_elimination: "productivity", task_simplification: "productivity",
+    context_surfacing: "productivity", labor_avoidance: "cost_avoidance",
+    tool_consolidation: "cost_avoidance", error_rework_elimination: "cost_avoidance",
+    compliance_assurance: "risk_quality", data_integrity: "risk_quality",
+    incident_prevention: "risk_quality", process_consistency: "risk_quality",
+  };
   return {
     _id: "test_id" as any,
     _creationTime: Date.now(),
     calculationId: "calc_id" as any,
+    archetype,
+    dimension: DIMS[archetype]! as any,
     name: "Test Item",
-    quantity: 1,
-    unitValue: 100,
+    inputs,
     order: 0,
     ...overrides,
   };
 }
 
-// Default test assumptions
+function vi(key: string, value: number, confidence: string = "custom") {
+  return { [key]: { value, confidence } };
+}
+
 const defaultAssumptions: Assumptions = {
-  hourlyRates: {
-    basic: 25,
-    operations: 50,
-    engineering: 100,
-    executive: 200,
-  },
-  taskMinutes: {
-    simple: 2,
-    medium: 8,
-    complex: 20,
-  },
   projectionYears: 3,
   realizationRamp: [0.5, 1, 1],
   annualGrowthRate: 0.1,
-  avgDataBreachCost: 150000,
-  avgSupportTicketCost: 150,
+  defaultRates: { admin: 35, operations: 50, salesOps: 60, engineering: 88, manager: 80, executive: 105 },
 };
 
-describe("calculateItemAnnualValue", () => {
-  describe("time_savings", () => {
-    test("calculates correctly with default complexity and rate tier", () => {
-      const item = createValueItem({
-        category: "time_savings",
-        quantity: 1000, // tasks per month
-      });
+// ============================================================
+// Revenue Impact Archetypes
+// ============================================================
 
-      // 1000 tasks * 8 min (medium) / 60 = 133.33 hours/month
-      // 133.33 * 12 * $50 (operations) = $80,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(80000);
+describe("pipeline_velocity", () => {
+  test("dealsPerQuarter x avgDealValue x conversionLift x 4", () => {
+    const item = createItem("pipeline_velocity", {
+      ...vi("dealsPerQuarter", 200),
+      ...vi("avgDealValue", 25000),
+      ...vi("conversionLift", 0.10),
     });
-
-    test("calculates correctly with simple complexity", () => {
-      const item = createValueItem({
-        category: "time_savings",
-        quantity: 1000,
-        complexity: "simple",
-        rateTier: "operations",
-      });
-
-      // 1000 tasks * 2 min / 60 = 33.33 hours/month
-      // 33.33 * 12 * $50 = $20,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(20000);
-    });
-
-    test("calculates correctly with complex tasks and engineering rate", () => {
-      const item = createValueItem({
-        category: "time_savings",
-        quantity: 500,
-        complexity: "complex",
-        rateTier: "engineering",
-      });
-
-      // 500 tasks * 20 min / 60 = 166.67 hours/month
-      // 166.67 * 12 * $100 = $200,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(200000);
-    });
-
-    test("uses executive rate tier correctly", () => {
-      const item = createValueItem({
-        category: "time_savings",
-        quantity: 60, // 60 tasks per month
-        complexity: "medium",
-        rateTier: "executive",
-      });
-
-      // 60 tasks * 8 min / 60 = 8 hours/month
-      // 8 * 12 * $200 = $19,200
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(19200);
-    });
-  });
-
-  describe("revenue_impact", () => {
-    test("calculates correctly with rate multiplier", () => {
-      const item = createValueItem({
-        category: "revenue_impact",
-        quantity: 1,
-        unitValue: 10000,
-        rate: 1, // 100%
-      });
-
-      // 1 * $10,000 * 1 = $10,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(10000);
-    });
-
-    test("applies partial rate correctly", () => {
-      const item = createValueItem({
-        category: "revenue_impact",
-        quantity: 10,
-        unitValue: 5000,
-        rate: 0.1, // 10% improvement
-      });
-
-      // 10 * $5,000 * 0.1 = $5,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(5000);
-    });
-
-    test("defaults to 100% rate when not specified", () => {
-      const item = createValueItem({
-        category: "revenue_impact",
-        quantity: 2,
-        unitValue: 1000,
-      });
-
-      // 2 * $1,000 * 1 = $2,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(2000);
-    });
-  });
-
-  describe("cost_reduction", () => {
-    test("calculates full cost reduction", () => {
-      const item = createValueItem({
-        category: "cost_reduction",
-        quantity: 1,
-        unitValue: 50000,
-        rate: 1, // 100% reduction
-      });
-
-      // 1 * $50,000 * 1 = $50,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(50000);
-    });
-
-    test("calculates partial cost reduction", () => {
-      const item = createValueItem({
-        category: "cost_reduction",
-        quantity: 1,
-        unitValue: 100000,
-        rate: 0.3, // 30% reduction
-      });
-
-      // 1 * $100,000 * 0.3 = $30,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(30000);
-    });
-
-    test("calculates cost reduction with quantity", () => {
-      const item = createValueItem({
-        category: "cost_reduction",
-        quantity: 500,
-        unitValue: 10000,
-        rate: 1, // 100% reduction
-      });
-
-      // 500 * $10,000 * 1 = $5,000,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(5000000);
-    });
-  });
-
-  describe("uptime", () => {
-    test("calculates expected value from probability and cost", () => {
-      const item = createValueItem({
-        category: "uptime",
-        quantity: 0.15, // 15% probability
-        unitValue: 100000, // cost per incident
-      });
-
-      // 0.15 * $100,000 = $15,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(15000);
-    });
-  });
-
-  describe("security_governance", () => {
-    test("calculates risk reduction value", () => {
-      const item = createValueItem({
-        category: "security_governance",
-        quantity: 0.08, // 8% probability
-        unitValue: 150000, // potential cost
-      });
-
-      // 0.08 * $150,000 = $12,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(12000);
-    });
-  });
-
-  describe("tool_consolidation", () => {
-    test("calculates direct cost savings", () => {
-      const item = createValueItem({
-        category: "tool_consolidation",
-        quantity: 3, // 3 tools
-        unitValue: 12000, // $12,000 per tool per year
-      });
-
-      // 3 * $12,000 = $36,000
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(36000);
-    });
-  });
-
-  describe("manual override", () => {
-    test("uses manualAnnualValue when set", () => {
-      const item = createValueItem({
-        category: "time_savings",
-        quantity: 1000,
-        manualAnnualValue: 50000,
-      });
-
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(50000);
-    });
-
-    test("ignores calculation when manualAnnualValue is set", () => {
-      const item = createValueItem({
-        category: "revenue_impact",
-        quantity: 100,
-        unitValue: 10000,
-        rate: 1,
-        manualAnnualValue: 999,
-      });
-
-      const result = calculateItemAnnualValue(item, defaultAssumptions);
-      expect(result).toBe(999);
-    });
+    // 200 × $25,000 × 10% × 4 = $2,000,000
+    expect(calculateItemAnnualValue(item)).toBe(2000000);
   });
 });
 
-describe("calculateCategoryTotals", () => {
-  test("calculates totals for each category", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", quantity: 100, complexity: "medium", rateTier: "operations" }),
-      createValueItem({ category: "time_savings", quantity: 50, complexity: "simple", rateTier: "basic" }),
-      createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 5000, rate: 1 }),
-      createValueItem({ category: "cost_reduction", quantity: 1, unitValue: 10000, rate: 0.5 }),
+describe("revenue_capture", () => {
+  test("annualRevenue x leakageRate x captureImprovement", () => {
+    const item = createItem("revenue_capture", {
+      ...vi("annualRevenue", 50000000),
+      ...vi("leakageRate", 0.02),
+      ...vi("captureImprovement", 0.45),
+    });
+    // $50M × 2% × 45% = $450,000
+    expect(calculateItemAnnualValue(item)).toBe(450000);
+  });
+});
+
+describe("revenue_expansion", () => {
+  test("customerBase x expansionRate x avgExpansionValue x lift", () => {
+    const item = createItem("revenue_expansion", {
+      ...vi("customerBase", 500),
+      ...vi("expansionRate", 0.15),
+      ...vi("avgExpansionValue", 10000),
+      ...vi("lift", 0.10),
+    });
+    // 500 × 15% × $10K × 10% = $75,000
+    expect(calculateItemAnnualValue(item)).toBe(75000);
+  });
+});
+
+describe("time_to_revenue", () => {
+  test("newCustomers x revenuePerCustomer x daysAccelerated / 365", () => {
+    const item = createItem("time_to_revenue", {
+      ...vi("newCustomersPerYear", 200),
+      ...vi("revenuePerCustomer", 50000),
+      ...vi("daysAccelerated", 10),
+    });
+    // 200 × $50K × 10/365 ≈ $273,973
+    expect(calculateItemAnnualValue(item)).toBeCloseTo(273972.60, 0);
+  });
+});
+
+// ============================================================
+// Speed / Cycle Time Archetypes
+// ============================================================
+
+describe("process_acceleration", () => {
+  test("processesPerMonth x (before - after) x rate x 12", () => {
+    const item = createItem("process_acceleration", {
+      ...vi("processesPerMonth", 100),
+      ...vi("timeBeforeHrs", 8),
+      ...vi("timeAfterHrs", 3),
+      ...vi("hourlyRate", 80),
+    });
+    // 100 × (8-3) × $80 × 12 = $480,000
+    expect(calculateItemAnnualValue(item)).toBe(480000);
+  });
+});
+
+describe("handoff_elimination", () => {
+  test("handoffs x queueTime x rate x 12", () => {
+    const item = createItem("handoff_elimination", {
+      ...vi("handoffsPerMonth", 500),
+      ...vi("avgQueueTimeHrs", 2),
+      ...vi("hourlyRateOfWaitingParty", 60),
+    });
+    // 500 × 2 × $60 × 12 = $720,000
+    expect(calculateItemAnnualValue(item)).toBe(720000);
+  });
+});
+
+// ============================================================
+// Productivity Archetypes
+// ============================================================
+
+describe("task_elimination", () => {
+  test("tasks x minutes x (rate/60) x 12", () => {
+    const item = createItem("task_elimination", {
+      ...vi("tasksPerMonth", 3000),
+      ...vi("minutesPerTask", 8),
+      ...vi("hourlyRate", 50),
+    });
+    // 3000 × 8 × ($50/60) × 12 = $240,000
+    expect(calculateItemAnnualValue(item)).toBe(240000);
+  });
+});
+
+describe("task_simplification", () => {
+  test("tasks x minutesSaved x (rate/60) x 12", () => {
+    const item = createItem("task_simplification", {
+      ...vi("tasksPerMonth", 2000),
+      ...vi("minutesSavedPerTask", 5),
+      ...vi("hourlyRate", 50),
+    });
+    // 2000 × 5 × ($50/60) × 12 = $100,000
+    expect(calculateItemAnnualValue(item)).toBe(100000);
+  });
+});
+
+describe("context_surfacing", () => {
+  test("meetings + searches value", () => {
+    const item = createItem("context_surfacing", {
+      ...vi("meetingsAvoidedPerMonth", 20),
+      ...vi("attendeesPerMeeting", 4),
+      ...vi("meetingDurationHrs", 1),
+      ...vi("meetingHourlyRate", 80),
+      ...vi("searchesAvoidedPerMonth", 100),
+      ...vi("avgSearchTimeMin", 20),
+      ...vi("searchHourlyRate", 60),
+    });
+    // Meetings: 20 × 4 × 1 × $80 × 12 = $76,800
+    // Searches: 100 × 20 × ($60/60) × 12 = $24,000
+    // Total = $100,800
+    expect(calculateItemAnnualValue(item)).toBe(100800);
+  });
+});
+
+// ============================================================
+// Cost Avoidance Archetypes
+// ============================================================
+
+describe("labor_avoidance", () => {
+  test("FTEs x annual cost", () => {
+    const item = createItem("labor_avoidance", {
+      ...vi("ftesAvoided", 2),
+      ...vi("fullyLoadedAnnualCost", 100000),
+    });
+    // 2 × $100K = $200,000
+    expect(calculateItemAnnualValue(item)).toBe(200000);
+  });
+});
+
+describe("tool_consolidation", () => {
+  test("tools x annual cost per tool", () => {
+    const item = createItem("tool_consolidation", {
+      ...vi("toolsEliminated", 3),
+      ...vi("annualLicenseCostPerTool", 15000),
+    });
+    // 3 × $15K = $45,000
+    expect(calculateItemAnnualValue(item)).toBe(45000);
+  });
+});
+
+describe("error_rework_elimination", () => {
+  test("errors x costPerError x reduction x 12", () => {
+    const item = createItem("error_rework_elimination", {
+      ...vi("errorsPerMonth", 200),
+      ...vi("avgCostPerError", 150),
+      ...vi("reductionRate", 0.70),
+    });
+    // 200 × $150 × 70% × 12 = $252,000
+    expect(calculateItemAnnualValue(item)).toBe(252000);
+  });
+});
+
+// ============================================================
+// Risk & Quality Archetypes
+// ============================================================
+
+describe("compliance_assurance", () => {
+  test("violations x penalty x reduction", () => {
+    const item = createItem("compliance_assurance", {
+      ...vi("expectedViolationsPerYear", 5),
+      ...vi("avgPenaltyPerViolation", 100000),
+      ...vi("reductionRate", 0.55),
+    });
+    // 5 × $100K × 55% = $275,000
+    expect(calculateItemAnnualValue(item)).toBe(275000);
+  });
+});
+
+describe("data_integrity", () => {
+  test("records x errorRate x cost x reduction x 12", () => {
+    const item = createItem("data_integrity", {
+      ...vi("recordsPerMonth", 50000),
+      ...vi("errorRate", 0.02),
+      ...vi("costPerError", 50),
+      ...vi("reductionRate", 0.75),
+    });
+    // 50K × 2% × $50 × 75% × 12 = $450,000
+    expect(calculateItemAnnualValue(item)).toBe(450000);
+  });
+});
+
+describe("incident_prevention", () => {
+  test("incidents x cost x reduction", () => {
+    const item = createItem("incident_prevention", {
+      ...vi("incidentsPerYear", 12),
+      ...vi("avgCostPerIncident", 10000),
+      ...vi("reductionRate", 0.30),
+    });
+    // 12 × $10K × 30% = $36,000
+    expect(calculateItemAnnualValue(item)).toBe(36000);
+  });
+});
+
+describe("process_consistency", () => {
+  test("processes x defectRate x cost x reduction x 12", () => {
+    const item = createItem("process_consistency", {
+      ...vi("processesPerMonth", 1000),
+      ...vi("defectRate", 0.05),
+      ...vi("costPerDefect", 200),
+      ...vi("reductionRate", 0.65),
+    });
+    // 1000 × 5% × $200 × 65% × 12 = $78,000
+    expect(calculateItemAnnualValue(item)).toBe(78000);
+  });
+});
+
+// ============================================================
+// Manual Override
+// ============================================================
+
+describe("manual override", () => {
+  test("uses manualAnnualValue when set", () => {
+    const item = createItem("task_elimination", {
+      ...vi("tasksPerMonth", 1000),
+      ...vi("minutesPerTask", 10),
+      ...vi("hourlyRate", 50),
+    }, { manualAnnualValue: 99999 });
+    expect(calculateItemAnnualValue(item)).toBe(99999);
+  });
+});
+
+// ============================================================
+// Computed Value (formula trace + confidence)
+// ============================================================
+
+describe("calculateComputedValue", () => {
+  test("generates formula trace and lowest confidence", () => {
+    const item = createItem("pipeline_velocity", {
+      dealsPerQuarter: { value: 100, confidence: "custom" as any },
+      avgDealValue: { value: 20000, confidence: "custom" as any },
+      conversionLift: { value: 0.10, confidence: "estimated" as any },
+    });
+    const result = calculateComputedValue(item);
+    expect(result.annualValue).toBe(800000);
+    expect(result.confidence).toBe("custom");
+    expect(result.formula).toContain("$800,000");
+  });
+});
+
+// ============================================================
+// Aggregation Functions
+// ============================================================
+
+describe("calculateDimensionTotals", () => {
+  test("groups by dimension correctly", () => {
+    const items = [
+      createItem("task_elimination", { ...vi("tasksPerMonth", 100), ...vi("minutesPerTask", 6), ...vi("hourlyRate", 50) }),
+      createItem("pipeline_velocity", { ...vi("dealsPerQuarter", 10), ...vi("avgDealValue", 1000), ...vi("conversionLift", 0.1) }),
     ];
+    const totals = calculateDimensionTotals(items);
 
-    const totals = calculateCategoryTotals(items, defaultAssumptions);
-
-    // time_savings: (100 * 8/60 * 12 * 50) + (50 * 2/60 * 12 * 25) = 8000 + 500 = 8500
-    expect(totals.time_savings).toBe(8500);
-    // revenue_impact: 1 * 5000 * 1 = 5000
-    expect(totals.revenue_impact).toBe(5000);
-    // cost_reduction: 10000 * 0.5 = 5000
-    expect(totals.cost_reduction).toBe(5000);
-    // Others should be 0
-    expect(totals.uptime).toBe(0);
-    expect(totals.security_governance).toBe(0);
-    expect(totals.tool_consolidation).toBe(0);
-  });
-
-  test("returns zeros for empty items array", () => {
-    const totals = calculateCategoryTotals([], defaultAssumptions);
-
-    expect(totals.time_savings).toBe(0);
-    expect(totals.revenue_impact).toBe(0);
-    expect(totals.cost_reduction).toBe(0);
-    expect(totals.uptime).toBe(0);
-    expect(totals.security_governance).toBe(0);
-    expect(totals.tool_consolidation).toBe(0);
+    const productivity = totals.find((t) => t.dimension === "productivity");
+    const revenue = totals.find((t) => t.dimension === "revenue_impact");
+    // task_elimination: 100 × 6 × ($50/60) × 12 = $6,000
+    expect(productivity!.total).toBe(6000);
+    expect(productivity!.itemCount).toBe(1);
+    // pipeline_velocity: 10 × $1000 × 10% × 4 = $4,000
+    expect(revenue!.total).toBe(4000);
+    expect(revenue!.itemCount).toBe(1);
   });
 });
 
-describe("calculateTotalAnnualValue", () => {
-  test("sums all item values", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", quantity: 1000, complexity: "medium", rateTier: "operations" }),
-      createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 10000, rate: 1 }),
+describe("getDimensionBreakdown", () => {
+  test("filters zero dimensions and sorts by value", () => {
+    const items = [
+      createItem("task_elimination", { ...vi("tasksPerMonth", 100), ...vi("minutesPerTask", 6), ...vi("hourlyRate", 50) }),
     ];
-
-    // time_savings: 80000, revenue_impact: 10000
-    const total = calculateTotalAnnualValue(items, defaultAssumptions);
-    expect(total).toBe(90000);
-  });
-
-  test("returns 0 for empty items", () => {
-    const total = calculateTotalAnnualValue([], defaultAssumptions);
-    expect(total).toBe(0);
+    const breakdown = getDimensionBreakdown(items);
+    expect(breakdown.length).toBe(1);
+    expect(breakdown[0]!.dimension).toBe("productivity");
+    expect(breakdown[0]!.percentage).toBe(100);
   });
 });
+
+// ============================================================
+// Projection
+// ============================================================
 
 describe("calculateProjection", () => {
-  test("applies realization ramp correctly", () => {
-    const projections = calculateProjection(100000, defaultAssumptions);
-
-    // Year 1: 100000 * 1.0^0 * 0.5 = 50000
-    expect(projections[0]!.year).toBe(1);
-    expect(projections[0]!.value).toBeCloseTo(50000, 2);
-
-    // Year 2: 100000 * 1.1^1 * 1.0 = 110000
-    expect(projections[1]!.year).toBe(2);
-    expect(projections[1]!.value).toBeCloseTo(110000, 2);
-
-    // Year 3: 100000 * 1.1^2 * 1.0 = 121000
-    expect(projections[2]!.year).toBe(3);
-    expect(projections[2]!.value).toBeCloseTo(121000, 2);
+  test("applies realization ramp and growth", () => {
+    const proj = calculateProjection(100000, defaultAssumptions);
+    expect(proj[0]!.value).toBeCloseTo(50000); // 100K × 0.5
+    expect(proj[1]!.value).toBeCloseTo(110000); // 100K × 1.1 × 1.0
+    expect(proj[2]!.value).toBeCloseTo(121000); // 100K × 1.21 × 1.0
   });
 
-  test("calculates investment correctly", () => {
-    const projections = calculateProjection(100000, defaultAssumptions, 10000, 30000);
-
-    // Incremental investment = 30000 - 10000 = 20000
-    expect(projections[0]!.investment).toBe(20000);
-    expect(projections[0]!.netValue).toBe(50000 - 20000);
+  test("calculates cumulative values", () => {
+    const proj = calculateProjection(100000, defaultAssumptions, 0, 50000);
+    expect(proj[0]!.cumulativeValue).toBeCloseTo(50000);
+    expect(proj[0]!.cumulativeInvestment).toBe(50000);
+    expect(proj[1]!.cumulativeValue).toBeCloseTo(160000);
   });
 
   test("handles zero investment", () => {
-    const projections = calculateProjection(100000, defaultAssumptions, 0, 0);
-
-    expect(projections[0]!.investment).toBe(0);
-    expect(projections[0]!.netValue).toBe(projections[0]!.value);
-  });
-
-  test("handles negative incremental investment (cost savings)", () => {
-    const projections = calculateProjection(100000, defaultAssumptions, 50000, 30000);
-
-    // Incremental = 30000 - 50000 = -20000, so investment should be 0
-    expect(projections[0]!.investment).toBe(0);
+    const proj = calculateProjection(100000, defaultAssumptions, 0, 0);
+    expect(proj[0]!.investment).toBe(0);
   });
 });
+
+// ============================================================
+// ROI Multiple
+// ============================================================
 
 describe("calculateROIMultiple", () => {
-  test("calculates ROI multiple correctly", () => {
-    const roi = calculateROIMultiple(100000, 10000, 30000);
-    // ROI = 100000 / (30000 - 10000) = 100000 / 20000 = 5
-    expect(roi).toBe(5);
+  test("calculates correctly", () => {
+    expect(calculateROIMultiple(100000, 10000, 30000)).toBe(5);
   });
-
-  test("returns null when investment is zero", () => {
-    const roi = calculateROIMultiple(100000, 0, 0);
-    expect(roi).toBeNull();
+  test("returns null for zero investment", () => {
+    expect(calculateROIMultiple(100000, 0, 0)).toBeNull();
   });
-
-  test("returns null when investment is negative", () => {
-    const roi = calculateROIMultiple(100000, 50000, 30000);
-    expect(roi).toBeNull();
-  });
-
-  test("calculates fractional ROI", () => {
-    const roi = calculateROIMultiple(50000, 0, 100000);
-    // ROI = 50000 / 100000 = 0.5
-    expect(roi).toBe(0.5);
+  test("returns null for negative investment", () => {
+    expect(calculateROIMultiple(100000, 50000, 30000)).toBeNull();
   });
 });
+
+// ============================================================
+// Hours Saved
+// ============================================================
 
 describe("calculateTotalHoursSaved", () => {
-  test("sums hours from time_savings items only", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", quantity: 600, complexity: "medium" }), // 600 * 8 / 60 = 80 hours
-      createValueItem({ category: "time_savings", quantity: 300, complexity: "simple" }), // 300 * 2 / 60 = 10 hours
-      createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 10000 }), // Should be ignored
+  test("sums hours from time-related archetypes", () => {
+    const items = [
+      createItem("task_elimination", { ...vi("tasksPerMonth", 600), ...vi("minutesPerTask", 8), ...vi("hourlyRate", 50) }), // 600×8/60 = 80 hrs
+      createItem("task_simplification", { ...vi("tasksPerMonth", 300), ...vi("minutesSavedPerTask", 4), ...vi("hourlyRate", 50) }), // 300×4/60 = 20 hrs
+      createItem("pipeline_velocity", { ...vi("dealsPerQuarter", 10), ...vi("avgDealValue", 1000), ...vi("conversionLift", 0.1) }), // 0 hrs
     ];
-
-    const hours = calculateTotalHoursSaved(items, defaultAssumptions);
-    expect(hours).toBe(90);
+    expect(calculateTotalHoursSaved(items)).toBe(100);
   });
 
-  test("returns 0 when no time_savings items", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 10000 }),
-      createValueItem({ category: "cost_reduction", quantity: 1, unitValue: 5000 }),
+  test("includes process_acceleration hours", () => {
+    const items = [
+      createItem("process_acceleration", { ...vi("processesPerMonth", 50), ...vi("timeBeforeHrs", 4), ...vi("timeAfterHrs", 1), ...vi("hourlyRate", 80) }), // 50×3 = 150 hrs
     ];
-
-    const hours = calculateTotalHoursSaved(items, defaultAssumptions);
-    expect(hours).toBe(0);
-  });
-
-  test("handles complex tasks", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", quantity: 180, complexity: "complex" }), // 180 * 20 / 60 = 60 hours
-    ];
-
-    const hours = calculateTotalHoursSaved(items, defaultAssumptions);
-    expect(hours).toBe(60);
+    expect(calculateTotalHoursSaved(items)).toBe(150);
   });
 });
 
-describe("getCategoryBreakdown", () => {
-  test("returns breakdown sorted by value descending", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", quantity: 1000, complexity: "medium", rateTier: "operations" }), // 80000
-      createValueItem({ category: "revenue_impact", quantity: 1, unitValue: 10000, rate: 1 }), // 10000
-    ];
-
-    const breakdown = getCategoryBreakdown(items, defaultAssumptions);
-
-    expect(breakdown.length).toBe(2);
-    expect(breakdown[0]!.category).toBe("time_savings");
-    expect(breakdown[0]!.value).toBe(80000);
-    expect(breakdown[1]!.category).toBe("revenue_impact");
-    expect(breakdown[1]!.value).toBe(10000);
+describe("calculateFTEEquivalent", () => {
+  test("160 hours = 1 FTE", () => {
+    expect(calculateFTEEquivalent(160)).toBe(1);
   });
-
-  test("calculates percentages correctly", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", manualAnnualValue: 75000 }),
-      createValueItem({ category: "revenue_impact", manualAnnualValue: 25000 }),
-    ];
-
-    const breakdown = getCategoryBreakdown(items, defaultAssumptions);
-
-    expect(breakdown[0]!.percentage).toBe(75);
-    expect(breakdown[1]!.percentage).toBe(25);
+  test("80 hours = 0.5 FTE", () => {
+    expect(calculateFTEEquivalent(80)).toBe(0.5);
   });
+});
 
-  test("filters out zero-value categories", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", manualAnnualValue: 50000 }),
+// ============================================================
+// Full Summary
+// ============================================================
+
+describe("calculateSummary", () => {
+  test("returns complete summary", () => {
+    const items = [
+      createItem("task_elimination", { ...vi("tasksPerMonth", 3000), ...vi("minutesPerTask", 8), ...vi("hourlyRate", 50) }),
+      createItem("pipeline_velocity", { ...vi("dealsPerQuarter", 200), ...vi("avgDealValue", 25000), ...vi("conversionLift", 0.10) }),
     ];
-
-    const breakdown = getCategoryBreakdown(items, defaultAssumptions);
-
-    expect(breakdown.length).toBe(1);
-    expect(breakdown[0]!.category).toBe("time_savings");
-  });
-
-  test("includes correct labels and colors", () => {
-    const items: ValueItem[] = [
-      createValueItem({ category: "time_savings", manualAnnualValue: 10000 }),
-    ];
-
-    const breakdown = getCategoryBreakdown(items, defaultAssumptions);
-
-    expect(breakdown[0]!.label).toBe("Time Savings");
-    expect(breakdown[0]!.color).toBe("#FF4A00");
-  });
-
-  test("returns empty array for no items", () => {
-    const breakdown = getCategoryBreakdown([], defaultAssumptions);
-    expect(breakdown.length).toBe(0);
+    const summary = calculateSummary(items, defaultAssumptions, 0, 70000);
+    // task_elimination: $240K, pipeline_velocity: $2M = $2,240K total
+    expect(summary.totalAnnualValue).toBe(2240000);
+    expect(summary.roiMultiple).toBe(32);
+    expect(summary.hoursSavedPerMonth).toBe(400); // 3000×8/60
+    expect(summary.fteEquivalent).toBe(2.5);
+    expect(summary.dimensionTotals.length).toBe(5);
+    expect(summary.projection.length).toBe(3);
   });
 });

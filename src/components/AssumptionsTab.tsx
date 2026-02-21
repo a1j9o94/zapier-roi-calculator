@@ -1,6 +1,6 @@
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { Calculation } from "../types/roi";
+import type { RateTier } from "../types/roi";
 import {
   Card,
   CardContent,
@@ -12,54 +12,52 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface AssumptionsTabProps {
-  calculation: Calculation;
+  calculation: {
+    _id: any;
+    assumptions: {
+      projectionYears: number;
+      realizationRamp: number[];
+      annualGrowthRate: number;
+      defaultRates: Record<string, number>;
+    };
+    currentSpend?: number;
+    proposedSpend?: number;
+    obfuscation?: { companyDescriptor?: string; hideNotes?: boolean; roundValues?: boolean };
+  };
   readOnly?: boolean;
 }
+
+const RATE_TIERS: { key: RateTier; label: string; description: string }[] = [
+  { key: "admin", label: "Admin / Data Entry", description: "$60-80K loaded" },
+  { key: "operations", label: "Operations / IT Support", description: "$80-120K loaded" },
+  { key: "salesOps", label: "Sales Operations", description: "$100-140K loaded" },
+  { key: "engineering", label: "Engineering", description: "$150-200K loaded" },
+  { key: "manager", label: "Manager", description: "$140-180K loaded" },
+  { key: "executive", label: "Executive", description: "$200K+ loaded" },
+];
 
 export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTabProps) {
   const updateAssumptions = useMutation(api.calculations.updateAssumptions);
   const updateInvestment = useMutation(api.calculations.updateInvestment);
+  const updateObfuscation = useMutation(api.calculations.updateObfuscation);
 
   const { assumptions } = calculation;
 
-  const handleHourlyRateChange = (
-    tier: "basic" | "operations" | "engineering" | "executive",
-    value: string
-  ) => {
+  const handleRateChange = (tier: RateTier, value: string) => {
     const numValue = parseFloat(value) || 0;
     updateAssumptions({
       id: calculation._id,
       assumptions: {
         ...assumptions,
-        hourlyRates: {
-          ...assumptions.hourlyRates,
+        defaultRates: {
+          ...assumptions.defaultRates,
           [tier]: numValue,
-        },
+        } as any,
       },
     });
   };
 
-  const handleTaskMinutesChange = (
-    complexity: "simple" | "medium" | "complex",
-    value: string
-  ) => {
-    const numValue = parseFloat(value) || 0;
-    updateAssumptions({
-      id: calculation._id,
-      assumptions: {
-        ...assumptions,
-        taskMinutes: {
-          ...assumptions.taskMinutes,
-          [complexity]: numValue,
-        },
-      },
-    });
-  };
-
-  const handleProjectionChange = (
-    field: "projectionYears" | "annualGrowthRate",
-    value: string
-  ) => {
+  const handleProjectionChange = (field: "projectionYears" | "annualGrowthRate", value: string) => {
     const numValue = parseFloat(value) || 0;
     updateAssumptions({
       id: calculation._id,
@@ -76,198 +74,47 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
     newRamp[yearIndex] = numValue;
     updateAssumptions({
       id: calculation._id,
-      assumptions: {
-        ...assumptions,
-        realizationRamp: newRamp,
-      },
+      assumptions: { ...assumptions, realizationRamp: newRamp },
     });
   };
 
-  const handleRiskAssumptionChange = (
-    field: "avgDataBreachCost" | "avgSupportTicketCost",
-    value: string
-  ) => {
+  const handleInvestmentChange = (field: "currentSpend" | "proposedSpend", value: string) => {
     const numValue = parseFloat(value) || 0;
-    updateAssumptions({
-      id: calculation._id,
-      assumptions: {
-        ...assumptions,
-        [field]: numValue,
-      },
-    });
-  };
-
-  const handleInvestmentChange = (
-    field: "currentSpend" | "proposedSpend",
-    value: string
-  ) => {
-    const numValue = parseFloat(value) || 0;
-    updateInvestment({
-      id: calculation._id,
-      [field]: numValue,
-    });
+    updateInvestment({ id: calculation._id, [field]: numValue });
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Labor Cost Assumptions */}
+      {/* Default Hourly Rates */}
       <Card>
         <CardHeader>
-          <CardTitle>Labor Cost Assumptions</CardTitle>
+          <CardTitle>Default Hourly Rates</CardTitle>
           <CardDescription>
-            Hourly rates by role tier for calculating time savings value
+            Loaded hourly rates by role tier. Used as defaults when creating value items.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="basic-rate">Basic Staff Rate</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">$</span>
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.hourlyRates.basic}</span>
-              ) : (
-                <Input
-                  id="basic-rate"
-                  type="number"
-                  value={assumptions.hourlyRates.basic}
-                  onChange={(e) =>
-                    handleHourlyRateChange("basic", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-              <span className="text-muted-foreground text-sm">/hour</span>
+        <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {RATE_TIERS.map(({ key, label, description }) => (
+            <div key={key} className="space-y-1">
+              <Label htmlFor={`rate-${key}`} className="text-sm">{label}</Label>
+              <p className="text-xs text-muted-foreground">{description}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">$</span>
+                {readOnly ? (
+                  <span className="font-mono py-2">{assumptions.defaultRates[key]}</span>
+                ) : (
+                  <Input
+                    id={`rate-${key}`}
+                    type="number"
+                    value={assumptions.defaultRates[key]}
+                    onChange={(e) => handleRateChange(key, e.target.value)}
+                    className="font-mono"
+                  />
+                )}
+                <span className="text-muted-foreground text-sm">/hr</span>
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="ops-rate">Operations Staff Rate</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">$</span>
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.hourlyRates.operations}</span>
-              ) : (
-                <Input
-                  id="ops-rate"
-                  type="number"
-                  value={assumptions.hourlyRates.operations}
-                  onChange={(e) =>
-                    handleHourlyRateChange("operations", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-              <span className="text-muted-foreground text-sm">/hour</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="eng-rate">Engineering Rate</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">$</span>
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.hourlyRates.engineering}</span>
-              ) : (
-                <Input
-                  id="eng-rate"
-                  type="number"
-                  value={assumptions.hourlyRates.engineering}
-                  onChange={(e) =>
-                    handleHourlyRateChange("engineering", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-              <span className="text-muted-foreground text-sm">/hour</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="exec-rate">Executive Rate</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">$</span>
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.hourlyRates.executive}</span>
-              ) : (
-                <Input
-                  id="exec-rate"
-                  type="number"
-                  value={assumptions.hourlyRates.executive}
-                  onChange={(e) =>
-                    handleHourlyRateChange("executive", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-              <span className="text-muted-foreground text-sm">/hour</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Task Complexity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Task Complexity</CardTitle>
-          <CardDescription>
-            Minutes required per task by complexity level
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="simple-mins">Simple Tasks</Label>
-            <div className="flex items-center gap-2">
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.taskMinutes.simple}</span>
-              ) : (
-                <Input
-                  id="simple-mins"
-                  type="number"
-                  value={assumptions.taskMinutes.simple}
-                  onChange={(e) =>
-                    handleTaskMinutesChange("simple", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-              <span className="text-muted-foreground text-sm">min</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="medium-mins">Medium Tasks</Label>
-            <div className="flex items-center gap-2">
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.taskMinutes.medium}</span>
-              ) : (
-                <Input
-                  id="medium-mins"
-                  type="number"
-                  value={assumptions.taskMinutes.medium}
-                  onChange={(e) =>
-                    handleTaskMinutesChange("medium", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-              <span className="text-muted-foreground text-sm">min</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="complex-mins">Complex Tasks</Label>
-            <div className="flex items-center gap-2">
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.taskMinutes.complex}</span>
-              ) : (
-                <Input
-                  id="complex-mins"
-                  type="number"
-                  value={assumptions.taskMinutes.complex}
-                  onChange={(e) =>
-                    handleTaskMinutesChange("complex", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-              <span className="text-muted-foreground text-sm">min</span>
-            </div>
-          </div>
+          ))}
         </CardContent>
       </Card>
 
@@ -275,9 +122,7 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
       <Card>
         <CardHeader>
           <CardTitle>Projection Settings</CardTitle>
-          <CardDescription>
-            Multi-year projection and realization assumptions
-          </CardDescription>
+          <CardDescription>Multi-year projection and realization assumptions</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
@@ -293,9 +138,7 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                     min="1"
                     max="10"
                     value={assumptions.projectionYears}
-                    onChange={(e) =>
-                      handleProjectionChange("projectionYears", e.target.value)
-                    }
+                    onChange={(e) => handleProjectionChange("projectionYears", e.target.value)}
                     className="font-mono"
                   />
                 )}
@@ -312,9 +155,7 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                     id="growth-rate"
                     type="number"
                     value={Math.round(assumptions.annualGrowthRate * 100)}
-                    onChange={(e) =>
-                      handleProjectionChange("annualGrowthRate", e.target.value)
-                    }
+                    onChange={(e) => handleProjectionChange("annualGrowthRate", e.target.value)}
                     className="font-mono"
                   />
                 )}
@@ -326,14 +167,12 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
           <div className="space-y-2">
             <Label>Realization Ramp</Label>
             <p className="text-sm text-muted-foreground mb-2">
-              Percentage of value realized each year
+              Percentage of value realized each year (accounts for adoption curve)
             </p>
             <div className="flex gap-4">
               {assumptions.realizationRamp.map((rate, index) => (
                 <div key={index} className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">
-                    Year {index + 1}
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">Year {index + 1}</Label>
                   <div className="flex items-center gap-1">
                     {readOnly ? (
                       <span className="font-mono py-2 w-20">{Math.round(rate * 100)}</span>
@@ -343,9 +182,7 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                         min="0"
                         max="100"
                         value={Math.round(rate * 100)}
-                        onChange={(e) =>
-                          handleRealizationChange(index, e.target.value)
-                        }
+                        onChange={(e) => handleRealizationChange(index, e.target.value)}
                         className="font-mono w-20"
                       />
                     )}
@@ -358,66 +195,11 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
         </CardContent>
       </Card>
 
-      {/* Risk Assumptions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Risk Assumptions</CardTitle>
-          <CardDescription>
-            Default values for security and uptime calculations
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="breach-cost">Avg Data Breach Cost</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">$</span>
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.avgDataBreachCost.toLocaleString()}</span>
-              ) : (
-                <Input
-                  id="breach-cost"
-                  type="number"
-                  value={assumptions.avgDataBreachCost}
-                  onChange={(e) =>
-                    handleRiskAssumptionChange("avgDataBreachCost", e.target.value)
-                  }
-                  className="font-mono"
-                />
-              )}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="ticket-cost">Avg Support Ticket Cost</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">$</span>
-              {readOnly ? (
-                <span className="font-mono py-2">{assumptions.avgSupportTicketCost.toLocaleString()}</span>
-              ) : (
-                <Input
-                  id="ticket-cost"
-                  type="number"
-                  value={assumptions.avgSupportTicketCost}
-                  onChange={(e) =>
-                    handleRiskAssumptionChange(
-                      "avgSupportTicketCost",
-                      e.target.value
-                    )
-                  }
-                  className="font-mono"
-                />
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Investment Comparison */}
       <Card>
         <CardHeader>
           <CardTitle>Investment Comparison</CardTitle>
-          <CardDescription>
-            Compare current spend vs proposed Zapier investment
-          </CardDescription>
+          <CardDescription>Current spend vs proposed Zapier investment for ROI calculation</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -431,9 +213,7 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                   id="current-spend"
                   type="number"
                   value={calculation.currentSpend ?? ""}
-                  onChange={(e) =>
-                    handleInvestmentChange("currentSpend", e.target.value)
-                  }
+                  onChange={(e) => handleInvestmentChange("currentSpend", e.target.value)}
                   className="font-mono"
                   placeholder="0"
                 />
@@ -451,15 +231,83 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                   id="proposed-spend"
                   type="number"
                   value={calculation.proposedSpend ?? ""}
-                  onChange={(e) =>
-                    handleInvestmentChange("proposedSpend", e.target.value)
-                  }
+                  onChange={(e) => handleInvestmentChange("proposedSpend", e.target.value)}
                   className="font-mono"
                   placeholder="0"
                 />
               )}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Obfuscation Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Obfuscation Settings</CardTitle>
+          <CardDescription>
+            Configure anonymization for shareable/demo views (applies to /demo and ?obfuscate=true URLs)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="company-descriptor">Company Descriptor</Label>
+            <p className="text-xs text-muted-foreground">Replaces company name in obfuscated views</p>
+            {readOnly ? (
+              <span className="font-mono py-2">{calculation.obfuscation?.companyDescriptor || "Enterprise Customer"}</span>
+            ) : (
+              <Input
+                id="company-descriptor"
+                value={calculation.obfuscation?.companyDescriptor ?? ""}
+                onChange={(e) =>
+                  updateObfuscation({
+                    id: calculation._id,
+                    obfuscation: {
+                      ...calculation.obfuscation,
+                      companyDescriptor: e.target.value,
+                    },
+                  })
+                }
+                placeholder="e.g., Fortune 500 Shipping & Logistics Company"
+              />
+            )}
+          </div>
+          {!readOnly && (
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={calculation.obfuscation?.hideNotes ?? false}
+                  onChange={(e) =>
+                    updateObfuscation({
+                      id: calculation._id,
+                      obfuscation: {
+                        ...calculation.obfuscation,
+                        hideNotes: e.target.checked,
+                      },
+                    })
+                  }
+                />
+                Hide descriptions/notes
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={calculation.obfuscation?.roundValues ?? false}
+                  onChange={(e) =>
+                    updateObfuscation({
+                      id: calculation._id,
+                      obfuscation: {
+                        ...calculation.obfuscation,
+                        roundValues: e.target.checked,
+                      },
+                    })
+                  }
+                />
+                Round monetary values
+              </label>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

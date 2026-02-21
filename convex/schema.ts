@@ -2,137 +2,179 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  // ROI Calculation (shareable document)
+  // ROI Calculation (root document)
   calculations: defineTable({
-    name: v.string(), // Customer/project name
-    shortId: v.optional(v.string()), // Short URL-friendly ID (e.g., "abc123")
+    name: v.string(),
+    shortId: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
 
-    // Global Assumptions
+    // Per-endpoint obfuscation settings
+    obfuscation: v.optional(
+      v.object({
+        companyDescriptor: v.optional(v.string()), // "Fortune 500 Shipping Company"
+        hideNotes: v.optional(v.boolean()),
+        roundValues: v.optional(v.boolean()),
+      })
+    ),
+
+    // Global assumptions
     assumptions: v.object({
-      // Labor costs by tier
-      hourlyRates: v.object({
-        basic: v.number(), // Default: $25 (admin staff)
-        operations: v.number(), // Default: $50 (ops/IT)
-        engineering: v.number(), // Default: $100 (engineering)
-        executive: v.number(), // Default: $200 (leadership)
+      projectionYears: v.number(),
+      realizationRamp: v.array(v.number()),
+      annualGrowthRate: v.number(),
+      // Default hourly rates by tier
+      defaultRates: v.object({
+        admin: v.number(), // $60-80K loaded -> ~$30-40/hr
+        operations: v.number(), // $80-120K -> ~$40-60/hr
+        salesOps: v.number(), // $100-140K -> ~$50-70/hr
+        engineering: v.number(), // $150-200K -> ~$75-100/hr
+        manager: v.number(), // $140-180K -> ~$70-90/hr
+        executive: v.number(), // $200K+ -> ~$100+/hr
       }),
-
-      // Task complexity multipliers (minutes per task)
-      taskMinutes: v.object({
-        simple: v.number(), // Default: 2 min
-        medium: v.number(), // Default: 8 min
-        complex: v.number(), // Default: 20 min
-      }),
-
-      // Projection settings
-      projectionYears: v.number(), // Default: 3
-      realizationRamp: v.array(v.number()), // Default: [0.5, 1, 1] for Y1/Y2/Y3
-      annualGrowthRate: v.number(), // Default: 0.1 (10% YoY)
-
-      // Risk assumptions
-      avgDataBreachCost: v.number(), // Default: $150,000
-      avgSupportTicketCost: v.number(), // Default: $150
     }),
 
     // Investment comparison
-    currentSpend: v.optional(v.number()), // What they pay now
-    proposedSpend: v.optional(v.number()), // Zapier investment
+    currentSpend: v.optional(v.number()),
+    proposedSpend: v.optional(v.number()),
 
-    // Editable talking points for the executive summary
+    // Editable talking points
     talkingPoints: v.optional(v.array(v.string())),
+
+    // Role-based view
+    role: v.optional(v.string()),
+    priorityOrder: v.optional(v.array(v.string())),
   }).index("by_shortId", ["shortId"]),
 
-  // Value Line Items (categorized by type)
+  // Value Items — archetype-driven
   valueItems: defineTable({
     calculationId: v.id("calculations"),
-    shortId: v.optional(v.string()), // Short URL-friendly ID for API access
+    shortId: v.optional(v.string()),
 
-    // Categorization
-    category: v.union(
-      v.literal("time_savings"),
-      v.literal("revenue_impact"),
-      v.literal("cost_reduction"),
-      v.literal("uptime"),
-      v.literal("security_governance"),
-      v.literal("tool_consolidation")
-    ),
+    // UVS taxonomy
+    archetype: v.string(), // One of 16 archetypes
+    dimension: v.string(), // Derived from archetype (denormalized)
 
     name: v.string(),
     description: v.optional(v.string()),
 
-    // Flexible value inputs - interpretation depends on category
-    // Time savings: quantity = tasks/month, unitValue = minutes per task
-    // Revenue: quantity = deals/month, unitValue = avg deal value, rate = improvement %
-    // Cost: quantity = 1, unitValue = annual cost, rate = reduction %
-    // Uptime: quantity = probability (0-1), unitValue = cost per incident
-    // Security: quantity = probability (0-1), unitValue = potential cost
-    // Tool consolidation: quantity = 1, unitValue = annual cost per tool
-    quantity: v.number(),
-    unitValue: v.number(),
-    rate: v.optional(v.number()), // Multiplier, improvement %, or hourly rate tier key
+    // Archetype-specific inputs stored as JSON
+    // Each key is an input name, value is { value, confidence, source }
+    inputs: v.any(),
 
-    // For time savings: which hourly rate tier to use
-    rateTier: v.optional(
-      v.union(
-        v.literal("basic"),
-        v.literal("operations"),
-        v.literal("engineering"),
-        v.literal("executive")
-      )
-    ),
-
-    // For time savings: task complexity
-    complexity: v.optional(
-      v.union(v.literal("simple"), v.literal("medium"), v.literal("complex"))
-    ),
-
-    // Override calculated annual value if needed
+    // Override calculated value
     manualAnnualValue: v.optional(v.number()),
 
-    // Context
-    notes: v.optional(v.string()),
-
-    // Ordering within category
-    order: v.number(),
-
-    // Optional link to a use case
+    // Optional link to use case
     useCaseId: v.optional(v.id("useCases")),
+
+    // Ordering
+    order: v.number(),
   })
-    .index("by_calculation", ["calculationId"])
+    .index("by_calculationId", ["calculationId"])
     .index("by_shortId", ["shortId"]),
 
-  // Use Cases (documentation-focused view of automation use cases)
+  // Use Cases — enhanced with architecture
   useCases: defineTable({
     calculationId: v.id("calculations"),
-    shortId: v.optional(v.string()), // Short URL-friendly ID for API access
+    shortId: v.optional(v.string()),
+
     name: v.string(),
-    department: v.optional(v.string()), // Free text field
-    status: v.union(
-      v.literal("identified"), // Just discovered
-      v.literal("in_progress"), // Being worked on (trial/discovery/building)
-      v.literal("deployed"), // Live in production
-      v.literal("future") // Planned for later
-    ),
-    difficulty: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    department: v.optional(v.string()),
+    status: v.string(), // identified | in_progress | deployed | future
+    implementationEffort: v.string(), // low | medium | high
+
+    // Single description field (no more notes/description split)
     description: v.optional(v.string()),
-    notes: v.optional(v.string()),
-    // Custom metrics for non-financial value (hiring time, attrition, ROAS, etc.)
+
+    // Custom metrics
     metrics: v.optional(
       v.array(
         v.object({
-          name: v.string(), // e.g., "Hiring Time", "Employee Retention", "ROAS"
-          before: v.optional(v.string()), // e.g., "45 days", "85%", "2.1x"
-          after: v.optional(v.string()), // e.g., "30 days", "92%", "3.5x"
-          improvement: v.optional(v.string()), // e.g., "33% faster", "+7%", "+67%"
+          name: v.string(),
+          before: v.optional(v.string()),
+          after: v.optional(v.string()),
+          improvement: v.optional(v.string()),
         })
       )
     ),
+
+    // Architecture: linked Zaps, Interfaces, Tables, Agents
+    architecture: v.optional(
+      v.array(
+        v.object({
+          type: v.string(), // "zap" | "interface" | "table" | "agent"
+          name: v.string(),
+          url: v.optional(v.string()),
+          zapId: v.optional(v.string()),
+          description: v.optional(v.string()),
+          status: v.optional(v.string()), // planned | building | active | paused
+          // Cached Zap details from Zapier API
+          zapDetails: v.optional(
+            v.object({
+              title: v.optional(v.string()),
+              isEnabled: v.optional(v.boolean()),
+              lastSuccessfulRun: v.optional(v.string()),
+              steps: v.optional(
+                v.array(
+                  v.object({
+                    appTitle: v.string(),
+                    appImageUrl: v.optional(v.string()),
+                    appColor: v.optional(v.string()),
+                    actionTitle: v.string(),
+                    actionType: v.optional(v.string()),
+                    isInstant: v.optional(v.boolean()),
+                  })
+                )
+              ),
+              fetchedAt: v.optional(v.number()),
+            })
+          ),
+          // Pre-filled Zap config for "Create Zap" flow
+          zapConfig: v.optional(
+            v.object({
+              title: v.optional(v.string()),
+              steps: v.optional(
+                v.array(
+                  v.object({
+                    action: v.string(),
+                    inputs: v.optional(v.any()),
+                    authentication: v.optional(v.string()),
+                    alias: v.optional(v.string()),
+                  })
+                )
+              ),
+            })
+          ),
+        })
+      )
+    ),
+
     order: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_calculation", ["calculationId"])
+    .index("by_calculationId", ["calculationId"])
     .index("by_shortId", ["shortId"]),
+
+  // Zap Run Cache — for Value Realized dashboard
+  zapRunCache: defineTable({
+    zapId: v.string(),
+    useCaseId: v.id("useCases"),
+    calculationId: v.id("calculations"),
+    // Cached run data
+    totalRuns: v.number(),
+    runsLast30Days: v.number(),
+    runsLast7Days: v.number(),
+    successfulRuns: v.number(),
+    failedRuns: v.number(),
+    lastRunAt: v.optional(v.string()),
+    // Computed
+    realizationRate: v.optional(v.number()),
+    realizedAnnualValue: v.optional(v.number()),
+    // Metadata
+    fetchedAt: v.number(),
+  })
+    .index("by_calculationId", ["calculationId"])
+    .index("by_zapId", ["zapId"]),
 });

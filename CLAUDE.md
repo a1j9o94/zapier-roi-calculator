@@ -1,67 +1,119 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
-Zapier ROI Calculator - A real-time ROI estimation tool for customer calls. Allows adding use cases, tracking metrics like average salary and estimated revenue impact.
+**Zapier ROI Calculator V2** — Enterprise ROI estimation platform powered by the UVS (Unified Value System) taxonomy. Calculates business value across 5 dimensions and 16 archetypes with archetype-specific formulas, confidence tracking, and Zapier platform integration.
+
+**Production**: zapier-roi-calculator.vercel.app
 
 ## Commands
 
 ```bash
-# Development
-bun dev              # Start dev server with HMR (localhost:3000)
+bun dev              # Dev server with HMR (localhost:3000)
 bun start            # Production server
-
-# Testing
-bun test             # Run unit tests
-bun test <file>      # Run single test file
+bun test             # Run unit tests (83 tests across 2 files)
 bun test --watch     # Watch mode
-bunx playwright test # Run E2E tests
-bunx playwright test --ui # Playwright UI mode
-
-# Type checking
-bunx tsc --noEmit    # Type check without emitting
+bunx tsc --noEmit    # Type check (ignore bun-types errors)
 ```
-
-## Development Workflow
-
-1. **Test-Driven Development**: Write failing tests before implementing features
-2. **After code changes**: Run `bunx tsc --noEmit` and `bun test`
-3. **After major UI changes**: Run `bunx playwright test`
-4. Always use TypeScript
 
 ## Architecture
 
-**Stack**: Bun + React 19 + Tailwind CSS 4 + shadcn/ui (new-york style)
+**Stack**: Bun + React 19 + Convex (serverless DB) + Tailwind CSS 4 + shadcn/ui
 
-**Server** (`src/index.ts`): Uses `Bun.serve()` with route-based API handling. HTML imports auto-bundle frontend.
+### Key Files
 
-**Frontend** (`src/frontend.tsx` → `src/App.tsx`): React SPA entry point. Uses HMR in development.
+| File | Purpose |
+|------|---------|
+| `src/types/roi.ts` | Core V2 types: Dimension, Archetype, ValueItem, Calculation, display metadata |
+| `src/types/archetypes.ts` | 16 archetype input schemas (ARCHETYPE_FIELDS) with field definitions |
+| `src/types/roles.ts` | Role types and ROLE_DEFAULT_PRIORITIES for dimension ordering |
+| `src/utils/calculations.ts` | 16 archetype calculation functions + aggregation + projection |
+| `src/utils/obfuscation.ts` | Anonymization utilities for shareable views |
+| `src/utils/zapier-api.ts` | Zapier REST API client (Zap CRUD, run data) |
+| `src/utils/zap-recommender.ts` | Maps archetypes to recommended Zap architectures |
+| `convex/schema.ts` | Database schema (calculations, valueItems, useCases, zapRunCache) |
+| `convex/http.ts` | REST API with self-describing schema endpoint |
+| `convex/calculations.ts` | Calculation mutations/queries |
+| `convex/valueItems.ts` | Value item mutations (including batch create) |
+| `convex/useCases.ts` | Use case mutations with architecture support |
+| `src/data/patterns/` | Pattern catalog per function (sales, IT, finance, etc.) |
+| `src/data/value-packages.ts` | 10 curated value packages by role |
 
-**UI Components** (`src/components/ui/`): shadcn components using Radix primitives. Add new components via `bunx shadcn@latest add <component>`.
+### UVS Taxonomy
 
-**Utilities** (`src/lib/utils.ts`): `cn()` helper for Tailwind class merging.
+**5 Dimensions → 16 Archetypes:**
 
-**Path alias**: `@/*` maps to `./src/*`
+| Dimension | Archetypes |
+|-----------|-----------|
+| Revenue Impact | pipeline_velocity, revenue_capture, revenue_expansion, time_to_revenue |
+| Speed / Cycle Time | process_acceleration, handoff_elimination |
+| Productivity | task_elimination, task_simplification, context_surfacing |
+| Cost Avoidance | labor_avoidance, tool_consolidation, error_rework_elimination |
+| Risk & Quality | compliance_assurance, data_integrity, incident_prevention, process_consistency |
 
-## Bun-Specific Guidelines
+**Confidence Tiers**: `[B]` Benchmarked (case-study data), `[E]` Estimated (industry research), `[C]` Custom (customer input)
 
-- Use `bun` instead of `node`, `npm`, `yarn`, `pnpm`
-- Bun auto-loads `.env` files (no dotenv needed)
-- Use `Bun.serve()` for server (not Express)
-- Use `Bun.file()` for file operations
-- HTML files can directly import `.tsx` files
+### Value Item Structure
 
-## Testing
+Each value item has:
+- `archetype`: One of 16 archetypes
+- `dimension`: Derived from archetype (denormalized)
+- `inputs`: Archetype-specific key-value pairs, each with `{ value, confidence, source? }`
+- `manualAnnualValue`: Optional override
 
-Unit tests use `bun:test`:
-```ts
-import { test, expect } from "bun:test";
+### API Endpoints
+
+```
+GET  /api/schema                                    # Full taxonomy + input schemas
+GET  /api/templates/:archetype                      # Pre-filled template
+POST /api/calculations                              # Create (nested: + items + cases)
+GET  /api/calculations/:shortId                     # Basic
+GET  /api/calculations/:shortId/full                # Full with computed values
+PUT  /api/calculations/:shortId                     # Update settings
+POST /api/calculations/:shortId/value-items         # Create value item
+POST /api/calculations/:shortId/value-items/batch   # Batch create
+PUT  /api/calculations/:shortId/value-items/:id     # Update
+DELETE /api/calculations/:shortId/value-items/:id   # Delete
+POST /api/calculations/:shortId/use-cases           # Create use case
+PUT  /api/calculations/:shortId/use-cases/:id       # Update (incl. architecture)
+DELETE /api/calculations/:shortId/use-cases/:id     # Delete
+GET  /api/calculations/:shortId/obfuscated          # Anonymized view
 ```
 
-E2E tests use Playwright. Place in `tests/` or `e2e/` directory.
+### Routes
+
+```
+/                           # Calculator listing
+/c/:id                      # Editor (all tabs)
+/c/:id/summary              # Read-only summary
+/c/:id/share                # Shareable link
+/c/:id/share/obfuscated     # Anonymized share
+/c/:id/demo                 # Demo mode (anonymized)
+?embed=true                 # Strips chrome for iframe embedding
+?obfuscate=true             # Obfuscation mode
+```
+
+### Calculation Formulas
+
+All 16 archetype formulas are in `src/utils/calculations.ts`. Key examples:
+- **task_elimination**: `tasksPerMonth × minutesPerTask × (hourlyRate / 60) × 12`
+- **pipeline_velocity**: `dealsPerQuarter × avgDealValue × conversionLift × 4`
+- **labor_avoidance**: `ftesAvoided × fullyLoadedAnnualCost`
+
+See `ARCHETYPE_FIELDS` in `src/types/archetypes.ts` for all input schemas.
+
+## Development Workflow
+
+1. Write failing tests → implement → verify with `bun test`
+2. After code changes: `bun test` (83 tests should pass)
+3. Always use TypeScript
+4. Convex schema changes: `npx convex dev` auto-deploys
 
 ## Storage
 
-If persistence is needed, use Convex.
+Uses Convex for persistence. Schema in `convex/schema.ts`.
+
+## Environment Variables
+
+- `CONVEX_DEPLOYMENT` — Convex deployment URL
+- `ZAPIER_API_TOKEN` — Bearer token for Zapier API (zap, zap:write scopes)
