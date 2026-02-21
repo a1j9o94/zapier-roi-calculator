@@ -204,6 +204,11 @@ export const update = mutation({
       }
     }
 
+    // Special case: allow clearing manualAnnualValue by passing -1
+    if (args.manualAnnualValue === -1) {
+      filtered.manualAnnualValue = undefined;
+    }
+
     // If archetype is being changed, update dimension too
     if (filtered.archetype) {
       const archetype = filtered.archetype as string;

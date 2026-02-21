@@ -307,19 +307,32 @@ function ValueItemCard({ item, readOnly }: ValueItemCardProps) {
                   {item.manualAnnualValue != null ? formatCurrency(item.manualAnnualValue) : "none"}
                 </span>
               ) : (
-                <DebouncedInput
-                  type="number"
-                  value={item.manualAnnualValue ?? ""}
-                  onChange={(v) => {
-                    const num = Number(v);
-                    updateItem({
-                      id: item._id,
-                      manualAnnualValue: num || undefined,
-                    } as any);
-                  }}
-                  placeholder="Leave blank for formula"
-                  className="h-7 text-xs font-mono w-32"
-                />
+                <>
+                  <DebouncedInput
+                    type="number"
+                    value={item.manualAnnualValue ?? ""}
+                    onChange={(v) => {
+                      const num = Number(v);
+                      if (v === "" || v === undefined) {
+                        updateItem({ id: item._id, manualAnnualValue: -1 } as any);
+                      } else {
+                        updateItem({ id: item._id, manualAnnualValue: num } as any);
+                      }
+                    }}
+                    placeholder="Leave blank for formula"
+                    className="h-7 text-xs font-mono w-32"
+                  />
+                  {item.manualAnnualValue != null && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => updateItem({ id: item._id, manualAnnualValue: -1 } as any)}
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </>
               )}
             </div>
             {!readOnly && (
