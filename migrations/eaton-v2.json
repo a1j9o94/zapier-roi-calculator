@@ -1,0 +1,401 @@
+{
+  "name": "Eaton Group",
+  "proposedSpend": 70000,
+  "currentSpend": 0,
+  "valueItems": [
+    {
+      "archetype": "task_elimination",
+      "name": "CLS → PandaDoc Document Sync (Client Services)",
+      "description": "Automated data sync from CLS to PandaDoc for document generation. 987 merge fields mapped.",
+      "inputs": {
+        "tasksPerMonth": { "value": 30, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Demand Letter Automation (Client Services)",
+      "description": "Auto-generate demand letters from CLS data, route to signing queue, track 10-day response window.",
+      "inputs": {
+        "tasksPerMonth": { "value": 200, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 8, "confidence": "custom", "source": "Medium task — V1 complexity=medium" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "LAM Document Review Routing (Legal)",
+      "description": "Smart bucket routing for attorney review — documents auto-sorted by type, priority, and assigned reviewer.",
+      "inputs": {
+        "tasksPerMonth": { "value": 80, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 8, "confidence": "custom", "source": "Medium task — V1 complexity=medium" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Attorney Signature Workflow (Hearing Dept)",
+      "description": "Chain of signatures automation: document complete → next reviewer auto-assigned → notification → deadline tracking.",
+      "inputs": {
+        "tasksPerMonth": { "value": 15, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 150, "confidence": "custom", "source": "Executive rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "I-PERFORM Court Filing Submission (Document Team)",
+      "description": "Auto-submit completed documents to I-PERFORM (Provana) for e-filing. ~300 suits filed/day.",
+      "inputs": {
+        "tasksPerMonth": { "value": 12, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Garnishment Data Entry (Accounting)",
+      "description": "Auto-populate garnishment data from court returns into CLS. Eliminates calculator + manual entry.",
+      "inputs": {
+        "tasksPerMonth": { "value": 100, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 8, "confidence": "custom", "source": "Medium task — V1 complexity=medium" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "incident_prevention",
+      "name": "Filing Deadline Risk Mitigation (Legal)",
+      "description": "Automated deadline tracking and alerts for court filing deadlines. Missed deadlines = lost claims.",
+      "inputs": {
+        "incidentsPerYear": { "value": 0.25, "confidence": "custom", "source": "Customer estimate — conservative" },
+        "avgCostPerIncident": { "value": 300000, "confidence": "custom", "source": "Customer-reported — missed claims value" },
+        "reductionRate": { "value": 1.0, "confidence": "estimated", "source": "Full prevention via automation" }
+      },
+      "manualAnnualValue": 75000
+    },
+    {
+      "archetype": "revenue_capture",
+      "name": "Increased Placement Capacity (Client Services)",
+      "description": "Remove client onboarding bottleneck. Automation enables taking on more client placements without adding headcount.",
+      "inputs": {
+        "annualRevenue": { "value": 0, "confidence": "custom" },
+        "leakageRate": { "value": 0, "confidence": "custom" },
+        "captureImprovement": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 25000
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Import/Export File Processing (Client Services)",
+      "description": "Automate FTP file transfers between CLS and client systems. Currently failing 3-4 times/week.",
+      "inputs": {
+        "tasksPerMonth": { "value": 50, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Media Movement Automation (Client Services)",
+      "description": "Automate document routing from Paper Vision to clients via FTP. 500-1,000 docs/day processed manually.",
+      "inputs": {
+        "tasksPerMonth": { "value": 100, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Missing Media Tracking (Client Services)",
+      "description": "Auto-track requested media across multiple spreadsheets and Paper Vision. Delays demand letters 3-4 weeks.",
+      "inputs": {
+        "tasksPerMonth": { "value": 40, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 8, "confidence": "custom", "source": "Medium task — V1 complexity=medium" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "LexisNexis Consumer Scrubs (Research)",
+      "description": "Batch consumer data validation through LexisNexis API. Manual lookup process for skip tracing.",
+      "inputs": {
+        "tasksPerMonth": { "value": 8, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Cross-client file transfer monitoring (all clients)",
+      "description": "Automated monitoring across ALL client file transfers. Alerting on failures before they become client escalations.",
+      "inputs": {
+        "tasksPerMonth": { "value": 40, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Submission log auditing across Trak, MCM, Velocity",
+      "description": "Automated auditing of submission logs across major clients. Catches missed coding, failed submissions, high rejection volumes.",
+      "inputs": {
+        "tasksPerMonth": { "value": 60, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Client-specific file routing and exception handling",
+      "description": "Each client has unique file format requirements, naming conventions, and exception handling rules.",
+      "inputs": {
+        "tasksPerMonth": { "value": 30, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Rejection tracking and auto-remediation across clients",
+      "description": "Track rejection volumes across all submission channels. Auto-flag for investigation and attempt common remediation.",
+      "inputs": {
+        "tasksPerMonth": { "value": 25, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "incident_prevention",
+      "name": "Client Retention Risk Mitigation (largest client raised concerns)",
+      "description": "Largest client raised concerns about inconsistencies — automation prevents escalations.",
+      "inputs": {
+        "incidentsPerYear": { "value": 0.15, "confidence": "custom", "source": "Customer estimate — conservative" },
+        "avgCostPerIncident": { "value": 350000, "confidence": "custom", "source": "Customer-reported — client loss value" },
+        "reductionRate": { "value": 1.0, "confidence": "estimated", "source": "Full prevention via automation" }
+      },
+      "manualAnnualValue": 52500
+    },
+    {
+      "archetype": "revenue_expansion",
+      "name": "Growth Capacity — Onboard New Clients Without Adding Headcount",
+      "description": "Remove client onboarding bottleneck. Automation enables onboarding new clients without proportional ops headcount.",
+      "inputs": {
+        "customerBase": { "value": 0, "confidence": "custom" },
+        "expansionRate": { "value": 0, "confidence": "custom" },
+        "avgExpansionValue": { "value": 0, "confidence": "custom" },
+        "lift": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 30000
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "vExchange diagnostic investigation time (Charmaine + team)",
+      "description": "Automate Charmaine Pool's manual daily investigation of vExchange submission failures to MCM and Velocity.",
+      "inputs": {
+        "tasksPerMonth": { "value": 50, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 8, "confidence": "custom", "source": "Medium task — V1 complexity=medium" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "error_rework_elimination",
+      "name": "Reduced client escalation from submission failures",
+      "description": "Reduced client escalation from submission failures via proactive monitoring and auto-remediation.",
+      "inputs": {
+        "errorsPerMonth": { "value": 1, "confidence": "custom", "source": "Customer estimate" },
+        "avgCostPerError": { "value": 15000, "confidence": "custom", "source": "Customer-reported — escalation cost" },
+        "reductionRate": { "value": 0.5, "confidence": "estimated", "source": "50% reduction from automation" }
+      },
+      "manualAnnualValue": 7500
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Debtor sheet manual collation & formatting",
+      "description": "Transform LexisNexis Accurint batch data into standardized one-page debtor sheets for garnishment service.",
+      "inputs": {
+        "tasksPerMonth": { "value": 200, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 8, "confidence": "custom", "source": "Medium task — V1 complexity=medium" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "labor_avoidance",
+      "name": "IT Inspired automation maintenance reduction",
+      "description": "Eliminating $120K/year in outside IT automation maintenance costs. Zapier eliminates root causes at 1/3 the cost.",
+      "inputs": {
+        "ftesAvoided": { "value": 1, "confidence": "custom", "source": "Customer-reported" },
+        "fullyLoadedAnnualCost": { "value": 120000, "confidence": "custom", "source": "Current IT Inspired annual spend" }
+      }
+    }
+  ],
+  "useCases": [
+    {
+      "name": "Import/Export File Processing",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Automate FTP file transfers between CLS and client systems. Currently failing 3-4 times per week, requiring daily manual verification.",
+      "metrics": [{ "name": "FTP Failure Rate", "before": "3-4/week", "after": "0/week", "improvement": "-100%" }],
+      "valueItemNames": ["Import/Export File Processing (Client Services)"]
+    },
+    {
+      "name": "Media Movement Automation",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Automate document routing from Paper Vision to clients via FTP. Currently 500-1,000 docs/day processed manually.",
+      "metrics": [{ "name": "Daily Document Volume", "before": "500-1,000 manual", "after": "500-1,000 automated", "improvement": "100%" }],
+      "valueItemNames": ["Media Movement Automation (Client Services)"]
+    },
+    {
+      "name": "Missing Media Tracking",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Auto-track requested media across multiple spreadsheets and Paper Vision. Delays demand letters 3-4 weeks, holding up revenue.",
+      "metrics": [{ "name": "Demand Letter Delay", "before": "3-4 weeks", "after": "<1 week", "improvement": "-75%" }],
+      "valueItemNames": ["Missing Media Tracking (Client Services)"]
+    },
+    {
+      "name": "Demand Letter Automation",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Auto-generate demand letters from CLS data, route to signing queue, track 10-day response window. ~300 intakes/day.",
+      "valueItemNames": ["Demand Letter Automation (Client Services)"]
+    },
+    {
+      "name": "LAM Document Review Routing",
+      "department": "Legal",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Smart bucket routing for attorney review — documents auto-sorted by type, priority, and assigned reviewer.",
+      "valueItemNames": ["LAM Document Review Routing (Legal)"]
+    },
+    {
+      "name": "Attorney Signature Workflow",
+      "department": "Hearing Dept",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Chain of signatures automation: document complete → next reviewer auto-assigned → notification → deadline tracking.",
+      "valueItemNames": ["Attorney Signature Workflow (Hearing Dept)"]
+    },
+    {
+      "name": "I-PERFORM Court Filing Submission",
+      "department": "Document Team",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Auto-submit completed documents to I-PERFORM (Provana) for e-filing. ~300 suits filed/day.",
+      "metrics": [{ "name": "Daily Filing Volume", "before": "~300 suits/day", "after": "~300 automated", "improvement": "100%" }],
+      "valueItemNames": ["I-PERFORM Court Filing Submission (Document Team)"]
+    },
+    {
+      "name": "Garnishment Data Entry",
+      "department": "Accounting",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Auto-populate garnishment data from court returns into CLS. Eliminates calculator + manual entry.",
+      "valueItemNames": ["Garnishment Data Entry (Accounting)"]
+    },
+    {
+      "name": "Filing Deadline Risk Mitigation",
+      "department": "Legal",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Automated deadline tracking and alerts for court filing deadlines. Missed deadlines = lost claims.",
+      "valueItemNames": ["Filing Deadline Risk Mitigation (Legal)"]
+    },
+    {
+      "name": "LexisNexis Consumer Scrubs",
+      "department": "Research",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Batch consumer data validation through LexisNexis API. Manual lookup process for skip tracing.",
+      "valueItemNames": ["LexisNexis Consumer Scrubs (Research)"]
+    },
+    {
+      "name": "CLS → PandaDoc Document Sync",
+      "department": "IT/Operations",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Automated data sync from CLS to PandaDoc for document generation. 987 merge fields mapped.",
+      "valueItemNames": ["CLS → PandaDoc Document Sync (Client Services)"]
+    },
+    {
+      "name": "Increased Placement Capacity",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Remove client onboarding bottleneck. Automation enables taking on more client placements without adding headcount.",
+      "valueItemNames": ["Increased Placement Capacity (Client Services)"]
+    },
+    {
+      "name": "Cross-Client File Monitoring & Alerting",
+      "department": "Client Services / IT",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Automated monitoring across ALL client file transfers. Alerting on failures before they become client escalations.",
+      "metrics": [
+        { "name": "Client Coverage", "before": "1 client monitored", "after": "All clients monitored", "improvement": "100% coverage" },
+        { "name": "Silent Failure Detection", "before": "Days to discover", "after": "Minutes", "improvement": "99% faster" }
+      ],
+      "valueItemNames": ["Cross-client file transfer monitoring (all clients)"]
+    },
+    {
+      "name": "Submission Log Auditing (Trak, MCM, Velocity)",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Automated auditing of submission logs across major clients. Catches missed coding, failed submissions, high rejection volumes.",
+      "metrics": [
+        { "name": "Manual Investigation Time", "before": "Hours per incident", "after": "Automated flagging", "improvement": "90% reduction" },
+        { "name": "Client-Specific Failures", "before": "Discovered reactively", "after": "Caught proactively", "improvement": "Prevention vs cure" }
+      ],
+      "valueItemNames": ["Submission log auditing across Trak, MCM, Velocity"]
+    },
+    {
+      "name": "Client-Specific File Routing & Exception Handling",
+      "department": "Operations",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Each client has unique file format requirements, naming conventions, and exception handling rules.",
+      "metrics": [{ "name": "Routing Errors", "before": "Multiple per week", "after": "Near zero", "improvement": "95%+ reduction" }],
+      "valueItemNames": ["Client-specific file routing and exception handling"]
+    },
+    {
+      "name": "Rejection Volume Tracking & Auto-Remediation",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Track rejection volumes across all submission channels. Auto-flag for investigation and attempt common remediation.",
+      "metrics": [{ "name": "Rejection Resolution Time", "before": "Manual investigation", "after": "Auto-remediation for common issues", "improvement": "70% auto-resolved" }],
+      "valueItemNames": ["Rejection tracking and auto-remediation across clients"]
+    },
+    {
+      "name": "vExchange Upload Monitoring & Auto-Diagnostics",
+      "department": "Client Services",
+      "status": "identified",
+      "implementationEffort": "high",
+      "description": "Automate Charmaine Pool's manual daily investigation of vExchange submission failures to MCM and Velocity.",
+      "metrics": [
+        { "name": "Daily Investigation Time", "before": "2-3 hours manual investigation", "after": "5 min automated report review", "improvement": "90% reduction" },
+        { "name": "Failure Detection Speed", "before": "Hours to days (reactive)", "after": "Real-time alerts", "improvement": "Immediate detection" },
+        { "name": "Rejection Resolution", "before": "Manual resubmission after investigation", "after": "Auto-resubmit on known failure patterns", "improvement": "Zero-touch for common failures" }
+      ],
+      "valueItemNames": ["vExchange diagnostic investigation time (Charmaine + team)", "Reduced client escalation from submission failures"]
+    },
+    {
+      "name": "LexisNexis Accurint Batch → Debtor Sheet Generation",
+      "department": "Research / Legal",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Transform LexisNexis Accurint batch data into standardized one-page debtor sheets for garnishment service.",
+      "metrics": [
+        { "name": "Manual Collation Time", "before": "15-20 min per debtor (multi-screen)", "after": "Automated per batch", "improvement": "95% reduction" },
+        { "name": "Document Consistency", "before": "Manual formatting varies", "after": "Standardized one-page format", "improvement": "100% consistent" }
+      ],
+      "valueItemNames": ["Debtor sheet manual collation & formatting"]
+    }
+  ]
+}

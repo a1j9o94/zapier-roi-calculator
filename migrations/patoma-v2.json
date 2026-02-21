@@ -1,0 +1,284 @@
+{
+  "name": "Patoma",
+  "proposedSpend": 70000,
+  "currentSpend": 9000,
+  "valueItems": [
+    {
+      "archetype": "task_elimination",
+      "name": "Incident troubleshooting & remediation",
+      "description": "Proactive monitoring reduces severity and time-to-fix. 10 incidents/month × 2hr at exec rate.",
+      "inputs": {
+        "tasksPerMonth": { "value": 10, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 120, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 200, "confidence": "custom", "source": "Executive rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Zap building & optimization (TAM)",
+      "description": "6 hrs/month TAM time. For someone with 290 zaps and a backlog of ideas, expert help is high leverage.",
+      "inputs": {
+        "tasksPerMonth": { "value": 6, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 120, "confidence": "custom", "source": "Complex task — V1 complexity=complex" },
+        "hourlyRate": { "value": 200, "confidence": "custom", "source": "Executive rate" }
+      }
+    },
+    {
+      "archetype": "revenue_capture",
+      "name": "Faster tenant response → improved retention",
+      "description": "Faster response → tenants stay. 10 retained tenants × $1,500 avg turnover cost.",
+      "inputs": {
+        "annualRevenue": { "value": 0, "confidence": "custom" },
+        "leakageRate": { "value": 0, "confidence": "custom" },
+        "captureImprovement": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 15000
+    },
+    {
+      "archetype": "revenue_capture",
+      "name": "Fee reconciliation accuracy → recovered revenue",
+      "description": "Better error handling + audit trail catches discrepancies. 6 discrepancies/year × $1K avg.",
+      "inputs": {
+        "annualRevenue": { "value": 0, "confidence": "custom" },
+        "leakageRate": { "value": 0, "confidence": "custom" },
+        "captureImprovement": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 6000
+    },
+    {
+      "archetype": "error_rework_elimination",
+      "name": "Task optimization → avoided overage costs",
+      "description": "General overage avoidance from task optimization. Baseline $2K current overages, growing with usage.",
+      "inputs": {
+        "errorsPerMonth": { "value": 1, "confidence": "custom" },
+        "avgCostPerError": { "value": 6000, "confidence": "custom" },
+        "reductionRate": { "value": 1.0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 6000
+    },
+    {
+      "archetype": "incident_prevention",
+      "name": "Version history → faster incident recovery",
+      "description": "Version history enables instant recovery when API changes break zaps. Paul explicitly asked for this.",
+      "inputs": {
+        "incidentsPerYear": { "value": 0.75, "confidence": "custom", "source": "Customer estimate — 75% probability" },
+        "avgCostPerIncident": { "value": 20000, "confidence": "custom", "source": "Customer-reported" },
+        "reductionRate": { "value": 1.0, "confidence": "estimated", "source": "Full prevention via version history" }
+      },
+      "manualAnnualValue": 15000
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Daily Ops Briefing - context gathering time saved",
+      "description": "30 min/day × 20 workdays gathering context from property mgmt system, email, Asana. Agent delivers morning summary.",
+      "inputs": {
+        "tasksPerMonth": { "value": 20, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 30, "confidence": "custom", "source": "Customer-reported — 30 min/day" },
+        "hourlyRate": { "value": 200, "confidence": "custom", "source": "Executive rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Tenant email auto-response - manual replies avoided",
+      "description": "60 routine tenant emails/month auto-handled. 10 min avg per response.",
+      "inputs": {
+        "tasksPerMonth": { "value": 60, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 10, "confidence": "custom", "source": "Customer-reported — 10 min avg" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "incident_prevention",
+      "name": "Zap health monitoring - proactive issue detection",
+      "description": "Catches errors before they compound. 50% chance of preventing one major incident/year worth $15K.",
+      "inputs": {
+        "incidentsPerYear": { "value": 0.5, "confidence": "custom", "source": "Customer estimate — 50% probability" },
+        "avgCostPerIncident": { "value": 15000, "confidence": "custom", "source": "Customer-reported" },
+        "reductionRate": { "value": 1.0, "confidence": "estimated", "source": "Full prevention via proactive monitoring" }
+      },
+      "manualAnnualValue": 7500
+    },
+    {
+      "archetype": "error_rework_elimination",
+      "name": "Work Order zap optimization - task headroom",
+      "description": "20% task reduction on 154K tasks = 30K tasks/month saved. Creates headroom for summer growth.",
+      "inputs": {
+        "errorsPerMonth": { "value": 1, "confidence": "custom" },
+        "avgCostPerError": { "value": 3600, "confidence": "custom" },
+        "reductionRate": { "value": 1.0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 3600
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Lease management & renewal outreach staff time",
+      "description": "Proactive outreach 90 days before expiry. Auto-generated terms, follow-up sequence.",
+      "inputs": {
+        "tasksPerMonth": { "value": 15, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Customer-reported — 1hr per renewal" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "revenue_capture",
+      "name": "Reduced vacancy from proactive renewals",
+      "description": "4 prevented vacancies/year × $2,500 avg vacancy cost.",
+      "inputs": {
+        "annualRevenue": { "value": 0, "confidence": "custom" },
+        "leakageRate": { "value": 0, "confidence": "custom" },
+        "captureImprovement": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 10000
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Auto-triage & vendor dispatch time saved",
+      "description": "Smart triage, auto-dispatch to vendors, predictive maintenance from work order history.",
+      "inputs": {
+        "tasksPerMonth": { "value": 20, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Customer-reported — 1hr per triage" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "labor_avoidance",
+      "name": "Maintenance cost optimization from smart routing",
+      "description": "Reduces management overhead and maintenance costs across all properties.",
+      "inputs": {
+        "ftesAvoided": { "value": 1, "confidence": "custom" },
+        "fullyLoadedAnnualCost": { "value": 30000, "confidence": "custom", "source": "Customer-reported — maintenance savings" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "AI-generated owner reporting",
+      "description": "Automated owner reporting — AI-generated narratives instead of manual spreadsheets.",
+      "inputs": {
+        "tasksPerMonth": { "value": 10, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Customer-reported — 1hr per report" },
+        "hourlyRate": { "value": 200, "confidence": "custom", "source": "Executive rate" }
+      }
+    },
+    {
+      "archetype": "task_elimination",
+      "name": "Team AI enablement — staff time savings",
+      "description": "Every team member AI-enabled. Staff training and tool adoption across the firm.",
+      "inputs": {
+        "tasksPerMonth": { "value": 24, "confidence": "custom", "source": "Customer-reported" },
+        "minutesPerTask": { "value": 60, "confidence": "custom", "source": "Customer-reported — 1hr per session" },
+        "hourlyRate": { "value": 50, "confidence": "custom", "source": "Operations rate" }
+      }
+    },
+    {
+      "archetype": "revenue_expansion",
+      "name": "Competitive positioning — client retention",
+      "description": "AI-forward positioning retains 2 clients/year × $10K value each.",
+      "inputs": {
+        "customerBase": { "value": 0, "confidence": "custom" },
+        "expansionRate": { "value": 0, "confidence": "custom" },
+        "avgExpansionValue": { "value": 0, "confidence": "custom" },
+        "lift": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 20000
+    },
+    {
+      "archetype": "revenue_expansion",
+      "name": "Dynamic pricing — optimized renewal rates",
+      "description": "Dynamic pricing intelligence from cross-property analytics.",
+      "inputs": {
+        "customerBase": { "value": 0, "confidence": "custom" },
+        "expansionRate": { "value": 0, "confidence": "custom" },
+        "avgExpansionValue": { "value": 0, "confidence": "custom" },
+        "lift": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 20000
+    },
+    {
+      "archetype": "revenue_expansion",
+      "name": "Cross-property analytics — portfolio optimization",
+      "description": "Better investment decisions from cross-property analytics. Occupancy trends, attention flags, maintenance patterns.",
+      "inputs": {
+        "customerBase": { "value": 0, "confidence": "custom" },
+        "expansionRate": { "value": 0, "confidence": "custom" },
+        "avgExpansionValue": { "value": 0, "confidence": "custom" },
+        "lift": { "value": 0, "confidence": "custom" }
+      },
+      "manualAnnualValue": 20000
+    }
+  ],
+  "useCases": [
+    {
+      "name": "Work Order Zap Optimization",
+      "department": "Operations",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Highest usage zap (154K tasks/month). Optimize loops to only run on items needing follow-up. Success metric: 20-30% task reduction + improved reliability.",
+      "valueItemNames": ["Task optimization → avoided overage costs", "Work Order zap optimization - task headroom"]
+    },
+    {
+      "name": "Tenant Communication Agent",
+      "department": "Operations",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "AI-powered auto-response to tenant emails with escalation logic. Success metric: faster response time, fewer manual interventions.",
+      "valueItemNames": ["Faster tenant response → improved retention", "Tenant email auto-response - manual replies avoided"]
+    },
+    {
+      "name": "Zap Health Monitor Agent",
+      "department": "IT",
+      "status": "identified",
+      "implementationEffort": "low",
+      "description": "Proactive alerts when zaps error before tenants notice. Slack/email notification with error context and suggested fix.",
+      "valueItemNames": ["Incident troubleshooting & remediation", "Zap health monitoring - proactive issue detection"]
+    },
+    {
+      "name": "Daily Ops Briefing Agent",
+      "department": "Executive",
+      "status": "identified",
+      "implementationEffort": "medium",
+      "description": "Morning summary from property management system, email, Asana. Surfaces urgent items: maintenance requests, lease renewals, tenant issues.",
+      "valueItemNames": ["Daily Ops Briefing - context gathering time saved"]
+    },
+    {
+      "name": "Fee Reconciliation Enhancement",
+      "department": "Finance",
+      "status": "identified",
+      "implementationEffort": "low",
+      "description": "Monthly app fee reconciliation between management company and buildings. Enhanced error handling, audit trail, and automatic discrepancy flagging.",
+      "valueItemNames": ["Fee reconciliation accuracy → recovered revenue"]
+    },
+    {
+      "name": "Lease Renewal Automation",
+      "department": "Operations",
+      "status": "future",
+      "implementationEffort": "medium",
+      "description": "Proactive outreach 90 days before expiry. Auto-generated terms, follow-up sequence. Reduces vacancy gaps.",
+      "metrics": [{ "name": "Renewal Start", "before": "Manual at expiry", "after": "90 days proactive", "improvement": "3 months earlier" }],
+      "valueItemNames": ["Lease management & renewal outreach staff time", "Reduced vacancy from proactive renewals"]
+    },
+    {
+      "name": "Work Order Intelligence System",
+      "department": "Operations",
+      "status": "future",
+      "implementationEffort": "high",
+      "description": "Smart triage, auto-dispatch to vendors, predictive maintenance from work order history.",
+      "metrics": [
+        { "name": "Triage Time", "before": "Manual review", "after": "AI auto-triage", "improvement": "90% faster" },
+        { "name": "Maintenance Costs", "before": "Reactive", "after": "Predictive", "improvement": "20-30% reduction" }
+      ],
+      "valueItemNames": ["Auto-triage & vendor dispatch time saved", "Maintenance cost optimization from smart routing"]
+    },
+    {
+      "name": "AI-First Operations Platform",
+      "department": "Executive",
+      "status": "future",
+      "implementationEffort": "high",
+      "description": "Full firm AI enablement: owner reporting, team AI tools, cross-property analytics, dynamic pricing intelligence.",
+      "metrics": [
+        { "name": "Reporting", "before": "Manual spreadsheets", "after": "AI-generated narratives", "improvement": "Auto-generated monthly" },
+        { "name": "Team Capability", "before": "Paul only", "after": "Every team member AI-enabled", "improvement": "Firm-wide" }
+      ],
+      "valueItemNames": ["AI-generated owner reporting", "Team AI enablement — staff time savings", "Competitive positioning — client retention", "Dynamic pricing — optimized renewal rates", "Cross-property analytics — portfolio optimization"]
+    }
+  ]
+}
