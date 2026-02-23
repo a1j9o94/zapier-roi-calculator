@@ -1,6 +1,8 @@
-# Zapier ROI Calculator API Guide
+# Zapier ROI Calculator API Guide (V1 — Legacy)
 
-Base URL: `https://zapier-roi-calculator.vercel.app`
+> **Note**: This guide documents the V1 API at `zapier-roi-calculator.vercel.app`. The V2 API is live at `zapier-value.vercel.app` with UVS taxonomy support (dimensions, archetypes, confidence tiers). See `API.md` for the V2 reference.
+
+Base URL: `https://zapier-roi-calculator.vercel.app` (V1) | `https://zapier-value.vercel.app` (V2)
 
 All endpoints return JSON. Use `Content-Type: application/json` for request bodies.
 

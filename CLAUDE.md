@@ -4,7 +4,8 @@
 
 **Zapier ROI Calculator V2** — Enterprise ROI estimation platform powered by the UVS (Unified Value System) taxonomy. Calculates business value across 5 dimensions and 16 archetypes with archetype-specific formulas, confidence tracking, and Zapier platform integration.
 
-**Production**: zapier-roi-calculator.vercel.app
+**Production (V2)**: zapier-value.vercel.app
+**Legacy (V1)**: zapier-roi-calculator.vercel.app (still live, separate Convex deployment)
 
 ## Commands
 

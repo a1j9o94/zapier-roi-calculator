@@ -1,15 +1,15 @@
 # ROI Calculator V2 — API Reference
 
-Base URL: `https://zapier-roi-calculator.vercel.app`
+Base URL: `https://zapier-value.vercel.app`
 
 ## Quick Start
 
 ```bash
 # 1. Get the full taxonomy (call once, cache)
-curl https://zapier-roi-calculator.vercel.app/api/schema
+curl https://zapier-value.vercel.app/api/schema
 
 # 2. Create a calculation with value items and use cases in one call
-curl -X POST https://zapier-roi-calculator.vercel.app/api/calculations \
+curl -X POST https://zapier-value.vercel.app/api/calculations \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Acme Corp ROI",
@@ -37,7 +37,7 @@ curl -X POST https://zapier-roi-calculator.vercel.app/api/calculations \
   }'
 
 # 3. Get full calculation with computed values
-curl https://zapier-roi-calculator.vercel.app/api/calculations/abc123/full
+curl https://zapier-value.vercel.app/api/calculations/abc123/full
 ```
 
 ## Endpoints
