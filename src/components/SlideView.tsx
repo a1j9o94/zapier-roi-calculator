@@ -29,7 +29,6 @@ export function SlideView({ calculation, valueItems, useCases }: SlideViewProps)
       calculateSummary(
         valueItems,
         calculation.assumptions,
-        calculation.currentSpend,
         calculation.proposedSpend
       ),
     [valueItems, calculation]

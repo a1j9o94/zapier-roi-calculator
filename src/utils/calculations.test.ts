@@ -349,14 +349,14 @@ describe("calculateProjection", () => {
   });
 
   test("calculates cumulative values", () => {
-    const proj = calculateProjection(100000, defaultAssumptions, 0, 50000);
+    const proj = calculateProjection(100000, defaultAssumptions, 50000);
     expect(proj[0]!.cumulativeValue).toBeCloseTo(50000);
     expect(proj[0]!.cumulativeInvestment).toBe(50000);
     expect(proj[1]!.cumulativeValue).toBeCloseTo(160000);
   });
 
   test("handles zero investment", () => {
-    const proj = calculateProjection(100000, defaultAssumptions, 0, 0);
+    const proj = calculateProjection(100000, defaultAssumptions, 0);
     expect(proj[0]!.investment).toBe(0);
   });
 });
@@ -367,13 +367,13 @@ describe("calculateProjection", () => {
 
 describe("calculateROIMultiple", () => {
   test("calculates correctly", () => {
-    expect(calculateROIMultiple(100000, 10000, 30000)).toBe(5);
+    expect(calculateROIMultiple(100000, 20000)).toBe(5);
   });
   test("returns null for zero investment", () => {
-    expect(calculateROIMultiple(100000, 0, 0)).toBeNull();
+    expect(calculateROIMultiple(100000, 0)).toBeNull();
   });
-  test("returns null for negative investment", () => {
-    expect(calculateROIMultiple(100000, 50000, 30000)).toBeNull();
+  test("returns null for no investment", () => {
+    expect(calculateROIMultiple(100000)).toBeNull();
   });
 });
 
@@ -418,7 +418,7 @@ describe("calculateSummary", () => {
       createItem("task_elimination", { ...vi("tasksPerMonth", 3000), ...vi("minutesPerTask", 8), ...vi("hourlyRate", 50) }),
       createItem("pipeline_velocity", { ...vi("dealsPerQuarter", 200), ...vi("avgDealValue", 25000), ...vi("conversionLift", 0.10) }),
     ];
-    const summary = calculateSummary(items, defaultAssumptions, 0, 70000);
+    const summary = calculateSummary(items, defaultAssumptions, 70000);
     // task_elimination: $240K, pipeline_velocity: $2M = $2,240K total
     expect(summary.totalAnnualValue).toBe(2240000);
     expect(summary.roiMultiple).toBe(32);

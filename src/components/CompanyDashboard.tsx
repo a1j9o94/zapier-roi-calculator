@@ -126,13 +126,13 @@ function useCompanyAggregate(companyId: Id<"companies">) {
       }
     }
 
-    const incrementalInvestment = Math.max(0, (calc.proposedSpend ?? 0) - (calc.currentSpend ?? 0));
+    const investment = calc.proposedSpend ?? 0;
     calcSummaries.push({
       shortId: calc.shortId,
       name: calc.name,
       role: calc.role,
       totalAnnualValue: Math.round(calcValue),
-      roiMultiple: incrementalInvestment > 0 ? Math.round((calcValue / incrementalInvestment) * 100) / 100 : null,
+      roiMultiple: investment > 0 ? Math.round((calcValue / investment) * 100) / 100 : null,
       hoursSavedPerMonth: Math.round(calcHours),
       proposedSpend: calc.proposedSpend,
       valueItemCount: effectiveItems.length,

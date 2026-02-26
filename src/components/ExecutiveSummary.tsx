@@ -44,14 +44,11 @@ export function ExecutiveSummary({
   const [copied, setCopied] = useState(false);
   const updateTalkingPoints = useMutation(api.calculations.updateTalkingPoints);
 
-  const currentSpend = calculation.currentSpend ?? 0;
   const proposedSpend = calculation.proposedSpend ?? 0;
-  const totalInvestment = currentSpend + proposedSpend;
 
   const summary = calculateSummary(
     valueItems,
     calculation.assumptions,
-    currentSpend,
     proposedSpend
   );
 
@@ -155,13 +152,8 @@ export function ExecutiveSummary({
           <CardContent className="pt-6">
             <p className="text-muted-foreground text-sm font-medium">Annual Investment</p>
             <p className="text-2xl sm:text-3xl font-bold font-mono">
-              {totalInvestment > 0 ? fmt(totalInvestment) : "\u2014"}
+              {proposedSpend > 0 ? fmt(proposedSpend) : "\u2014"}
             </p>
-            {currentSpend > 0 && proposedSpend > 0 && (
-              <p className="text-muted-foreground text-xs mt-1">
-                {fmt(currentSpend)} current + {fmt(proposedSpend)} proposed
-              </p>
-            )}
           </CardContent>
         </Card>
 

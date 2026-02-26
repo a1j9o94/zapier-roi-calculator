@@ -30,7 +30,7 @@ interface PDFData {
   calculation: Calculation;
   valueItems: ValueItem[];
   totalValue: number;
-  incrementalInvestment: number;
+  proposedInvestment: number;
   roiMultiple: number | null;
   breakdown: CategoryBreakdown[];
   projections: YearProjection[];
@@ -42,15 +42,12 @@ export function generateExecutiveSummaryPDF(
   valueItems: ValueItem[]
 ): void {
   const totalValue = calculateTotalAnnualValue(valueItems, calculation.assumptions);
-  const currentSpend = calculation.currentSpend ?? 0;
   const proposedSpend = calculation.proposedSpend ?? 0;
-  const incrementalInvestment = proposedSpend - currentSpend;
-  const roiMultiple = calculateROIMultiple(totalValue, currentSpend, proposedSpend);
+  const roiMultiple = calculateROIMultiple(totalValue, proposedSpend);
   const breakdown = getCategoryBreakdown(valueItems, calculation.assumptions);
   const projections = calculateProjection(
     totalValue,
     calculation.assumptions,
-    currentSpend,
     proposedSpend
   );
   const totalHoursSaved = calculateTotalHoursSaved(valueItems, calculation.assumptions);
@@ -59,7 +56,7 @@ export function generateExecutiveSummaryPDF(
     calculation,
     valueItems,
     totalValue,
-    incrementalInvestment,
+    proposedInvestment: proposedSpend,
     roiMultiple,
     breakdown,
     projections,
@@ -165,7 +162,7 @@ function drawKPISummary(doc: jsPDF, data: PDFData, y: number): number {
   doc.setFontSize(14);
   doc.setTextColor(COLORS.darkGray);
   doc.text(
-    data.incrementalInvestment > 0 ? formatCurrencyCompact(data.incrementalInvestment) : "—",
+    data.proposedInvestment > 0 ? formatCurrencyCompact(data.proposedInvestment) : "—",
     box2X + boxWidth / 2,
     y + 16,
     { align: "center" }
@@ -246,7 +243,7 @@ function drawValueBreakdown(doc: jsPDF, data: PDFData, y: number): number {
 
 function drawProjectionTable(doc: jsPDF, data: PDFData, y: number): number {
   const pageWidth = doc.internal.pageSize.getWidth();
-  const { projections, incrementalInvestment } = data;
+  const { projections, proposedInvestment } = data;
   const years = data.calculation.assumptions.projectionYears;
 
   // Section title
@@ -297,7 +294,7 @@ function drawProjectionTable(doc: jsPDF, data: PDFData, y: number): number {
   y += rowHeight;
 
   // Investment and Net Value rows (if there's investment)
-  if (incrementalInvestment > 0) {
+  if (proposedInvestment > 0) {
     // Investment row
     doc.setFont("helvetica", "normal");
     doc.setTextColor(COLORS.mediumGray);

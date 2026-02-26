@@ -136,8 +136,8 @@ function computeSummary(
     }
   }
 
-  const incrementalInvestment = Math.max(0, (proposedSpend ?? 0) - (currentSpend ?? 0));
-  const roiMultiple = incrementalInvestment > 0 ? totalAnnualValue / incrementalInvestment : null;
+  const investment = proposedSpend ?? 0;
+  const roiMultiple = investment > 0 ? totalAnnualValue / investment : null;
 
   const projection = [];
   let cumValue = 0, cumInvestment = 0;
@@ -146,12 +146,12 @@ function computeSummary(
     const ramp = assumptions.realizationRamp[i] ?? 1;
     const value = totalAnnualValue * growth * ramp;
     cumValue += value;
-    cumInvestment += incrementalInvestment;
+    cumInvestment += investment;
     projection.push({
       year: i + 1,
       value: Math.round(value),
-      investment: incrementalInvestment,
-      netValue: Math.round(value - incrementalInvestment),
+      investment: investment,
+      netValue: Math.round(value - investment),
       cumulativeValue: Math.round(cumValue),
       cumulativeInvestment: Math.round(cumInvestment),
       cumulativeNetValue: Math.round(cumValue - cumInvestment),

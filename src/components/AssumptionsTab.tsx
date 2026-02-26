@@ -195,33 +195,15 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
         </CardContent>
       </Card>
 
-      {/* Investment Comparison */}
+      {/* Proposed Investment */}
       <Card>
         <CardHeader>
-          <CardTitle>Investment Comparison</CardTitle>
-          <CardDescription>Current spend vs proposed Zapier investment for ROI calculation</CardDescription>
+          <CardTitle>Proposed Investment</CardTitle>
+          <CardDescription>Annual Zapier investment used as the denominator for ROI</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="current-spend">Current Annual Spend</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">$</span>
-              {readOnly ? (
-                <span className="font-mono py-2">{(calculation.currentSpend ?? 0).toLocaleString()}</span>
-              ) : (
-                <Input
-                  id="current-spend"
-                  type="number"
-                  value={calculation.currentSpend ?? ""}
-                  onChange={(e) => handleInvestmentChange("currentSpend", e.target.value)}
-                  className="font-mono"
-                  placeholder="0"
-                />
-              )}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="proposed-spend">Proposed Zapier Investment</Label>
+        <CardContent>
+          <div className="space-y-2 max-w-xs">
+            <Label htmlFor="proposed-spend">Annual Investment</Label>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">$</span>
               {readOnly ? (

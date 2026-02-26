@@ -313,11 +313,9 @@ export function calculateTotalAnnualValue(items: ValueItem[]): number {
 export function calculateProjection(
   baseAnnualValue: number,
   assumptions: Assumptions,
-  currentSpend: number = 0,
   proposedSpend: number = 0
 ): YearProjection[] {
   const projections: YearProjection[] = [];
-  const incrementalInvestment = Math.max(0, proposedSpend - currentSpend);
 
   let cumulativeValue = 0;
   let cumulativeInvestment = 0;
@@ -328,7 +326,7 @@ export function calculateProjection(
     const realizationRate = assumptions.realizationRamp[i] ?? 1;
 
     const value = baseAnnualValue * growthMultiplier * realizationRate;
-    const investment = incrementalInvestment;
+    const investment = proposedSpend;
 
     cumulativeValue += value;
     cumulativeInvestment += investment;
@@ -348,16 +346,14 @@ export function calculateProjection(
 }
 
 /**
- * Calculate ROI multiple
+ * Calculate ROI multiple (value / proposed investment)
  */
 export function calculateROIMultiple(
   totalAnnualValue: number,
-  currentSpend: number = 0,
   proposedSpend: number = 0
 ): number | null {
-  const incrementalInvestment = proposedSpend - currentSpend;
-  if (incrementalInvestment <= 0) return null;
-  return totalAnnualValue / incrementalInvestment;
+  if (proposedSpend <= 0) return null;
+  return totalAnnualValue / proposedSpend;
 }
 
 /**
@@ -424,7 +420,6 @@ export function calculateFTEEquivalent(monthlyHoursSaved: number): number {
 export function calculateSummary(
   items: ValueItem[],
   assumptions: Assumptions,
-  currentSpend?: number,
   proposedSpend?: number
 ): {
   totalAnnualValue: number;
@@ -436,13 +431,12 @@ export function calculateSummary(
 } {
   const totalAnnualValue = calculateTotalAnnualValue(items);
   const dimensionTotals = calculateDimensionTotals(items);
-  const roiMultiple = calculateROIMultiple(totalAnnualValue, currentSpend, proposedSpend);
+  const roiMultiple = calculateROIMultiple(totalAnnualValue, proposedSpend);
   const hoursSavedPerMonth = calculateTotalHoursSaved(items);
   const fteEquivalent = calculateFTEEquivalent(hoursSavedPerMonth);
   const projection = calculateProjection(
     totalAnnualValue,
     assumptions,
-    currentSpend,
     proposedSpend
   );
 
