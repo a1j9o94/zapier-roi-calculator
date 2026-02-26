@@ -4,15 +4,14 @@
 
 **Zapier ROI Calculator V2** — Enterprise ROI estimation platform powered by the UVS (Unified Value System) taxonomy. Calculates business value across 5 dimensions and 16 archetypes with archetype-specific formulas, confidence tracking, and Zapier platform integration.
 
-**Production (V2)**: zapier-value.vercel.app
-**Legacy (V1)**: zapier-roi-calculator.vercel.app (still live, separate Convex deployment)
+**Production**: zapier-value.vercel.app
 
 ## Commands
 
 ```bash
 bun dev              # Dev server with HMR (localhost:3000)
 bun start            # Production server
-bun test             # Run unit tests (83 tests across 2 files)
+bun test             # Run unit tests (93 tests across 3 files)
 bun test --watch     # Watch mode
 bunx tsc --noEmit    # Type check (ignore bun-types errors)
 ```
@@ -106,7 +105,7 @@ See `ARCHETYPE_FIELDS` in `src/types/archetypes.ts` for all input schemas.
 ## Development Workflow
 
 1. Write failing tests → implement → verify with `bun test`
-2. After code changes: `bun test` (83 tests should pass)
+2. After code changes: `bun test` (93 tests should pass)
 3. Always use TypeScript
 4. Convex schema changes: `npx convex dev` auto-deploys
 

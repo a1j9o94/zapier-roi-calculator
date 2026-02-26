@@ -22,6 +22,17 @@ export const IT_PATTERNS: PatternTemplate[] = [
       "30 new hires/month, 45 min provisioning each at $75/hr = $20.3K/year.",
     commonApps: ["BambooHR", "Okta", "Google Workspace", "Slack"],
     tags: ["provisioning", "onboarding", "user-management", "access"],
+    zapBundle: {
+      zaps: [{
+        title: "New Hire Account Provisioning",
+        description: "Auto-provision accounts when new employee added to HRIS",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "New Employee in HRIS", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Build Account List", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Notify IT of Provisioning", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "it-deprovisioning",
@@ -40,6 +51,18 @@ export const IT_PATTERNS: PatternTemplate[] = [
       "3 potential access violations/year, $50K avg penalty, 60% reduction = $90K/year avoided.",
     commonApps: ["BambooHR", "Okta", "Google Workspace", "Jira"],
     tags: ["offboarding", "deprovisioning", "security", "compliance"],
+    zapBundle: {
+      zaps: [{
+        title: "Offboarding Access Revocation",
+        description: "Auto-revoke access and deactivate accounts on termination",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "Employee Terminated in HRIS", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Generate Deprovisioning Checklist", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Notify Security Team", type: "action" },
+          { app: "Gmail", action: "send_email", stepTitle: "Send Compliance Confirmation", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "it-ticket-routing",
@@ -59,6 +82,17 @@ export const IT_PATTERNS: PatternTemplate[] = [
       "500 tickets/month, 30 min to 5 min triage at $65/hr = $16.3K/year.",
     commonApps: ["Zendesk", "Jira", "Slack", "PagerDuty"],
     tags: ["tickets", "triage", "routing", "helpdesk"],
+    zapBundle: {
+      zaps: [{
+        title: "IT Ticket Auto-Triage",
+        description: "Classify and route IT tickets by category and urgency",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "New Ticket Submitted", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Classify & Prioritize", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Route to Appropriate Channel", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "it-tool-consolidation",
@@ -76,6 +110,17 @@ export const IT_PATTERNS: PatternTemplate[] = [
       "Eliminate 3 middleware tools at $12K/year each = $36K/year.",
     commonApps: ["Zapier Tables", "Webhooks", "Code by Zapier"],
     tags: ["tool-sprawl", "consolidation", "middleware", "cost-reduction"],
+    zapBundle: {
+      zaps: [{
+        title: "Replace Middleware with Zapier Tables",
+        description: "Use Zapier Tables as central hub, eliminate standalone tools",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "Incoming Data from Source", type: "trigger" },
+          { app: "Zapier Tables", action: "create_record", stepTitle: "Store in Zapier Tables", type: "action" },
+          { app: "Webhooks by Zapier", action: "post", stepTitle: "Sync to Destination", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "it-incident-monitoring",
@@ -94,6 +139,18 @@ export const IT_PATTERNS: PatternTemplate[] = [
       "24 incidents/year, $8K avg cost, 35% reduction = $67.2K/year.",
     commonApps: ["PagerDuty", "Datadog", "Slack", "Webhooks"],
     tags: ["monitoring", "alerting", "incidents", "uptime"],
+    zapBundle: {
+      zaps: [{
+        title: "Proactive System Monitoring",
+        description: "Monitor health endpoints and alert before incidents escalate",
+        steps: [
+          { app: "Schedule by Zapier", action: "every_15_min", stepTitle: "Periodic Health Check", type: "trigger" },
+          { app: "Webhooks by Zapier", action: "get", stepTitle: "Query Health Endpoint", type: "action" },
+          { app: "Filter by Zapier", action: "filter", stepTitle: "Check Thresholds", type: "filter" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Alert on Anomaly", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "it-data-sync",
@@ -113,5 +170,28 @@ export const IT_PATTERNS: PatternTemplate[] = [
       "10K records/month, 3% error rate, $25/error, 80% reduction = $72K/year.",
     commonApps: ["Salesforce", "HubSpot", "Google Sheets", "Webhooks"],
     tags: ["sync", "data-integrity", "consistency", "deduplication"],
+    zapBundle: {
+      zaps: [
+        {
+          title: "Cross-System Data Sync",
+          description: "Keep data consistent between CRM and other systems",
+          steps: [
+            { app: "Salesforce", action: "updated_record", stepTitle: "Record Updated in Source", type: "trigger" },
+            { app: "Code by Zapier", action: "run_javascript", stepTitle: "Validate Data Integrity", type: "action" },
+            { app: "HubSpot", action: "update_contact", stepTitle: "Sync to Destination System", type: "action" },
+          ],
+        },
+        {
+          title: "Duplicate Detection & Alert",
+          description: "Detect duplicate records across systems",
+          steps: [
+            { app: "Zapier Tables", action: "new_record", stepTitle: "New Record Created", type: "trigger" },
+            { app: "Zapier Tables", action: "find_records", stepTitle: "Search for Duplicates", type: "search" },
+            { app: "Filter by Zapier", action: "filter", stepTitle: "Filter Matches", type: "filter" },
+            { app: "Slack", action: "send_channel_message", stepTitle: "Alert on Potential Duplicates", type: "action" },
+          ],
+        },
+      ],
+    },
   },
 ];

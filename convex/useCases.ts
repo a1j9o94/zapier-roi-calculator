@@ -67,9 +67,31 @@ const architectureItemValidator = v.object({
 export const listByCalculation = query({
   args: { calculationId: v.id("calculations") },
   handler: async (ctx, args) => {
+    const calculation = await ctx.db.get(args.calculationId);
+    if (!calculation) return [];
+
+    // If calculation has useCaseIds, use those (new model)
+    if (calculation.useCaseIds && calculation.useCaseIds.length > 0) {
+      const useCases = await Promise.all(
+        calculation.useCaseIds.map((id) => ctx.db.get(id))
+      );
+      return useCases.filter((uc): uc is NonNullable<typeof uc> => uc !== null);
+    }
+
+    // Fallback: old model via calculationId index
     return await ctx.db
       .query("useCases")
       .withIndex("by_calculationId", (q) => q.eq("calculationId", args.calculationId))
+      .collect();
+  },
+});
+
+export const listByCompany = query({
+  args: { companyId: v.id("companies") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("useCases")
+      .withIndex("by_companyId", (q) => q.eq("companyId", args.companyId))
       .collect();
   },
 });
@@ -134,10 +156,13 @@ export const create = mutation({
         .unique();
     }
 
-    await ctx.db.patch(args.calculationId, { updatedAt: now });
+    // Look up the calculation's companyId
+    const calculation = await ctx.db.get(args.calculationId);
+    const companyId = calculation?.companyId;
 
     const id = await ctx.db.insert("useCases", {
       calculationId: args.calculationId,
+      companyId,
       shortId,
       name: args.name,
       department: args.department,
@@ -149,6 +174,13 @@ export const create = mutation({
       order: maxOrder + 1,
       createdAt: now,
       updatedAt: now,
+    });
+
+    // Append to calculation's useCaseIds array
+    const existingIds = calculation?.useCaseIds ?? [];
+    await ctx.db.patch(args.calculationId, {
+      updatedAt: now,
+      useCaseIds: [...existingIds, id],
     });
 
     return { id, shortId };
@@ -209,7 +241,17 @@ export const remove = mutation({
           await ctx.db.patch(item._id, { useCaseId: undefined });
         }
       }
-      await ctx.db.patch(useCase.calculationId, { updatedAt: Date.now() });
+
+      // Remove from all calculations' useCaseIds arrays
+      const allCalcs = await ctx.db.query("calculations").collect();
+      for (const calc of allCalcs) {
+        if (calc.useCaseIds?.includes(args.id)) {
+          await ctx.db.patch(calc._id, {
+            useCaseIds: calc.useCaseIds.filter((id) => id !== args.id),
+            updatedAt: Date.now(),
+          });
+        }
+      }
     }
     await ctx.db.delete(args.id);
   },
@@ -225,5 +267,57 @@ export const reorder = mutation({
       await ctx.db.patch(useCaseId, { order: index, updatedAt: Date.now() });
     }
     await ctx.db.patch(args.calculationId, { updatedAt: Date.now() });
+  },
+});
+
+// Add an existing use case to a calculation (import/share)
+export const addToCalculation = mutation({
+  args: {
+    calculationId: v.id("calculations"),
+    useCaseId: v.id("useCases"),
+  },
+  handler: async (ctx, args) => {
+    const calculation = await ctx.db.get(args.calculationId);
+    if (!calculation) throw new Error("Calculation not found");
+
+    const useCase = await ctx.db.get(args.useCaseId);
+    if (!useCase) throw new Error("Use case not found");
+
+    // Check it's not already in this calculation
+    const existingIds = calculation.useCaseIds ?? [];
+    if (existingIds.includes(args.useCaseId)) {
+      throw new Error("Use case already in this calculation");
+    }
+
+    await ctx.db.patch(args.calculationId, {
+      useCaseIds: [...existingIds, args.useCaseId],
+      updatedAt: Date.now(),
+    });
+
+    return args.useCaseId;
+  },
+});
+
+// Remove a use case reference from a calculation (unlink, not delete)
+export const removeFromCalculation = mutation({
+  args: {
+    calculationId: v.id("calculations"),
+    useCaseId: v.id("useCases"),
+  },
+  handler: async (ctx, args) => {
+    const calculation = await ctx.db.get(args.calculationId);
+    if (!calculation) throw new Error("Calculation not found");
+
+    const existingIds = calculation.useCaseIds ?? [];
+    if (!existingIds.includes(args.useCaseId)) {
+      throw new Error("Use case not in this calculation");
+    }
+
+    await ctx.db.patch(args.calculationId, {
+      useCaseIds: existingIds.filter((id) => id !== args.useCaseId),
+      updatedAt: Date.now(),
+    });
+
+    return args.useCaseId;
   },
 });

@@ -12,20 +12,19 @@ import { ExecutiveSummary } from "../components/ExecutiveSummary";
 // Lazy load heavier view components
 const SlideView = lazy(() => import("../components/SlideView").then(m => ({ default: m.SlideView })));
 const DetailView = lazy(() => import("../components/DetailView").then(m => ({ default: m.DetailView })));
-const ValueRealizedDashboard = lazy(() => import("../components/ValueRealizedDashboard").then(m => ({ default: m.ValueRealizedDashboard })));
 
 interface CalculatorPageProps {
   summaryOnly?: boolean;
   obfuscated?: boolean;
 }
 
-type TabId = "assumptions" | "values" | "usecases" | "summary" | "dashboard" | "detail" | "realized";
+type TabId = "assumptions" | "values" | "usecases" | "summary" | "dashboard" | "detail";
 
 export function CalculatorPage({ summaryOnly = false, obfuscated = false }: CalculatorPageProps) {
   const { id: shortId } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>(summaryOnly ? "summary" : "values");
+  const [activeTab, setActiveTab] = useState<TabId>("summary");
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
 
@@ -34,7 +33,7 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
   const tabParam = searchParams.get("tab");
 
   // Override active tab from URL param
-  const effectiveTab = tabParam && ["assumptions", "values", "usecases", "summary", "dashboard", "detail", "realized"].includes(tabParam)
+  const effectiveTab = tabParam && ["assumptions", "values", "usecases", "summary", "dashboard", "detail"].includes(tabParam)
     ? tabParam as TabId
     : activeTab;
 
@@ -49,6 +48,10 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
   const useCases = useQuery(
     api.useCases.listByCalculation,
     calculation ? { calculationId: calculation._id } : "skip"
+  );
+  const company = useQuery(
+    api.companies.getById,
+    calculation?.companyId ? { id: calculation.companyId } : "skip"
   );
   const updateName = useMutation(api.calculations.updateName);
 
@@ -100,12 +103,11 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
         { id: "dashboard", label: "Dashboard" },
       ]
     : [
-        { id: "values", label: "Value Items" },
-        { id: "usecases", label: "Use Cases" },
         { id: "summary", label: "Summary" },
+        { id: "usecases", label: "Use Cases" },
         { id: "dashboard", label: "Dashboard" },
         { id: "detail", label: "Detail View" },
-        { id: "realized", label: "Value Realized" },
+        { id: "values", label: "Value Items" },
         { id: "assumptions", label: "Settings" },
       ];
 
@@ -123,7 +125,10 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 {!summaryOnly && (
-                  <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Link
+                    to={company?.shortId ? `/company/${company.shortId}` : "/"}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2">
                       <path d="M19 12H5M12 19l-7-7 7-7" />
                     </svg>
@@ -224,15 +229,6 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
         {effectiveTab === "detail" && (
           <Suspense fallback={loadingFallback}>
             <DetailView
-              calculation={calculation}
-              valueItems={valueItems}
-              useCases={useCases ?? []}
-            />
-          </Suspense>
-        )}
-        {effectiveTab === "realized" && (
-          <Suspense fallback={loadingFallback}>
-            <ValueRealizedDashboard
               calculation={calculation}
               valueItems={valueItems}
               useCases={useCases ?? []}

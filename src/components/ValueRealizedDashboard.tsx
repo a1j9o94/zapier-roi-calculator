@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import type { Calculation, ValueItem, UseCase } from "../types/roi";
 import {
   computeRealizationSummary,
@@ -12,6 +15,8 @@ import {
 } from "../utils/formatting";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ValueRealizedDashboardProps {
   calculation: Calculation;
@@ -19,10 +24,25 @@ interface ValueRealizedDashboardProps {
   useCases: UseCase[];
 }
 
-// Placeholder: in production, this would come from Convex or local cache
-function getZapRunCache(_useCases: UseCase[]): ZapRunCacheEntry[] {
-  return [];
+interface ManualEntryForm {
+  zapId: string;
+  useCaseId: string;
+  totalRuns: string;
+  runsLast30Days: string;
+  runsLast7Days: string;
+  successfulRuns: string;
+  failedRuns: string;
 }
+
+const EMPTY_ENTRY: ManualEntryForm = {
+  zapId: "",
+  useCaseId: "",
+  totalRuns: "",
+  runsLast30Days: "",
+  runsLast7Days: "",
+  successfulRuns: "",
+  failedRuns: "",
+};
 
 function RealizationBar({ rate }: { rate: number }) {
   const pct = Math.min(rate * 100, 100);
@@ -71,18 +91,245 @@ function TrendIndicator({ trend }: { trend: "increasing" | "stable" | "decreasin
   );
 }
 
+function ManualEntrySection({
+  calculationId,
+  useCases,
+}: {
+  calculationId: string;
+  useCases: UseCase[];
+}) {
+  const [entries, setEntries] = useState<ManualEntryForm[]>([{ ...EMPTY_ENTRY }]);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const upsertRunData = useMutation(api.zapRunCache.upsertRunData);
+
+  const updateEntry = (index: number, field: keyof ManualEntryForm, value: string) => {
+    setEntries((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index]!, [field]: value };
+      return updated;
+    });
+  };
+
+  const addEntry = () => {
+    setEntries((prev) => [...prev, { ...EMPTY_ENTRY }]);
+  };
+
+  const removeEntry = (index: number) => {
+    setEntries((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      for (const entry of entries) {
+        if (!entry.zapId || !entry.useCaseId) continue;
+
+        await upsertRunData({
+          zapId: entry.zapId,
+          useCaseId: entry.useCaseId as any,
+          calculationId: calculationId as any,
+          totalRuns: parseInt(entry.totalRuns) || 0,
+          runsLast30Days: parseInt(entry.runsLast30Days) || 0,
+          runsLast7Days: parseInt(entry.runsLast7Days) || 0,
+          successfulRuns: parseInt(entry.successfulRuns) || 0,
+          failedRuns: parseInt(entry.failedRuns) || 0,
+        });
+      }
+      setMessage({ type: "success", text: "Run data saved successfully." });
+      setEntries([{ ...EMPTY_ENTRY }]);
+    } catch (err) {
+      setMessage({ type: "error", text: `Failed to save: ${err instanceof Error ? err.message : "Unknown error"}` });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Manual Run Data Entry</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {entries.map((entry, index) => (
+          <div key={index} className="border rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">
+                Entry {index + 1}
+              </span>
+              {entries.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeEntry(index)}
+                  className="text-red-500 hover:text-red-700 h-6 px-2"
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor={`zapId-${index}`} className="text-xs">
+                  Zap ID
+                </Label>
+                <Input
+                  id={`zapId-${index}`}
+                  placeholder="e.g. 123456"
+                  value={entry.zapId}
+                  onChange={(e) => updateEntry(index, "zapId", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor={`useCaseId-${index}`} className="text-xs">
+                  Use Case
+                </Label>
+                <select
+                  id={`useCaseId-${index}`}
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  value={entry.useCaseId}
+                  onChange={(e) => updateEntry(index, "useCaseId", e.target.value)}
+                >
+                  <option value="">Select use case...</option>
+                  {useCases.map((uc) => (
+                    <option key={uc._id} value={uc._id}>
+                      {uc.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div>
+                <Label htmlFor={`totalRuns-${index}`} className="text-xs">
+                  Total Runs
+                </Label>
+                <Input
+                  id={`totalRuns-${index}`}
+                  type="number"
+                  placeholder="0"
+                  value={entry.totalRuns}
+                  onChange={(e) => updateEntry(index, "totalRuns", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor={`runs30-${index}`} className="text-xs">
+                  Runs (30d)
+                </Label>
+                <Input
+                  id={`runs30-${index}`}
+                  type="number"
+                  placeholder="0"
+                  value={entry.runsLast30Days}
+                  onChange={(e) => updateEntry(index, "runsLast30Days", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor={`runs7-${index}`} className="text-xs">
+                  Runs (7d)
+                </Label>
+                <Input
+                  id={`runs7-${index}`}
+                  type="number"
+                  placeholder="0"
+                  value={entry.runsLast7Days}
+                  onChange={(e) => updateEntry(index, "runsLast7Days", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor={`success-${index}`} className="text-xs">
+                  Successful
+                </Label>
+                <Input
+                  id={`success-${index}`}
+                  type="number"
+                  placeholder="0"
+                  value={entry.successfulRuns}
+                  onChange={(e) => updateEntry(index, "successfulRuns", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor={`failed-${index}`} className="text-xs">
+                  Failed
+                </Label>
+                <Input
+                  id={`failed-${index}`}
+                  type="number"
+                  placeholder="0"
+                  value={entry.failedRuns}
+                  onChange={(e) => updateEntry(index, "failedRuns", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={addEntry}>
+            + Add Entry
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={saving || entries.every((e) => !e.zapId || !e.useCaseId)}
+          >
+            {saving ? "Saving..." : "Save Run Data"}
+          </Button>
+        </div>
+
+        {message && (
+          <p
+            className={`text-sm ${
+              message.type === "success" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function ValueRealizedDashboard({
-  calculation: _calculation,
+  calculation,
   valueItems,
   useCases,
 }: ValueRealizedDashboardProps) {
-  const zapRunCache = getZapRunCache(useCases);
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
+
+  // Fetch live zap run cache from Convex
+  const zapRunCacheRaw = useQuery(api.zapRunCache.getByCalculation, {
+    calculationId: calculation._id as any,
+  });
+
+  // Convert Convex data to the ZapRunCacheEntry type expected by computeRealizationSummary
+  const zapRunCache: ZapRunCacheEntry[] = (zapRunCacheRaw ?? []).map((entry) => ({
+    zapId: entry.zapId,
+    useCaseId: entry.useCaseId,
+    totalRuns: entry.totalRuns,
+    runsLast30Days: entry.runsLast30Days,
+    runsLast7Days: entry.runsLast7Days,
+    successfulRuns: entry.successfulRuns,
+    failedRuns: entry.failedRuns,
+    lastRunAt: entry.lastRunAt,
+    fetchedAt: entry.fetchedAt,
+  }));
+
   const summary = computeRealizationSummary(useCases, valueItems, zapRunCache);
 
+  const handleRefresh = () => {
+    setRefreshMessage("Refresh queued. API-based auto-refresh coming soon.");
+    setTimeout(() => setRefreshMessage(null), 3000);
+  };
+
   // Empty state: no linked Zaps at all
-  if (!summary.hasAnyLinkedZaps) {
+  if (!summary.hasAnyLinkedZaps && zapRunCache.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <CardContent className="py-16 text-center">
             <div className="text-4xl mb-4 text-muted-foreground">
@@ -93,12 +340,26 @@ export function ValueRealizedDashboard({
             <h3 className="text-lg font-semibold mb-2">
               No Zaps Linked Yet
             </h3>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Link Zaps to your use cases to start tracking value realization.
-              Go to the Use Cases tab to add Zap architecture.
+            <p className="text-muted-foreground text-sm max-w-md mx-auto mb-4">
+              Link Zaps to your use cases to start tracking value realization,
+              or manually enter run data below.
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowManualEntry(true)}
+            >
+              Enter Run Data Manually
+            </Button>
           </CardContent>
         </Card>
+
+        {showManualEntry && (
+          <ManualEntrySection
+            calculationId={calculation._id}
+            useCases={useCases}
+          />
+        )}
       </div>
     );
   }
@@ -120,13 +381,66 @@ export function ValueRealizedDashboard({
             Comparing actual Zap runs against projected automation value
           </p>
         </div>
-        <Button variant="outline" size="sm" disabled>
-          Refresh Run Data
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowManualEntry((prev) => !prev)}
+          >
+            {showManualEntry ? "Hide Entry Form" : "Enter Data"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            Refresh Run Data
+          </Button>
+        </div>
       </div>
 
+      {refreshMessage && (
+        <p className="text-sm text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+          {refreshMessage}
+        </p>
+      )}
+
+      {/* Manual Entry */}
+      {showManualEntry && (
+        <ManualEntrySection
+          calculationId={calculation._id}
+          useCases={useCases}
+        />
+      )}
+
       {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm font-medium">
+              Projected Value
+            </p>
+            <p className="text-2xl sm:text-3xl font-bold font-mono">
+              {formatCurrencyCompact(summary.projectedAnnualValue)}
+            </p>
+            <p className="text-muted-foreground text-xs mt-1">
+              Annual
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-sm font-medium">
+              Realized Value
+            </p>
+            <p className="text-2xl sm:text-3xl font-bold font-mono">
+              {summary.hasAnyRunData
+                ? formatCurrencyCompact(summary.realizedAnnualValue)
+                : "--"}
+            </p>
+            <p className="text-muted-foreground text-xs mt-1">
+              {summary.hasAnyRunData ? "Annual (from run data)" : "No run data yet"}
+            </p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent className="pt-6">
             <p className="text-muted-foreground text-sm font-medium">
@@ -139,7 +453,7 @@ export function ValueRealizedDashboard({
             </p>
             <p className="text-muted-foreground text-xs mt-1">
               {summary.hasAnyRunData
-                ? "Actual vs. projected value"
+                ? "Actual vs. projected"
                 : "No run data yet"}
             </p>
           </CardContent>
@@ -148,26 +462,7 @@ export function ValueRealizedDashboard({
         <Card>
           <CardContent className="pt-6">
             <p className="text-muted-foreground text-sm font-medium">
-              Projected vs. Realized
-            </p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-2xl sm:text-3xl font-bold font-mono">
-                {formatCurrencyCompact(summary.realizedAnnualValue)}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                / {formatCurrencyCompact(summary.projectedAnnualValue)}
-              </p>
-            </div>
-            <p className="text-muted-foreground text-xs mt-1">
-              Annual value
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm font-medium">
-              Zap Runs (30 days)
+              Zap Runs (30d)
             </p>
             <p className="text-2xl sm:text-3xl font-bold font-mono">
               {summary.hasAnyRunData

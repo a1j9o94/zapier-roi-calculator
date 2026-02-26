@@ -392,11 +392,82 @@ const SCHEMA_RESPONSE = {
     estimated: "Industry research + Zapier internal data [E]",
     custom: "Customer-provided inputs [C]",
   },
+  endpoints: {
+    companies: {
+      list: { method: "GET", path: "/api/companies", description: "List all companies" },
+      get: { method: "GET", path: "/api/companies/:shortId", description: "Get company with its calculators" },
+      create: { method: "POST", path: "/api/companies", body: { name: "required", industry: "optional", employeeCount: "optional" } },
+      update: { method: "PUT", path: "/api/companies/:shortId", body: { name: "optional", industry: "optional", employeeCount: "optional" } },
+      aggregate: { method: "GET", path: "/api/companies/:shortId/aggregate", description: "Company-level totals across all calculators" },
+      useCases: { method: "GET", path: "/api/companies/:shortId/use-cases", description: "All company use cases with _id, totalAnnualValue, valueItemCount, sourceCalculator, referencedByCalculators. Use this to discover use cases available for import." },
+    },
+    calculations: {
+      list: { method: "GET", path: "/api/calculations", description: "List all calculations" },
+      get: { method: "GET", path: "/api/calculations/:shortId", description: "Basic calculation data" },
+      getFull: { method: "GET", path: "/api/calculations/:shortId/full", description: "Full calculation with computed values, use cases, and summary" },
+      create: {
+        method: "POST", path: "/api/calculations",
+        description: "Create a calculator. Supports nested value items, use cases, and importing shared use cases in one call.",
+        body: {
+          name: "required",
+          companyShortId: "optional — links calculator to a company by short ID",
+          companyId: "optional — links calculator to a company by Convex ID",
+          role: "optional",
+          proposedSpend: "optional",
+          currentSpend: "optional",
+          importUseCaseIds: "optional — array of use case _ids to import as shared references (get IDs from GET /api/companies/:shortId/use-cases)",
+          valueItems: "optional — array of { archetype, name, inputs, ... } to create new value items",
+          useCases: "optional — array of { name, department, status, ... } to create new use cases. Use valueItemNames to link to value items by name.",
+        },
+      },
+      update: { method: "PUT", path: "/api/calculations/:shortId" },
+      delete: { method: "DELETE", path: "/api/calculations/:shortId" },
+    },
+    valueItems: {
+      list: { method: "GET", path: "/api/calculations/:shortId/value-items" },
+      create: { method: "POST", path: "/api/calculations/:shortId/value-items", body: { archetype: "required — one of 16 archetypes", name: "required", inputs: "required — archetype-specific key-value pairs" } },
+      createBatch: { method: "POST", path: "/api/calculations/:shortId/value-items/batch", body: { items: "array of value item objects" } },
+      update: { method: "PUT", path: "/api/calculations/:shortId/value-items/:itemShortId" },
+      delete: { method: "DELETE", path: "/api/calculations/:shortId/value-items/:itemShortId" },
+    },
+    useCases: {
+      list: { method: "GET", path: "/api/calculations/:shortId/use-cases", description: "Use cases in this calculator (includes shared ones)" },
+      create: { method: "POST", path: "/api/calculations/:shortId/use-cases", body: { name: "required", department: "optional", status: "optional (default: identified)", implementationEffort: "optional (default: medium)" } },
+      import: { method: "POST", path: "/api/calculations/:shortId/use-cases/import", description: "Add an existing company use case to this calculator as a shared reference. No data is copied — edits reflect everywhere.", body: { useCaseId: "required — _id from GET /api/companies/:shortId/use-cases" } },
+      update: { method: "PUT", path: "/api/calculations/:shortId/use-cases/:ucShortId", description: "Edit a use case. Changes apply to all calculators referencing it." },
+      delete: { method: "DELETE", path: "/api/calculations/:shortId/use-cases/:ucShortId", description: "Default: unlinks from this calculator only. Add ?permanent=true to delete permanently from all calculators." },
+    },
+    templates: {
+      get: { method: "GET", path: "/api/templates/:archetype", description: "Pre-filled template with input prompts and defaults for an archetype" },
+    },
+  },
+  workflow: {
+    description: "Recommended workflow for AI agents creating calculators",
+    steps: [
+      "1. GET /api/schema — Read taxonomy, archetypes, input schemas, and this endpoint guide",
+      "2. GET /api/companies — Find or POST /api/companies to create the target company",
+      "3. GET /api/companies/:shortId/use-cases — Discover existing use cases (with _ids and values)",
+      "4. POST /api/calculations — Create calculator with companyShortId, importUseCaseIds for existing use cases, plus new valueItems and useCases",
+      "5. GET /api/calculations/:shortId/full — Verify the result with computed totals",
+    ],
+  },
 };
 
 // ============================================================
 // CORS preflight
 // ============================================================
+
+http.route({
+  path: "/api/companies",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { status: 204, headers: corsHeaders })),
+});
+
+http.route({
+  pathPrefix: "/api/companies/",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { status: 204, headers: corsHeaders })),
+});
 
 http.route({
   path: "/api/schema",
@@ -505,11 +576,14 @@ http.route({
   handler: httpAction(async (ctx, request) => {
     const body = await parseBody<{
       name?: string;
+      companyId?: string;
+      companyShortId?: string;
       role?: string;
       priorityOrder?: string[];
       currentSpend?: number;
       proposedSpend?: number;
       assumptions?: Record<string, unknown>;
+      importUseCaseIds?: string[];
       valueItems?: Array<{
         archetype: string;
         name: string;
@@ -532,6 +606,16 @@ http.route({
       return errorResponse("name is required and must be a string");
     }
 
+    // Resolve companyId from either companyId (Convex ID) or companyShortId
+    let resolvedCompanyId: string | undefined;
+    if (body.companyId) {
+      resolvedCompanyId = body.companyId;
+    } else if (body.companyShortId) {
+      const company = await ctx.runQuery(api.companies.getByShortId, { shortId: body.companyShortId });
+      if (!company) return errorResponse(`Company not found with shortId "${body.companyShortId}"`, 404);
+      resolvedCompanyId = company._id;
+    }
+
     // Create calculation
     const result = await ctx.runMutation(api.calculations.create, {
       name: body.name,
@@ -539,6 +623,7 @@ http.route({
       priorityOrder: body.priorityOrder,
       currentSpend: body.currentSpend,
       proposedSpend: body.proposedSpend,
+      ...(resolvedCompanyId && { companyId: resolvedCompanyId as any }),
       ...(body.assumptions && { assumptions: body.assumptions as { projectionYears: number; realizationRamp: number[]; annualGrowthRate: number; defaultRates: { admin: number; operations: number; salesOps: number; engineering: number; manager: number; executive: number } } }),
     });
 
@@ -604,7 +689,24 @@ http.route({
       }
     }
 
+    // Import existing use cases by ID (shared references, not clones)
+    const importedUseCases: string[] = [];
+    if (body.importUseCaseIds && body.importUseCaseIds.length > 0) {
+      for (const ucId of body.importUseCaseIds) {
+        try {
+          await ctx.runMutation(api.useCases.addToCalculation, {
+            calculationId: calculation._id,
+            useCaseId: ucId as any,
+          });
+          importedUseCases.push(ucId);
+        } catch (e: any) {
+          // Skip duplicates or invalid IDs silently
+        }
+      }
+    }
+
     // Return full calculation with computed values
+    const updatedCalc = await ctx.runQuery(api.calculations.getByShortId, { shortId: result.shortId });
     const valueItems = await ctx.runQuery(api.valueItems.listByCalculation, { calculationId: calculation._id });
     const useCases = await ctx.runQuery(api.useCases.listByCalculation, { calculationId: calculation._id });
     const summary = computeSummary(
@@ -615,7 +717,7 @@ http.route({
     );
 
     return jsonResponse({
-      calculation,
+      calculation: updatedCalc,
       valueItems: valueItems.map((vi) => ({
         ...vi,
         computed: {
@@ -624,6 +726,7 @@ http.route({
       })),
       useCases,
       summary,
+      ...(importedUseCases.length > 0 && { importedUseCaseIds: importedUseCases }),
     }, 201);
   }),
 });
@@ -679,6 +782,61 @@ http.route({
       if (!calculation) return errorResponse("Calculation not found", 404);
       const useCases = await ctx.runQuery(api.useCases.listByCalculation, { calculationId: calculation._id });
       return jsonResponse(useCases);
+    }
+
+    // GET /api/calculations/:shortId/realized
+    const realizedMatch = path.match(/^\/api\/calculations\/([a-z0-9]+)\/realized$/);
+    if (realizedMatch) {
+      const shortId = realizedMatch[1]!;
+      const calculation = await ctx.runQuery(api.calculations.getByShortId, { shortId });
+      if (!calculation) return errorResponse("Calculation not found", 404);
+
+      const valueItems = await ctx.runQuery(api.valueItems.listByCalculation, { calculationId: calculation._id });
+      const useCases = await ctx.runQuery(api.useCases.listByCalculation, { calculationId: calculation._id });
+      const zapRunEntries = await ctx.runQuery(api.zapRunCache.getByCalculation, { calculationId: calculation._id });
+
+      let totalProjectedAnnualValue = 0;
+      let totalRealizedAnnualValue = 0;
+
+      const useCaseResults = useCases.map((uc) => {
+        const linkedItems = valueItems.filter((vi) => vi.useCaseId === uc._id);
+        const projectedAnnualValue = linkedItems.reduce((sum, item) => sum + computeItemValue(item as any), 0);
+        totalProjectedAnnualValue += projectedAnnualValue;
+
+        const zapRuns = zapRunEntries.filter((e) => e.useCaseId === uc._id);
+        const runData = zapRuns.length > 0 ? {
+          zapId: zapRuns[0]!.zapId,
+          totalRuns: zapRuns.reduce((s, r) => s + r.totalRuns, 0),
+          runsLast30Days: zapRuns.reduce((s, r) => s + r.runsLast30Days, 0),
+          successRate: (() => {
+            const total = zapRuns.reduce((s, r) => s + r.successfulRuns + r.failedRuns, 0);
+            return total > 0 ? Math.round((zapRuns.reduce((s, r) => s + r.successfulRuns, 0) / total) * 100) / 100 : 0;
+          })(),
+          realizationRate: zapRuns[0]!.realizationRate ?? 0,
+          realizedAnnualValue: zapRuns[0]!.realizedAnnualValue ?? 0,
+        } : null;
+
+        if (runData) {
+          totalRealizedAnnualValue += runData.realizedAnnualValue;
+        }
+
+        return {
+          useCaseId: uc._id,
+          useCaseName: uc.name,
+          projectedAnnualValue: Math.round(projectedAnnualValue),
+          zapRuns: runData,
+        };
+      });
+
+      return jsonResponse({
+        calculationId: calculation._id,
+        totalProjectedAnnualValue: Math.round(totalProjectedAnnualValue),
+        totalRealizedAnnualValue: Math.round(totalRealizedAnnualValue),
+        overallRealizationRate: totalProjectedAnnualValue > 0
+          ? Math.round((totalRealizedAnnualValue / totalProjectedAnnualValue) * 100) / 100
+          : 0,
+        useCases: useCaseResults,
+      });
     }
 
     // GET /api/calculations/:shortId/obfuscated
@@ -817,6 +975,29 @@ http.route({
       return jsonResponse({ ...item, computed: { annualValue: computeItemValue(item as any) } }, 201);
     }
 
+    // POST /api/calculations/:shortId/use-cases/import
+    const ucImportMatch = path.match(/^\/api\/calculations\/([a-z0-9]+)\/use-cases\/import$/);
+    if (ucImportMatch) {
+      const shortId = ucImportMatch[1]!;
+      const calculation = await ctx.runQuery(api.calculations.getByShortId, { shortId });
+      if (!calculation) return errorResponse("Calculation not found", 404);
+
+      const body = await parseBody<{ useCaseId?: string }>(request);
+      if (!body?.useCaseId) return errorResponse("useCaseId is required");
+
+      try {
+        await ctx.runMutation(api.useCases.addToCalculation, {
+          calculationId: calculation._id,
+          useCaseId: body.useCaseId as any,
+        });
+      } catch (e: any) {
+        return errorResponse(e.message ?? "Failed to import use case");
+      }
+
+      const useCase = await ctx.runQuery(api.useCases.get, { id: body.useCaseId as any });
+      return jsonResponse(useCase, 200);
+    }
+
     // POST /api/calculations/:shortId/use-cases
     const ucMatch = path.match(/^\/api\/calculations\/([a-z0-9]+)\/use-cases$/);
     if (ucMatch) {
@@ -849,6 +1030,76 @@ http.route({
 
       const useCase = await ctx.runQuery(api.useCases.get, { id: result.id });
       return jsonResponse(useCase, 201);
+    }
+
+    // POST /api/calculations/:shortId/zap-run-data
+    const runDataMatch = path.match(/^\/api\/calculations\/([a-z0-9]+)\/zap-run-data$/);
+    if (runDataMatch) {
+      const shortId = runDataMatch[1]!;
+      const calculation = await ctx.runQuery(api.calculations.getByShortId, { shortId });
+      if (!calculation) return errorResponse("Calculation not found", 404);
+
+      const body = await parseBody<{
+        zapId?: string;
+        useCaseId?: string;
+        totalRuns?: number;
+        runsLast30Days?: number;
+        runsLast7Days?: number;
+        successfulRuns?: number;
+        failedRuns?: number;
+        lastRunAt?: string;
+        realizationRate?: number;
+        realizedAnnualValue?: number;
+      }>(request);
+      if (!body) return errorResponse("Invalid JSON body");
+      if (!body.zapId) return errorResponse("zapId is required");
+      if (typeof body.totalRuns !== "number") return errorResponse("totalRuns is required (number)");
+      if (typeof body.runsLast30Days !== "number") return errorResponse("runsLast30Days is required (number)");
+      if (typeof body.runsLast7Days !== "number") return errorResponse("runsLast7Days is required (number)");
+      if (typeof body.successfulRuns !== "number") return errorResponse("successfulRuns is required (number)");
+      if (typeof body.failedRuns !== "number") return errorResponse("failedRuns is required (number)");
+
+      // Resolve use case: by useCaseId or by finding a use case with matching zapId in architecture
+      let resolvedUseCaseId: string | null = null;
+
+      if (body.useCaseId) {
+        // Validate that this use case belongs to this calculation
+        const useCases = await ctx.runQuery(api.useCases.listByCalculation, { calculationId: calculation._id });
+        const match = useCases.find((uc) => uc._id === body.useCaseId);
+        if (!match) return errorResponse("Use case not found in this calculation", 404);
+        resolvedUseCaseId = match._id;
+      } else {
+        // Find use case by zapId in architecture
+        const useCases = await ctx.runQuery(api.useCases.listByCalculation, { calculationId: calculation._id });
+        for (const uc of useCases) {
+          if (uc.architecture?.some((a) => a.type === "zap" && a.zapId === body.zapId)) {
+            resolvedUseCaseId = uc._id;
+            break;
+          }
+        }
+        if (!resolvedUseCaseId) {
+          return errorResponse(
+            `No use case found with zapId "${body.zapId}" in architecture. Provide useCaseId explicitly or link the Zap to a use case first.`,
+            404
+          );
+        }
+      }
+
+      const entryId = await ctx.runMutation(api.zapRunCache.upsertRunData, {
+        zapId: body.zapId,
+        useCaseId: resolvedUseCaseId as any,
+        calculationId: calculation._id,
+        totalRuns: body.totalRuns,
+        runsLast30Days: body.runsLast30Days,
+        runsLast7Days: body.runsLast7Days,
+        successfulRuns: body.successfulRuns,
+        failedRuns: body.failedRuns,
+        lastRunAt: body.lastRunAt,
+        realizationRate: body.realizationRate,
+        realizedAnnualValue: body.realizedAnnualValue,
+      });
+
+      return jsonResponse({ id: entryId, zapId: body.zapId, useCaseId: resolvedUseCaseId }, 201);
     }
 
     return errorResponse("Unknown endpoint", 404);
@@ -900,7 +1151,12 @@ http.route({
       if (!calculation) return errorResponse("Calculation not found", 404);
 
       const useCase = await ctx.runQuery(api.useCases.getByShortId, { shortId: ucShortId! });
-      if (!useCase || useCase.calculationId !== calculation._id) return errorResponse("Use case not found", 404);
+      // Allow editing if use case belongs to this calc OR is in its useCaseIds (shared)
+      const isInCalc = useCase && (
+        useCase.calculationId === calculation._id ||
+        (calculation.useCaseIds?.includes(useCase._id) ?? false)
+      );
+      if (!useCase || !isInCalc) return errorResponse("Use case not found", 404);
 
       const body = await parseBody<Record<string, unknown>>(request);
       if (!body) return errorResponse("Invalid JSON body");
@@ -948,6 +1204,12 @@ http.route({
           ...(body.priorityOrder !== undefined && { priorityOrder: body.priorityOrder as string[] }),
         });
       }
+      if (body.companyId !== undefined) {
+        await ctx.runMutation(api.calculations.updateCompanyId, {
+          id: calculation._id,
+          companyId: body.companyId ? (body.companyId as any) : undefined,
+        });
+      }
 
       const updated = await ctx.runQuery(api.calculations.getByShortId, { shortId });
       return jsonResponse(updated);
@@ -981,15 +1243,37 @@ http.route({
     }
 
     // DELETE /api/calculations/:shortId/use-cases/:ucShortId
+    // ?permanent=true to actually delete; default is unlink from this calculator
     const ucMatch = path.match(/^\/api\/calculations\/([a-z0-9]+)\/use-cases\/([a-z0-9]+)$/);
     if (ucMatch) {
       const [, calcShortId, ucShortId] = ucMatch;
       const calculation = await ctx.runQuery(api.calculations.getByShortId, { shortId: calcShortId! });
       if (!calculation) return errorResponse("Calculation not found", 404);
       const useCase = await ctx.runQuery(api.useCases.getByShortId, { shortId: ucShortId! });
-      if (!useCase || useCase.calculationId !== calculation._id) return errorResponse("Use case not found", 404);
-      await ctx.runMutation(api.useCases.remove, { id: useCase._id });
-      return jsonResponse({ deleted: true });
+      const isInCalc = useCase && (
+        useCase.calculationId === calculation._id ||
+        (calculation.useCaseIds?.includes(useCase._id) ?? false)
+      );
+      if (!useCase || !isInCalc) return errorResponse("Use case not found", 404);
+
+      const permanent = url.searchParams.get("permanent") === "true";
+      if (permanent) {
+        await ctx.runMutation(api.useCases.remove, { id: useCase._id });
+        return jsonResponse({ deleted: true, permanent: true });
+      } else {
+        // Unlink from this calculation only
+        try {
+          await ctx.runMutation(api.useCases.removeFromCalculation, {
+            calculationId: calculation._id,
+            useCaseId: useCase._id,
+          });
+        } catch {
+          // If not in useCaseIds (old model), fall back to permanent delete
+          await ctx.runMutation(api.useCases.remove, { id: useCase._id });
+          return jsonResponse({ deleted: true, permanent: true });
+        }
+        return jsonResponse({ deleted: false, unlinked: true });
+      }
     }
 
     // DELETE /api/calculations/:shortId
@@ -1003,6 +1287,256 @@ http.route({
     }
 
     return errorResponse("Unknown endpoint", 404);
+  }),
+});
+
+// ============================================================
+// GET /api/companies — List all companies
+// ============================================================
+
+http.route({
+  path: "/api/companies",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    const companies = await ctx.runQuery(api.companies.list);
+    return jsonResponse(companies);
+  }),
+});
+
+// ============================================================
+// POST /api/companies — Create company
+// ============================================================
+
+http.route({
+  path: "/api/companies",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const body = await parseBody<{
+      name?: string;
+      industry?: string;
+      employeeCount?: number;
+    }>(request);
+
+    if (!body?.name) {
+      return errorResponse("name is required");
+    }
+
+    const result = await ctx.runMutation(api.companies.create, {
+      name: body.name,
+      industry: body.industry,
+      employeeCount: body.employeeCount,
+    });
+
+    const company = await ctx.runQuery(api.companies.getByShortId, { shortId: result.shortId });
+    return jsonResponse(company, 201);
+  }),
+});
+
+// ============================================================
+// GET /api/companies/:shortId and /api/companies/:shortId/aggregate
+// ============================================================
+
+http.route({
+  pathPrefix: "/api/companies/",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    // GET /api/companies/:shortId/aggregate
+    const aggregateMatch = path.match(/^\/api\/companies\/([a-z0-9]+)\/aggregate$/);
+    if (aggregateMatch) {
+      const shortId = aggregateMatch[1]!;
+      const company = await ctx.runQuery(api.companies.getByShortId, { shortId });
+      if (!company) return errorResponse("Company not found", 404);
+
+      const calculations = await ctx.runQuery(api.calculations.listByCompany, { companyId: company._id });
+
+      let totalAnnualValue = 0;
+      let totalProposedSpend = 0;
+      let totalHoursSavedPerMonth = 0;
+      const dimensionTotals: Record<string, number> = {};
+      const calculatorSummaries = [];
+
+      for (const calc of calculations) {
+        const valueItems = await ctx.runQuery(api.valueItems.listByCalculation, { calculationId: calc._id });
+        const summary = computeSummary(
+          valueItems as any,
+          calc.assumptions,
+          calc.currentSpend,
+          calc.proposedSpend
+        );
+
+        totalAnnualValue += summary.totalAnnualValue;
+        totalProposedSpend += calc.proposedSpend ?? 0;
+        totalHoursSavedPerMonth += summary.hoursSavedPerMonth;
+
+        for (const dt of summary.dimensionTotals) {
+          dimensionTotals[dt.dimension] = (dimensionTotals[dt.dimension] ?? 0) + dt.total;
+        }
+
+        calculatorSummaries.push({
+          shortId: calc.shortId,
+          name: calc.name,
+          role: calc.role,
+          totalAnnualValue: summary.totalAnnualValue,
+          roiMultiple: summary.roiMultiple,
+          hoursSavedPerMonth: summary.hoursSavedPerMonth,
+          valueItemCount: valueItems.length,
+          updatedAt: calc.updatedAt,
+        });
+      }
+
+      const dims = ["revenue_impact", "speed_cycle_time", "productivity", "cost_avoidance", "risk_quality"];
+      const dimLabels: Record<string, string> = {
+        revenue_impact: "Revenue Impact",
+        speed_cycle_time: "Speed / Cycle Time",
+        productivity: "Productivity",
+        cost_avoidance: "Cost Avoidance",
+        risk_quality: "Risk & Quality",
+      };
+      const dimColors: Record<string, string> = {
+        revenue_impact: "#10B981",
+        speed_cycle_time: "#3B82F6",
+        productivity: "#FF4A00",
+        cost_avoidance: "#8B5CF6",
+        risk_quality: "#EF4444",
+      };
+
+      return jsonResponse({
+        company,
+        totalAnnualValue: Math.round(totalAnnualValue),
+        totalROI: totalProposedSpend > 0 ? Math.round((totalAnnualValue / totalProposedSpend) * 100) / 100 : null,
+        totalHoursSavedPerMonth: Math.round(totalHoursSavedPerMonth),
+        calculatorCount: calculations.length,
+        dimensionTotals: dims.map((d) => ({
+          dimension: d,
+          label: dimLabels[d],
+          total: Math.round(dimensionTotals[d] ?? 0),
+          color: dimColors[d],
+          percentage: totalAnnualValue > 0 ? Math.round(((dimensionTotals[d] ?? 0) / totalAnnualValue) * 100) : 0,
+        })),
+        calculators: calculatorSummaries,
+      });
+    }
+
+    // GET /api/companies/:shortId/use-cases
+    const ucMatch = path.match(/^\/api\/companies\/([a-z0-9]+)\/use-cases$/);
+    if (ucMatch) {
+      const shortId = ucMatch[1]!;
+      const company = await ctx.runQuery(api.companies.getByShortId, { shortId });
+      if (!company) return errorResponse("Company not found", 404);
+
+      const useCases = await ctx.runQuery(api.useCases.listByCompany, { companyId: company._id });
+      const calculations = await ctx.runQuery(api.calculations.listByCompany, { companyId: company._id });
+
+      // Build a map of calculationId → calc shortId/name for source info
+      const calcMap = new Map(calculations.map((c) => [c._id, { shortId: c.shortId, name: c.name }]));
+
+      // For each use case, get linked value items and compute total value
+      const results = [];
+      for (const uc of useCases) {
+        // Get value items linked to this use case from its source calculator
+        const sourceItems = await ctx.runQuery(api.valueItems.listByCalculation, { calculationId: uc.calculationId });
+        const linkedItems = sourceItems.filter((vi) => vi.useCaseId === uc._id);
+        const totalValue = linkedItems.reduce((sum, vi) => sum + computeItemValue(vi as any), 0);
+
+        // Which calculations reference this use case?
+        const referencedBy = calculations
+          .filter((c) => c.useCaseIds?.includes(uc._id))
+          .map((c) => ({ shortId: c.shortId, name: c.name }));
+
+        const source = calcMap.get(uc.calculationId);
+        results.push({
+          _id: uc._id,
+          shortId: uc.shortId,
+          name: uc.name,
+          department: uc.department,
+          status: uc.status,
+          implementationEffort: uc.implementationEffort,
+          description: uc.description,
+          valueItemCount: linkedItems.length,
+          totalAnnualValue: Math.round(totalValue),
+          sourceCalculator: source ?? null,
+          referencedByCalculators: referencedBy,
+        });
+      }
+
+      return jsonResponse({
+        company: { shortId: company.shortId, name: company.name },
+        useCases: results,
+        totalUseCases: results.length,
+      });
+    }
+
+    // GET /api/companies/:shortId
+    const companyMatch = path.match(/^\/api\/companies\/([a-z0-9]+)$/);
+    if (companyMatch) {
+      const shortId = companyMatch[1]!;
+      const company = await ctx.runQuery(api.companies.getByShortId, { shortId });
+      if (!company) return errorResponse("Company not found", 404);
+
+      const calculations = await ctx.runQuery(api.calculations.listByCompany, { companyId: company._id });
+      return jsonResponse({ company, calculations });
+    }
+
+    return errorResponse("Unknown endpoint", 404);
+  }),
+});
+
+// ============================================================
+// PUT /api/companies/:shortId
+// ============================================================
+
+http.route({
+  pathPrefix: "/api/companies/",
+  method: "PUT",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    const companyMatch = path.match(/^\/api\/companies\/([a-z0-9]+)$/);
+    if (!companyMatch) return errorResponse("Unknown endpoint", 404);
+
+    const shortId = companyMatch[1]!;
+    const company = await ctx.runQuery(api.companies.getByShortId, { shortId });
+    if (!company) return errorResponse("Company not found", 404);
+
+    const body = await parseBody<Record<string, unknown>>(request);
+    if (!body) return errorResponse("Invalid JSON body");
+
+    await ctx.runMutation(api.companies.update, {
+      id: company._id,
+      ...(body.name !== undefined && { name: String(body.name) }),
+      ...(body.industry !== undefined && { industry: String(body.industry) }),
+      ...(body.employeeCount !== undefined && { employeeCount: Number(body.employeeCount) }),
+    });
+
+    const updated = await ctx.runQuery(api.companies.getByShortId, { shortId });
+    return jsonResponse(updated);
+  }),
+});
+
+// ============================================================
+// DELETE /api/companies/:shortId
+// ============================================================
+
+http.route({
+  pathPrefix: "/api/companies/",
+  method: "DELETE",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    const companyMatch = path.match(/^\/api\/companies\/([a-z0-9]+)$/);
+    if (!companyMatch) return errorResponse("Unknown endpoint", 404);
+
+    const shortId = companyMatch[1]!;
+    const company = await ctx.runQuery(api.companies.getByShortId, { shortId });
+    if (!company) return errorResponse("Company not found", 404);
+
+    await ctx.runMutation(api.companies.remove, { id: company._id });
+    return jsonResponse({ deleted: true });
   }),
 });
 

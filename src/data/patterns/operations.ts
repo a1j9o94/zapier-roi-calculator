@@ -23,6 +23,18 @@ export const OPERATIONS_PATTERNS: PatternTemplate[] = [
       "500 orders/month, 30 min to 5 min processing at $45/hr = $56.7K/year.",
     commonApps: ["Shopify", "Google Sheets", "Slack", "Airtable"],
     tags: ["orders", "fulfillment", "processing", "routing"],
+    zapBundle: {
+      zaps: [{
+        title: "Order Processing Automation",
+        description: "Route orders from intake to fulfillment",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "New Order Received", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Validate & Enrich Order", type: "action" },
+          { app: "Google Sheets", action: "create_spreadsheet_row", stepTitle: "Log Order", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Notify Fulfillment Team", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "ops-inventory-alerts",
@@ -41,6 +53,18 @@ export const OPERATIONS_PATTERNS: PatternTemplate[] = [
       "24 stockouts/year, $3K avg cost, 40% prevention = $28.8K/year.",
     commonApps: ["Shopify", "Airtable", "Slack", "Gmail"],
     tags: ["inventory", "stock", "alerts", "reorder", "supply"],
+    zapBundle: {
+      zaps: [{
+        title: "Inventory Stock Alerts",
+        description: "Monitor inventory levels and alert on low stock",
+        steps: [
+          { app: "Schedule by Zapier", action: "every_hour", stepTitle: "Hourly Stock Check", type: "trigger" },
+          { app: "Google Sheets", action: "lookup_row", stepTitle: "Check Inventory Levels", type: "search" },
+          { app: "Filter by Zapier", action: "filter", stepTitle: "Filter Below Threshold", type: "filter" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Alert Ops Team", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "ops-data-entry-elimination",
@@ -59,6 +83,17 @@ export const OPERATIONS_PATTERNS: PatternTemplate[] = [
       "800 manual entries/month, 5 min each at $40/hr = $32K/year.",
     commonApps: ["Google Sheets", "Salesforce", "QuickBooks", "Airtable"],
     tags: ["data-entry", "sync", "elimination", "re-keying"],
+    zapBundle: {
+      zaps: [{
+        title: "Cross-System Data Entry Elimination",
+        description: "Auto-sync data between systems to eliminate re-keying",
+        steps: [
+          { app: "Google Sheets", action: "new_spreadsheet_row", stepTitle: "New Row in Source Sheet", type: "trigger" },
+          { app: "Formatter by Zapier", action: "text", stepTitle: "Format Data for Destination", type: "action" },
+          { app: "Salesforce", action: "create_record", stepTitle: "Create Record in CRM", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "ops-quality-checks",
@@ -78,6 +113,18 @@ export const OPERATIONS_PATTERNS: PatternTemplate[] = [
       "1K processes/month, 4% defect rate, $100/defect, 65% reduction = $31.2K/year.",
     commonApps: ["Airtable", "Google Sheets", "Slack", "Email"],
     tags: ["quality", "checks", "defects", "consistency"],
+    zapBundle: {
+      zaps: [{
+        title: "Automated Quality Check Workflow",
+        description: "Run quality checks and flag deviations",
+        steps: [
+          { app: "Schedule by Zapier", action: "every_day", stepTitle: "Daily Quality Check", type: "trigger" },
+          { app: "Google Sheets", action: "lookup_row", stepTitle: "Query Process Outputs", type: "search" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Apply Quality Rules", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Report Deviations", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "ops-labor-avoidance",
@@ -95,6 +142,18 @@ export const OPERATIONS_PATTERNS: PatternTemplate[] = [
       "2 FTEs avoided at $80K/year each = $160K/year.",
     commonApps: ["Webhooks", "Zapier Tables", "Slack", "Code by Zapier"],
     tags: ["scaling", "headcount", "labor", "growth"],
+    zapBundle: {
+      zaps: [{
+        title: "Volume Handling Automation",
+        description: "Handle growing volume without additional headcount",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "Incoming Request", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Process & Route", type: "action" },
+          { app: "Zapier Tables", action: "create_record", stepTitle: "Log & Track", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Alert Only on Exceptions", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "ops-vendor-communication",
@@ -113,5 +172,16 @@ export const OPERATIONS_PATTERNS: PatternTemplate[] = [
       "100 vendor communications/month, 3hr delay at $45/hr = $162K/year.",
     commonApps: ["Gmail", "Google Sheets", "Slack", "Airtable"],
     tags: ["vendors", "communication", "purchase-orders", "handoffs"],
+    zapBundle: {
+      zaps: [{
+        title: "Vendor Communication Automation",
+        description: "Auto-send POs and status updates to vendors",
+        steps: [
+          { app: "Google Sheets", action: "new_spreadsheet_row", stepTitle: "New PO Created", type: "trigger" },
+          { app: "Gmail", action: "send_email", stepTitle: "Send PO to Vendor", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Notify Procurement Team", type: "action" },
+        ],
+      }],
+    },
   },
 ];

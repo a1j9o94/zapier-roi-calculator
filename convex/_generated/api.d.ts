@@ -9,9 +9,12 @@
  */
 
 import type * as calculations from "../calculations.js";
+import type * as companies from "../companies.js";
 import type * as http from "../http.js";
+import type * as migrations from "../migrations.js";
 import type * as useCases from "../useCases.js";
 import type * as valueItems from "../valueItems.js";
+import type * as zapRunCache from "../zapRunCache.js";
 
 import type {
   ApiFromModules,
@@ -21,9 +24,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   calculations: typeof calculations;
+  companies: typeof companies;
   http: typeof http;
+  migrations: typeof migrations;
   useCases: typeof useCases;
   valueItems: typeof valueItems;
+  zapRunCache: typeof zapRunCache;
 }>;
 
 /**

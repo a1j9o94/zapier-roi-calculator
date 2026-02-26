@@ -2,10 +2,21 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  // Companies — groups of related calculators
+  companies: defineTable({
+    name: v.string(),
+    shortId: v.string(),
+    industry: v.optional(v.string()),
+    employeeCount: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_shortId", ["shortId"]),
+
   // ROI Calculation (root document)
   calculations: defineTable({
     name: v.string(),
     shortId: v.string(),
+    companyId: v.optional(v.id("companies")),
     createdAt: v.number(),
     updatedAt: v.number(),
 
@@ -44,6 +55,9 @@ export default defineSchema({
     // Role-based view
     role: v.optional(v.string()),
     priorityOrder: v.optional(v.array(v.string())),
+
+    // Referenced use case IDs (company-scoped sharing)
+    useCaseIds: v.optional(v.array(v.id("useCases"))),
   }).index("by_shortId", ["shortId"]),
 
   // Value Items — archetype-driven
@@ -74,9 +88,10 @@ export default defineSchema({
     .index("by_calculationId", ["calculationId"])
     .index("by_shortId", ["shortId"]),
 
-  // Use Cases — enhanced with architecture
+  // Use Cases — enhanced with architecture (company-scoped)
   useCases: defineTable({
-    calculationId: v.id("calculations"),
+    calculationId: v.id("calculations"), // Original creator (backward compat)
+    companyId: v.optional(v.id("companies")), // Company scope for sharing
     shortId: v.optional(v.string()),
 
     name: v.string(),
@@ -155,6 +170,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_calculationId", ["calculationId"])
+    .index("by_companyId", ["companyId"])
     .index("by_shortId", ["shortId"]),
 
   // Zap Run Cache — for Value Realized dashboard

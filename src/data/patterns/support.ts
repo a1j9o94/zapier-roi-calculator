@@ -23,6 +23,17 @@ export const SUPPORT_PATTERNS: PatternTemplate[] = [
       "2K tickets/month, 15 min to 2 min triage at $35/hr = $18.5K/year.",
     commonApps: ["Zendesk", "Intercom", "Slack", "Jira"],
     tags: ["tickets", "triage", "priority", "routing", "classification"],
+    zapBundle: {
+      zaps: [{
+        title: "Ticket Auto-Triage & Routing",
+        description: "Classify and route tickets by category and urgency",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "New Ticket Created", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Classify by Keywords & Sentiment", type: "action" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Route to Appropriate Queue", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "support-csat-followup",
@@ -41,6 +52,17 @@ export const SUPPORT_PATTERNS: PatternTemplate[] = [
       "500 surveys/month, 5 min manual follow-up at $35/hr = $17.5K/year.",
     commonApps: ["Typeform", "Zendesk", "Slack", "Gmail"],
     tags: ["csat", "nps", "surveys", "follow-up", "escalation"],
+    zapBundle: {
+      zaps: [{
+        title: "CSAT Survey & Follow-Up",
+        description: "Auto-send satisfaction surveys and escalate low scores",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "Ticket Resolved", type: "trigger" },
+          { app: "Gmail", action: "send_email", stepTitle: "Send CSAT Survey", type: "action" },
+          { app: "Zapier Tables", action: "create_record", stepTitle: "Log Response", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "support-knowledge-surfacing",
@@ -63,6 +85,17 @@ export const SUPPORT_PATTERNS: PatternTemplate[] = [
       "500 KB searches avoided/month, 8 min each at $35/hr = $28K/year.",
     commonApps: ["Zendesk", "Notion", "Intercom", "Slack"],
     tags: ["knowledge-base", "kb", "articles", "deflection", "self-service"],
+    zapBundle: {
+      zaps: [{
+        title: "KB Article Auto-Suggest",
+        description: "Surface relevant KB articles when tickets are created",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "New Ticket Created", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Search KB for Matches", type: "action" },
+          { app: "Slack", action: "send_direct_message", stepTitle: "Send Suggested Articles to Agent", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "support-escalation-workflow",
@@ -81,6 +114,18 @@ export const SUPPORT_PATTERNS: PatternTemplate[] = [
       "50 SLA breaches/year, $2K avg penalty/impact, 60% reduction = $60K/year.",
     commonApps: ["Zendesk", "PagerDuty", "Slack", "Jira"],
     tags: ["escalation", "sla", "breach", "management", "priority"],
+    zapBundle: {
+      zaps: [{
+        title: "SLA Breach Prevention & Escalation",
+        description: "Auto-escalate tickets approaching SLA breach",
+        steps: [
+          { app: "Schedule by Zapier", action: "every_15_min", stepTitle: "Check SLA Status", type: "trigger" },
+          { app: "Zapier Tables", action: "find_records", stepTitle: "Query Tickets Near SLA Breach", type: "search" },
+          { app: "Filter by Zapier", action: "filter", stepTitle: "Filter Approaching Breach", type: "filter" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Escalate to Manager", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "support-customer-health",
@@ -99,6 +144,18 @@ export const SUPPORT_PATTERNS: PatternTemplate[] = [
       "$5M ARR, 5% at-risk churn, 30% save rate = $75K/year saved.",
     commonApps: ["Intercom", "Salesforce", "Slack", "Webhooks"],
     tags: ["health-score", "churn", "retention", "csm", "alerts"],
+    zapBundle: {
+      zaps: [{
+        title: "Customer Health Score Alerting",
+        description: "Monitor usage signals and alert on churn risk",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "Usage Signal Received", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Calculate Health Score", type: "action" },
+          { app: "Filter by Zapier", action: "filter", stepTitle: "Filter Below Threshold", type: "filter" },
+          { app: "Slack", action: "send_channel_message", stepTitle: "Alert CSM of At-Risk Customer", type: "action" },
+        ],
+      }],
+    },
   },
   {
     id: "support-error-reduction",
@@ -117,5 +174,17 @@ export const SUPPORT_PATTERNS: PatternTemplate[] = [
       "100 response errors/month, $50 avg rework cost, 65% reduction = $39K/year.",
     commonApps: ["Zendesk", "Intercom", "Code by Zapier", "Slack"],
     tags: ["errors", "templates", "quality", "response-validation"],
+    zapBundle: {
+      zaps: [{
+        title: "Response Quality Checker",
+        description: "Validate agent responses before sending",
+        steps: [
+          { app: "Webhooks by Zapier", action: "catch_hook", stepTitle: "Agent Response Drafted", type: "trigger" },
+          { app: "Code by Zapier", action: "run_javascript", stepTitle: "Validate Against Templates", type: "action" },
+          { app: "Filter by Zapier", action: "filter", stepTitle: "Flag Deviations", type: "filter" },
+          { app: "Slack", action: "send_direct_message", stepTitle: "Notify Agent of Issue", type: "action" },
+        ],
+      }],
+    },
   },
 ];

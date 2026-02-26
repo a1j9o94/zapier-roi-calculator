@@ -7,6 +7,8 @@
 import type { Archetype, Dimension } from "../types/roi";
 import { ARCHETYPE_DIMENSION } from "../types/roi";
 import { generatePrefillUrl } from "./zapier-api";
+import { ALL_PATTERNS } from "../data/patterns/index";
+import type { ZapBundleConfig } from "./zap-template-generator";
 
 // ============================================================
 // Types
@@ -866,4 +868,45 @@ export function recommendZapArchitecture(
 
     return recommendation;
   });
+}
+
+// ============================================================
+// Template lookup functions
+// ============================================================
+
+/**
+ * Get Zap bundle configs for a given pattern ID.
+ * Returns the zapBundle.zaps as ZapBundleConfig[] if the pattern has one.
+ */
+export function getTemplateForPattern(
+  patternId: string,
+): ZapBundleConfig[] | undefined {
+  const pattern = ALL_PATTERNS.find((p) => p.id === patternId);
+  if (!pattern?.zapBundle) return undefined;
+
+  return pattern.zapBundle.zaps.map((zap) => ({
+    title: zap.title,
+    description: zap.description,
+    steps: zap.steps,
+  }));
+}
+
+/**
+ * Get all Zap bundle configs for patterns matching a given archetype.
+ * Aggregates zapBundle.zaps across all matching patterns.
+ */
+export function getTemplatesForArchetype(
+  archetype: Archetype,
+): ZapBundleConfig[] {
+  const patterns = ALL_PATTERNS.filter(
+    (p) => p.archetype === archetype && p.zapBundle,
+  );
+
+  return patterns.flatMap((p) =>
+    (p.zapBundle?.zaps ?? []).map((zap) => ({
+      title: zap.title,
+      description: zap.description,
+      steps: zap.steps,
+    })),
+  );
 }

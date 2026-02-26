@@ -35,10 +35,63 @@ const VALID_ARCHETYPES = Object.keys(ARCHETYPE_DIMENSIONS);
 export const listByCalculation = query({
   args: { calculationId: v.id("calculations") },
   handler: async (ctx, args) => {
+    const calculation = await ctx.db.get(args.calculationId);
+
+    // If calculation has useCaseIds, collect value items from those use cases
+    // plus any unlinked items that belong directly to this calculation
+    if (calculation?.useCaseIds && calculation.useCaseIds.length > 0) {
+      const useCaseIdSet = new Set(calculation.useCaseIds);
+
+      // Get all value items for this calculation (includes unlinked items)
+      const directItems = await ctx.db
+        .query("valueItems")
+        .withIndex("by_calculationId", (q) => q.eq("calculationId", args.calculationId))
+        .collect();
+
+      // Get value items linked to shared use cases (may be on a different calculationId)
+      const useCaseItems: typeof directItems = [];
+      for (const ucId of calculation.useCaseIds) {
+        // Value items linked to this use case might have a different calculationId
+        // (they belong to the use case's original calculator but are shared here)
+        const useCase = await ctx.db.get(ucId);
+        if (useCase && useCase.calculationId !== args.calculationId) {
+          const items = await ctx.db
+            .query("valueItems")
+            .withIndex("by_calculationId", (q) => q.eq("calculationId", useCase.calculationId))
+            .collect();
+          for (const item of items) {
+            if (item.useCaseId && useCaseIdSet.has(item.useCaseId)) {
+              useCaseItems.push(item);
+            }
+          }
+        }
+      }
+
+      // Combine: direct items + shared use case items (dedup by _id)
+      const seenIds = new Set(directItems.map((i) => i._id));
+      const combined = [...directItems];
+      for (const item of useCaseItems) {
+        if (!seenIds.has(item._id)) {
+          combined.push(item);
+          seenIds.add(item._id);
+        }
+      }
+
+      return combined;
+    }
+
+    // Fallback: old model
     return await ctx.db
       .query("valueItems")
       .withIndex("by_calculationId", (q) => q.eq("calculationId", args.calculationId))
       .collect();
+  },
+});
+
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("valueItems").collect();
   },
 });
 

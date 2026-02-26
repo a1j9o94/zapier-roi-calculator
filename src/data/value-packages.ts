@@ -17,6 +17,8 @@ export interface ValuePackagePattern {
   name: string;
   description: string;
   estimatedAnnualValue: number;
+  zapCount?: number;
+  keyApps?: string[];
 }
 
 export interface ValuePackage {
@@ -55,6 +57,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Automated Lead Routing & Assignment",
         description: "Route inbound leads to the right rep instantly",
         estimatedAnnualValue: 500000,
+        zapCount: 1,
+        keyApps: ["Salesforce", "Slack", "Filter by Zapier"],
       },
       {
         patternId: "sales-renewal-capture",
@@ -62,6 +66,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Renewal & Dunning Automation",
         description: "Catch expiring subscriptions before they churn",
         estimatedAnnualValue: 90000,
+        zapCount: 1,
+        keyApps: ["Stripe", "Gmail", "Filter by Zapier", "Salesforce"],
       },
       {
         patternId: "sales-crm-data-entry",
@@ -69,6 +75,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "CRM Data Entry Elimination",
         description: "Free reps from manual CRM logging",
         estimatedAnnualValue: 21600,
+        zapCount: 2,
+        keyApps: ["Gmail", "HubSpot", "Google Calendar", "Salesforce"],
       },
       {
         patternId: "sales-deal-alerts",
@@ -76,6 +84,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Deal Stage Progression Alerts",
         description: "Keep pipeline momentum with real-time alerts",
         estimatedAnnualValue: 200000,
+        zapCount: 1,
+        keyApps: ["HubSpot", "Slack", "Gmail"],
       },
     ],
     narrative:
@@ -102,6 +112,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Lead Nurture Sequence Automation",
         description: "Auto-enroll leads based on behavior signals",
         estimatedAnnualValue: 160000,
+        zapCount: 1,
+        keyApps: ["HubSpot", "Gmail", "Slack", "Filter by Zapier"],
       },
       {
         patternId: "mktg-form-to-crm",
@@ -109,6 +121,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Form Capture to CRM Pipeline",
         description: "Route submissions with enrichment and scoring",
         estimatedAnnualValue: 15000,
+        zapCount: 1,
+        keyApps: ["Typeform", "HubSpot", "Formatter by Zapier", "Slack"],
       },
       {
         patternId: "mktg-campaign-attribution",
@@ -116,6 +130,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Campaign Attribution Sync",
         description: "Keep attribution data clean across platforms",
         estimatedAnnualValue: 45000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Formatter by Zapier", "Google Sheets", "HubSpot"],
       },
       {
         patternId: "mktg-content-distribution",
@@ -123,6 +139,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Content Distribution Workflow",
         description: "Auto-distribute content across all channels",
         estimatedAnnualValue: 13200,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Slack", "Zapier Tables"],
       },
     ],
     narrative:
@@ -149,6 +167,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Employee Onboarding Provisioning",
         description: "Auto-provision accounts on new hire",
         estimatedAnnualValue: 20300,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Slack"],
       },
       {
         patternId: "it-deprovisioning",
@@ -156,6 +176,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Offboarding & Access Revocation",
         description: "Auto-revoke access on termination",
         estimatedAnnualValue: 90000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Slack", "Gmail"],
       },
       {
         patternId: "it-tool-consolidation",
@@ -163,6 +185,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Tool Sprawl Consolidation",
         description: "Replace standalone middleware tools",
         estimatedAnnualValue: 36000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Zapier Tables"],
       },
       {
         patternId: "it-data-sync",
@@ -170,6 +194,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Cross-System Data Synchronization",
         description: "Keep data consistent across all systems",
         estimatedAnnualValue: 72000,
+        zapCount: 2,
+        keyApps: ["Salesforce", "HubSpot", "Code by Zapier", "Zapier Tables"],
       },
     ],
     narrative:
@@ -196,6 +222,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Month-End Close Acceleration",
         description: "Cut close time by 50-60%",
         estimatedAnnualValue: 40300,
+        zapCount: 1,
+        keyApps: ["Schedule by Zapier", "Google Sheets", "Code by Zapier", "Slack"],
       },
       {
         patternId: "finance-ap-automation",
@@ -203,6 +231,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Accounts Payable Processing",
         description: "Auto-capture and route invoices",
         estimatedAnnualValue: 27000,
+        zapCount: 1,
+        keyApps: ["Gmail", "Formatter by Zapier", "Google Sheets", "Slack"],
       },
       {
         patternId: "finance-revenue-rec",
@@ -210,6 +240,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Revenue Recognition Automation",
         description: "Eliminate rev rec errors",
         estimatedAnnualValue: 63000,
+        zapCount: 1,
+        keyApps: ["Salesforce", "Code by Zapier", "Google Sheets", "Slack"],
       },
       {
         patternId: "finance-expense-compliance",
@@ -217,6 +249,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Expense Policy Compliance",
         description: "Auto-flag policy violations",
         estimatedAnnualValue: 39600,
+        zapCount: 1,
+        keyApps: ["Schedule by Zapier", "Google Sheets", "Filter by Zapier", "Gmail"],
       },
     ],
     narrative:
@@ -243,6 +277,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "New Hire Onboarding Workflow",
         description: "Automated onboarding checklist execution",
         estimatedAnnualValue: 45000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Gmail", "Google Sheets", "Slack"],
       },
       {
         patternId: "hr-offboarding",
@@ -250,6 +286,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Employee Offboarding Automation",
         description: "Consistent, secure offboarding every time",
         estimatedAnnualValue: 12600,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Zapier Tables", "Slack", "Gmail"],
       },
       {
         patternId: "hr-pto-tracking",
@@ -257,6 +295,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "PTO & Leave Management Automation",
         description: "Sync leave requests across systems",
         estimatedAnnualValue: 9000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Google Calendar", "Slack"],
       },
       {
         patternId: "hr-compliance-training",
@@ -264,6 +304,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Compliance Training Tracking",
         description: "Auto-enroll and track required training",
         estimatedAnnualValue: 25000,
+        zapCount: 1,
+        keyApps: ["Schedule by Zapier", "Google Sheets", "Filter by Zapier", "Gmail"],
       },
     ],
     narrative:
@@ -290,6 +332,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "CI/CD Pipeline Notifications",
         description: "Real-time build and deploy alerts",
         estimatedAnnualValue: 31200,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Filter by Zapier", "Slack"],
       },
       {
         patternId: "eng-incident-response",
@@ -297,6 +341,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Incident Response Orchestration",
         description: "Auto-create channels and page on-call",
         estimatedAnnualValue: 54000,
+        zapCount: 2,
+        keyApps: ["Webhooks by Zapier", "Slack", "Google Sheets"],
       },
       {
         patternId: "eng-issue-tracking-sync",
@@ -304,6 +350,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Issue Tracking Cross-Sync",
         description: "Keep Jira, GitHub, and Linear in sync",
         estimatedAnnualValue: 26400,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier"],
       },
       {
         patternId: "eng-pr-review-workflow",
@@ -311,6 +359,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "PR Review & Merge Automation",
         description: "Faster code review cycles",
         estimatedAnnualValue: 316800,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Slack"],
       },
     ],
     narrative:
@@ -337,6 +387,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Ticket Auto-Triage & Priority Assignment",
         description: "Classify and route tickets instantly",
         estimatedAnnualValue: 18500,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Slack"],
       },
       {
         patternId: "support-knowledge-surfacing",
@@ -344,6 +396,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Knowledge Base Article Suggestions",
         description: "Surface relevant articles automatically",
         estimatedAnnualValue: 28000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Slack"],
       },
       {
         patternId: "support-escalation-workflow",
@@ -351,6 +405,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Escalation & SLA Management",
         description: "Prevent SLA breaches with auto-escalation",
         estimatedAnnualValue: 60000,
+        zapCount: 1,
+        keyApps: ["Schedule by Zapier", "Zapier Tables", "Filter by Zapier", "Slack"],
       },
       {
         patternId: "support-customer-health",
@@ -358,6 +414,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Customer Health Score Alerting",
         description: "Detect churn risk from usage signals",
         estimatedAnnualValue: 75000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Filter by Zapier", "Slack"],
       },
     ],
     narrative:
@@ -384,6 +442,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Order Processing Automation",
         description: "Route orders from intake to fulfillment",
         estimatedAnnualValue: 56700,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Google Sheets", "Slack"],
       },
       {
         patternId: "ops-labor-avoidance",
@@ -391,6 +451,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Volume Scaling Without Headcount",
         description: "Avoid 2+ FTE hires with automation",
         estimatedAnnualValue: 160000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Zapier Tables", "Slack"],
       },
       {
         patternId: "ops-data-entry-elimination",
@@ -398,6 +460,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Cross-System Data Entry Elimination",
         description: "Stop re-keying data between systems",
         estimatedAnnualValue: 32000,
+        zapCount: 1,
+        keyApps: ["Google Sheets", "Formatter by Zapier", "Salesforce"],
       },
       {
         patternId: "ops-quality-checks",
@@ -405,6 +469,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Automated Quality Check Workflows",
         description: "Catch defects before they reach customers",
         estimatedAnnualValue: 31200,
+        zapCount: 1,
+        keyApps: ["Schedule by Zapier", "Google Sheets", "Code by Zapier", "Slack"],
       },
     ],
     narrative:
@@ -431,6 +497,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Cross-System Data Synchronization",
         description: "Consistent data across all systems",
         estimatedAnnualValue: 72000,
+        zapCount: 2,
+        keyApps: ["Salesforce", "HubSpot", "Code by Zapier", "Zapier Tables"],
       },
       {
         patternId: "it-deprovisioning",
@@ -438,6 +506,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Offboarding & Access Revocation",
         description: "Secure access management on exit",
         estimatedAnnualValue: 90000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Code by Zapier", "Slack", "Gmail"],
       },
       {
         patternId: "finance-expense-compliance",
@@ -445,6 +515,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Expense Policy Compliance",
         description: "Auto-enforce spending policies",
         estimatedAnnualValue: 39600,
+        zapCount: 1,
+        keyApps: ["Schedule by Zapier", "Google Sheets", "Filter by Zapier", "Gmail"],
       },
       {
         patternId: "mktg-campaign-attribution",
@@ -452,6 +524,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Campaign Attribution Sync",
         description: "Clean marketing data across platforms",
         estimatedAnnualValue: 45000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Formatter by Zapier", "Google Sheets", "HubSpot"],
       },
     ],
     narrative:
@@ -478,6 +552,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "CRM Data Entry Elimination",
         description: "Free reps from manual CRM logging",
         estimatedAnnualValue: 21600,
+        zapCount: 2,
+        keyApps: ["Gmail", "HubSpot", "Google Calendar", "Salesforce"],
       },
       {
         patternId: "mktg-form-to-crm",
@@ -485,6 +561,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "Form Capture to CRM Pipeline",
         description: "Route form submissions automatically",
         estimatedAnnualValue: 15000,
+        zapCount: 1,
+        keyApps: ["Typeform", "HubSpot", "Formatter by Zapier", "Slack"],
       },
       {
         patternId: "hr-pto-tracking",
@@ -492,6 +570,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "PTO & Leave Management Automation",
         description: "Auto-sync leave across systems",
         estimatedAnnualValue: 9000,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Google Calendar", "Slack"],
       },
       {
         patternId: "support-csat-followup",
@@ -499,6 +579,8 @@ export const VALUE_PACKAGES: ValuePackage[] = [
         name: "CSAT Survey & Follow-Up Automation",
         description: "Automated post-interaction surveys",
         estimatedAnnualValue: 17500,
+        zapCount: 1,
+        keyApps: ["Webhooks by Zapier", "Gmail", "Zapier Tables"],
       },
     ],
     narrative:

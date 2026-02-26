@@ -55,6 +55,7 @@ export const create = mutation({
     priorityOrder: v.optional(v.array(v.string())),
     currentSpend: v.optional(v.number()),
     proposedSpend: v.optional(v.number()),
+    companyId: v.optional(v.id("companies")),
     assumptions: v.optional(
       v.object({
         projectionYears: v.number(),
@@ -97,6 +98,7 @@ export const create = mutation({
       priorityOrder: args.priorityOrder,
       currentSpend: args.currentSpend,
       proposedSpend: args.proposedSpend,
+      companyId: args.companyId,
       talkingPoints: [
         "Automation delivers measurable value across 5 dimensions",
         "ROI projections use conservative realization estimates",
@@ -192,6 +194,27 @@ export const updateRole = mutation({
     await ctx.db.patch(args.id, {
       role: args.role,
       priorityOrder: args.priorityOrder,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const listByCompany = query({
+  args: { companyId: v.id("companies") },
+  handler: async (ctx, { companyId }) => {
+    const all = await ctx.db.query("calculations").order("desc").collect();
+    return all.filter((c) => c.companyId === companyId);
+  },
+});
+
+export const updateCompanyId = mutation({
+  args: {
+    id: v.id("calculations"),
+    companyId: v.optional(v.id("companies")),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      companyId: args.companyId,
       updatedAt: Date.now(),
     });
   },

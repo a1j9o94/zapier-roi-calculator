@@ -19,6 +19,21 @@ import { SUPPORT_PATTERNS } from "./support";
 // Shared types
 // ============================================================
 
+export interface ZapBundleStepDef {
+  app: string;
+  action: string;
+  stepTitle: string;
+  type: "trigger" | "action" | "search" | "filter";
+}
+
+export interface ZapBundleDef {
+  zaps: Array<{
+    title: string;
+    description: string;
+    steps: ZapBundleStepDef[];
+  }>;
+}
+
 export interface PatternTemplate {
   id: string;
   name: string;
@@ -30,6 +45,7 @@ export interface PatternTemplate {
   exampleScenario: string;
   commonApps: string[];
   tags: string[];
+  zapBundle?: ZapBundleDef;
 }
 
 // ============================================================

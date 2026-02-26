@@ -33,3 +33,13 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Finder (MacOS) folder config
 .DS_Store
 .vercel
+
+# Tooling directories
+.playwright-mcp/
+.beads/
+.letta/
+.claude/
+
+# Screenshots (keep src assets)
+*.png
+!src/**/*.png
