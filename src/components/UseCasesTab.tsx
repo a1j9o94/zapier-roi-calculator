@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { UseCaseCard } from "./UseCaseCard";
 import { calculateItemAnnualValue } from "../utils/calculations";
-import { formatCurrencyCompact } from "../utils/formatting";
+import { formatCurrencyCompact, formatPercent } from "../utils/formatting";
+import { computeRealizationSummary, type ZapRunCacheEntry } from "../utils/value-realized";
 
 interface UseCasesTabProps {
   calculation: { _id: any; companyId?: Id<"companies">; useCaseIds?: Id<"useCases">[] };
@@ -27,6 +28,23 @@ export function UseCasesTab({
   const removeFromCalculation = useMutation(api.useCases.removeFromCalculation);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
+
+  // Fetch zap run cache for realization summary
+  const zapRunCacheRaw = useQuery(api.zapRunCache.getByCalculation, {
+    calculationId: calculation._id,
+  });
+  const zapRunCache: ZapRunCacheEntry[] = (zapRunCacheRaw ?? []).map((entry) => ({
+    zapId: entry.zapId,
+    useCaseId: entry.useCaseId,
+    totalRuns: entry.totalRuns,
+    runsLast30Days: entry.runsLast30Days,
+    runsLast7Days: entry.runsLast7Days,
+    successfulRuns: entry.successfulRuns,
+    failedRuns: entry.failedRuns,
+    lastRunAt: entry.lastRunAt,
+    fetchedAt: entry.fetchedAt,
+  }));
+  const summary = computeRealizationSummary(useCases, valueItems, zapRunCache);
 
   // Fetch all company use cases when company exists
   const companyUseCases = useQuery(
@@ -121,6 +139,25 @@ export function UseCasesTab({
         </span>
       </div>
 
+      {/* Value Realized Aggregate */}
+      {summary.hasAnyRunData && (
+        <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[#FF4A00]">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span className="text-sm font-medium">Value Realized</span>
+          </div>
+          <div className="flex items-center gap-4 text-sm">
+            <span>Projected: <strong className="font-mono">{formatCurrencyCompact(summary.projectedAnnualValue)}</strong></span>
+            <span>Realized: <strong className="font-mono">{formatCurrencyCompact(summary.realizedAnnualValue)}</strong></span>
+            <span className={`font-mono font-medium ${summary.overallRealizationRate >= 0.8 ? "text-green-600" : summary.overallRealizationRate >= 0.5 ? "text-yellow-600" : "text-red-600"}`}>
+              {formatPercent(summary.overallRealizationRate)}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Use Case Cards */}
       {sortedUseCases.length === 0 ? (
         <Card>
@@ -152,6 +189,7 @@ export function UseCasesTab({
               onToggleExpand={() => handleToggleExpand(useCase._id)}
               isShared={isSharedUseCase(useCase)}
               onRemoveFromCalculation={() => handleRemoveFromCalculation(useCase._id)}
+              zapRunCache={zapRunCache}
             />
           ))}
 
