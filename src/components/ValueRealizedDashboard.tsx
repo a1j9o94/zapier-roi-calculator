@@ -5,6 +5,7 @@ import type { Calculation, ValueItem, UseCase } from "../types/roi";
 import {
   computeRealizationSummary,
   HEALTH_STATUS_INFO,
+  type RealizationSummary,
   type ZapRunCacheEntry,
 } from "../utils/value-realized";
 import {
@@ -341,16 +342,19 @@ export function ValueRealizedDashboard({
               No Zaps Linked Yet
             </h3>
             <p className="text-muted-foreground text-sm max-w-md mx-auto mb-4">
-              Link Zaps to your use cases to start tracking value realization,
+              Link Zaps to your use cases to start tracking value realization.
+              Use the <strong>Automation</strong> button on any use case card,
               or manually enter run data below.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowManualEntry(true)}
-            >
-              Enter Run Data Manually
-            </Button>
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowManualEntry(true)}
+              >
+                Enter Run Data Manually
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -478,6 +482,9 @@ export function ValueRealizedDashboard({
         </Card>
       </div>
 
+      {/* Automation Coverage Summary */}
+      <AutomationCoverageSummary useCases={useCases} realizationSummary={summary} />
+
       {/* Per-Use-Case Table */}
       <Card>
         <CardHeader>
@@ -573,5 +580,87 @@ export function ValueRealizedDashboard({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// ============================================================
+// AutomationCoverageSummary — aggregate of linked Zaps + health
+// ============================================================
+
+function AutomationCoverageSummary({
+  useCases,
+  realizationSummary,
+}: {
+  useCases: UseCase[];
+  realizationSummary: RealizationSummary;
+}) {
+  const totalUseCases = useCases.length;
+  const linkedCount = useCases.filter((uc) =>
+    uc.architecture?.some((a) => a.type === "zap" && a.zapId),
+  ).length;
+  const coveragePct = totalUseCases > 0 ? linkedCount / totalUseCases : 0;
+
+  const healthCounts = realizationSummary.useCases.reduce(
+    (acc, uc) => {
+      if (uc.hasRunData) {
+        acc[uc.healthStatus] = (acc[uc.healthStatus] ?? 0) + 1;
+      }
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          Automation Coverage
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="flex items-center gap-6 flex-wrap">
+          {/* Coverage bar */}
+          <div className="flex-1 min-w-[200px] space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {linkedCount} of {totalUseCases} use cases linked
+              </span>
+              <span className="font-medium font-mono">
+                {formatPercent(coveragePct)}
+              </span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${coveragePct * 100}%`,
+                  backgroundColor: coveragePct >= 0.8 ? "#059669" : coveragePct >= 0.5 ? "#D97706" : "#6B7280",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Health breakdown */}
+          {realizationSummary.hasAnyRunData && (
+            <div className="flex items-center gap-3 text-xs">
+              {(["healthy", "warning", "at_risk"] as const).map((status) => {
+                const count = healthCounts[status] ?? 0;
+                if (count === 0) return null;
+                const info = HEALTH_STATUS_INFO[status];
+                return (
+                  <span
+                    key={status}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full font-medium"
+                    style={{ color: info.color, backgroundColor: info.bgColor }}
+                  >
+                    {count} {info.label}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

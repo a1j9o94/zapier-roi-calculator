@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { UseCaseStatus, ImplementationEffort, UseCaseMetric } from "../types/roi";
 import { USE_CASE_STATUS_INFO, IMPLEMENTATION_EFFORT_INFO } from "../types/roi";
+import type { Archetype } from "../types/roi";
 import { Button } from "@/components/ui/button";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { DebouncedTextarea } from "@/components/ui/debounced-textarea";
@@ -12,6 +14,10 @@ import { generateZapTemplate, downloadTemplate, generatePrefillUrlFromTemplate }
 import type { ZapBundleConfig } from "../utils/zap-template-generator";
 import { calculateItemAnnualValue } from "../utils/calculations";
 import { formatCurrencyCompact } from "../utils/formatting";
+import type { ZapRunCacheEntry } from "../utils/value-realized";
+import { ValueRealizedBadge } from "./ValueRealizedBadge";
+import { ZapPicker } from "./ZapPicker";
+import { ZapTemplateSuggestions } from "./ZapTemplateSuggestions";
 
 interface UseCaseCardProps {
   useCase: any;
@@ -21,9 +27,11 @@ interface UseCaseCardProps {
   onToggleExpand: () => void;
   isShared?: boolean;
   onRemoveFromCalculation?: () => void;
+  zapRunCache?: ZapRunCacheEntry[];
 }
 
-export function UseCaseCard({ useCase, valueItems, readOnly = false, isExpanded = false, onToggleExpand, isShared = false, onRemoveFromCalculation }: UseCaseCardProps) {
+export function UseCaseCard({ useCase, valueItems, readOnly = false, isExpanded = false, onToggleExpand, isShared = false, onRemoveFromCalculation, zapRunCache = [] }: UseCaseCardProps) {
+  const [showZapPicker, setShowZapPicker] = useState(false);
   const updateUseCase = useMutation(api.useCases.update);
   const deleteUseCase = useMutation(api.useCases.remove);
   const statusInfo = USE_CASE_STATUS_INFO[useCase.status as UseCaseStatus] ?? USE_CASE_STATUS_INFO.identified;
@@ -78,12 +86,31 @@ export function UseCaseCard({ useCase, valueItems, readOnly = false, isExpanded 
             </div>
             <h3 className="font-semibold text-lg truncate">{useCase.name}</h3>
           </div>
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             {linkedItemsTotal > 0 && (
               <span className="text-sm font-semibold font-mono text-[#FF4A00]">{formatCurrencyCompact(linkedItemsTotal)}</span>
             )}
             {linkedItems.length > 0 && (
               <span className="text-xs text-muted-foreground">{linkedItems.length} value item{linkedItems.length !== 1 ? "s" : ""}</span>
+            )}
+            <ValueRealizedBadge
+              useCase={useCase}
+              valueItems={valueItems}
+              zapRunCache={zapRunCache}
+            />
+            {!readOnly && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                title="Link automation (Zaps)"
+                onClick={(e) => { e.stopPropagation(); setShowZapPicker(true); }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 mr-1">
+                  <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Automation
+              </Button>
             )}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-5 h-5 transition-transform ${isExpanded ? "rotate-180" : ""}`}>
               <path d="M6 9l6 6 6-6" />
@@ -91,6 +118,10 @@ export function UseCaseCard({ useCase, valueItems, readOnly = false, isExpanded 
           </div>
         </div>
       </CardHeader>
+
+      {showZapPicker && (
+        <ZapPicker useCase={useCase} onClose={() => setShowZapPicker(false)} />
+      )}
 
       {isExpanded && (
         <CardContent className="pt-0 space-y-6">
@@ -231,8 +262,15 @@ export function UseCaseCard({ useCase, valueItems, readOnly = false, isExpanded 
             </div>
           )}
 
-          {/* Zap Templates — from pattern catalog */}
-          <ZapTemplateActions patternId={useCase.patternId} />
+          {/* Zap Templates — from pattern catalog or archetype suggestions */}
+          {useCase.patternId ? (
+            <ZapTemplateActions patternId={useCase.patternId} />
+          ) : linkedItems.length > 0 && (
+            <ZapTemplateSuggestions
+              archetypes={[...new Set(linkedItems.map((i: any) => i.archetype as Archetype).filter(Boolean))]}
+              useCaseName={useCase.name}
+            />
+          )}
 
           {/* Linked Value Items */}
           <div className="space-y-2">
