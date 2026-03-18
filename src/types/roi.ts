@@ -174,22 +174,10 @@ export interface ValueItem {
 // Calculation types
 // ============================================================
 
-export type RateTier = "admin" | "operations" | "salesOps" | "engineering" | "manager" | "executive";
-
-export interface DefaultRates {
-  admin: number;       // $60-80K loaded -> ~$30-40/hr
-  operations: number;  // $80-120K -> ~$40-60/hr
-  salesOps: number;    // $100-140K -> ~$50-70/hr
-  engineering: number; // $150-200K -> ~$75-100/hr
-  manager: number;     // $140-180K -> ~$70-90/hr
-  executive: number;   // $200K+ -> ~$100+/hr
-}
-
 export interface Assumptions {
   projectionYears: number;
   realizationRamp: number[];
   annualGrowthRate: number;
-  defaultRates: DefaultRates;
 }
 
 export interface ObfuscationSettings {
@@ -477,12 +465,4 @@ export const DEFAULT_ASSUMPTIONS: Assumptions = {
   projectionYears: 3,
   realizationRamp: [0.5, 1, 1],
   annualGrowthRate: 0.1,
-  defaultRates: {
-    admin: 35,
-    operations: 50,
-    salesOps: 60,
-    engineering: 88,
-    manager: 80,
-    executive: 105,
-  },
 };

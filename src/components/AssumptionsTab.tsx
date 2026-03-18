@@ -1,6 +1,6 @@
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { RateTier, ValueItem, UseCase } from "../types/roi";
+import type { ValueItem, UseCase } from "../types/roi";
 import { calculateTotalAnnualValue, calculateTotalHoursSaved, calculateFTEEquivalent } from "../utils/calculations";
 import { formatCurrencyCompact } from "../utils/formatting";
 import {
@@ -21,7 +21,6 @@ interface AssumptionsTabProps {
       projectionYears: number;
       realizationRamp: number[];
       annualGrowthRate: number;
-      defaultRates: Record<RateTier, number>;
     };
     currentSpend?: number;
     proposedSpend?: number;
@@ -32,35 +31,12 @@ interface AssumptionsTabProps {
   readOnly?: boolean;
 }
 
-const RATE_TIERS: { key: RateTier; label: string; description: string }[] = [
-  { key: "admin", label: "Admin / Data Entry", description: "$60-80K loaded" },
-  { key: "operations", label: "Operations / IT Support", description: "$80-120K loaded" },
-  { key: "salesOps", label: "Sales Operations", description: "$100-140K loaded" },
-  { key: "engineering", label: "Engineering", description: "$150-200K loaded" },
-  { key: "manager", label: "Manager", description: "$140-180K loaded" },
-  { key: "executive", label: "Executive", description: "$200K+ loaded" },
-];
-
 export function AssumptionsTab({ calculation, valueItems, useCases, readOnly = false }: AssumptionsTabProps) {
   const updateAssumptions = useMutation(api.calculations.updateAssumptions);
   const updateInvestment = useMutation(api.calculations.updateInvestment);
   const updateObfuscation = useMutation(api.calculations.updateObfuscation);
 
   const { assumptions } = calculation;
-
-  const handleRateChange = (tier: RateTier, value: string | number) => {
-    const numValue = Number(value) || 0;
-    updateAssumptions({
-      id: calculation._id,
-      assumptions: {
-        ...assumptions,
-        defaultRates: {
-          ...assumptions.defaultRates,
-          [tier]: numValue,
-        } as any,
-      },
-    });
-  };
 
   const handleProjectionChange = (field: "projectionYears" | "annualGrowthRate", value: string | number) => {
     const numValue = Number(value) || 0;
@@ -132,40 +108,6 @@ export function AssumptionsTab({ calculation, valueItems, useCases, readOnly = f
         calculationId={calculation._id}
         readOnly={readOnly}
       />
-
-      {/* Default Hourly Rates */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Default Hourly Rates</CardTitle>
-          <CardDescription>
-            Loaded hourly rates by role tier. Used as defaults when creating value items.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {RATE_TIERS.map(({ key, label, description }) => (
-            <div key={key} className="space-y-1">
-              <Label htmlFor={`rate-${key}`} className="text-sm">{label}</Label>
-              <p className="text-xs text-muted-foreground">{description}</p>
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">$</span>
-                {readOnly ? (
-                  <span className="font-mono py-2">{assumptions.defaultRates[key]}</span>
-                ) : (
-                  <DebouncedInput
-                    id={`rate-${key}`}
-                    type="number"
-                    value={assumptions.defaultRates[key]}
-                    onChange={(value) => handleRateChange(key, value)}
-                    debounceMs={300}
-                    className="font-mono"
-                  />
-                )}
-                <span className="text-muted-foreground text-sm">/hr</span>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
 
       {/* Projection Settings */}
       <Card>

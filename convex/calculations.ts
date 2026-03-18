@@ -14,14 +14,6 @@ const DEFAULT_ASSUMPTIONS = {
   projectionYears: 3,
   realizationRamp: [0.5, 1, 1],
   annualGrowthRate: 0.1,
-  defaultRates: {
-    admin: 35,
-    operations: 50,
-    salesOps: 60,
-    engineering: 88,
-    manager: 80,
-    executive: 105,
-  },
 };
 
 export const list = query({
@@ -61,14 +53,6 @@ export const create = mutation({
         projectionYears: v.number(),
         realizationRamp: v.array(v.number()),
         annualGrowthRate: v.number(),
-        defaultRates: v.object({
-          admin: v.number(),
-          operations: v.number(),
-          salesOps: v.number(),
-          engineering: v.number(),
-          manager: v.number(),
-          executive: v.number(),
-        }),
       })
     ),
   },
@@ -124,14 +108,6 @@ export const updateAssumptions = mutation({
       projectionYears: v.number(),
       realizationRamp: v.array(v.number()),
       annualGrowthRate: v.number(),
-      defaultRates: v.object({
-        admin: v.number(),
-        operations: v.number(),
-        salesOps: v.number(),
-        engineering: v.number(),
-        manager: v.number(),
-        executive: v.number(),
-      }),
     }),
   },
   handler: async (ctx, args) => {

@@ -34,15 +34,6 @@ export default defineSchema({
       projectionYears: v.number(),
       realizationRamp: v.array(v.number()),
       annualGrowthRate: v.number(),
-      // Default hourly rates by tier
-      defaultRates: v.object({
-        admin: v.number(), // $60-80K loaded -> ~$30-40/hr
-        operations: v.number(), // $80-120K -> ~$40-60/hr
-        salesOps: v.number(), // $100-140K -> ~$50-70/hr
-        engineering: v.number(), // $150-200K -> ~$75-100/hr
-        manager: v.number(), // $140-180K -> ~$70-90/hr
-        executive: v.number(), // $200K+ -> ~$100+/hr
-      }),
     }),
 
     // Investment comparison

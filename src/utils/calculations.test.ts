@@ -45,7 +45,6 @@ const defaultAssumptions: Assumptions = {
   projectionYears: 3,
   realizationRamp: [0.5, 1, 1],
   annualGrowthRate: 0.1,
-  defaultRates: { admin: 35, operations: 50, salesOps: 60, engineering: 88, manager: 80, executive: 105 },
 };
 
 // ============================================================

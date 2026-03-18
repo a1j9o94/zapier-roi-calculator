@@ -625,7 +625,7 @@ http.route({
       currentSpend: body.currentSpend,
       proposedSpend: body.proposedSpend,
       ...(resolvedCompanyId && { companyId: resolvedCompanyId as any }),
-      ...(body.assumptions && { assumptions: body.assumptions as { projectionYears: number; realizationRamp: number[]; annualGrowthRate: number; defaultRates: { admin: number; operations: number; salesOps: number; engineering: number; manager: number; executive: number } } }),
+      ...(body.assumptions && { assumptions: body.assumptions as { projectionYears: number; realizationRamp: number[]; annualGrowthRate: number } }),
     });
 
     const calculation = await ctx.runQuery(api.calculations.getByShortId, { shortId: result.shortId });
