@@ -77,7 +77,7 @@ export function ExecutiveSummary({
       `${calculation.name} - Value Analysis`,
       "",
       `Total Annual Value: ${fmtFull(summary.totalAnnualValue)}`,
-      `Annual Investment: ${fmtFull(totalInvestment)}`,
+      `Annual Investment: ${fmtFull(proposedSpend)}`,
       "",
       "",
       "Value by Dimension:",

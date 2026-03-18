@@ -28,30 +28,30 @@ describe("generateZapTemplate", () => {
     const template = generateZapTemplate(basicConfig);
     expect(template.metadata).toEqual({ version: 2 });
     expect(template.zaps).toBeArrayOfSize(1);
-    expect(template.zaps[0].title).toBe("Lead Routing & Assignment");
-    expect(template.zaps[0].id).toBe(1);
+    expect(template.zaps[0]!.title).toBe("Lead Routing & Assignment");
+    expect(template.zaps[0]!.id).toBe(1);
   });
 
   test("nodes chain parent_id correctly", () => {
     const template = generateZapTemplate(basicConfig);
-    const nodes = template.zaps[0].nodes;
+    const nodes = template.zaps[0]!.nodes;
     const nodeIds = Object.keys(nodes).sort((a, b) => Number(a) - Number(b));
 
     // First node (trigger) has parent_id null
-    expect(nodes[nodeIds[0]].parent_id).toBeNull();
-    expect(nodes[nodeIds[0]].root_id).toBeNull();
+    expect(nodes[nodeIds[0]!]!.parent_id).toBeNull();
+    expect(nodes[nodeIds[0]!]!.root_id).toBeNull();
 
     // Subsequent nodes chain parent_id
     for (let i = 1; i < nodeIds.length; i++) {
-      expect(nodes[nodeIds[i]].parent_id).toBe(Number(nodeIds[i - 1]));
+      expect(nodes[nodeIds[i]!]!.parent_id).toBe(Number(nodeIds[i - 1]!));
       // root_id should be the trigger's id
-      expect(nodes[nodeIds[i]].root_id).toBe(Number(nodeIds[0]));
+      expect(nodes[nodeIds[i]!]!.root_id).toBe(Number(nodeIds[0]!));
     }
   });
 
   test("authentication_id is always null", () => {
     const template = generateZapTemplate(basicConfig);
-    const nodes = template.zaps[0].nodes;
+    const nodes = template.zaps[0]!.nodes;
     for (const node of Object.values(nodes)) {
       expect(node.authentication_id).toBeNull();
     }
@@ -59,15 +59,15 @@ describe("generateZapTemplate", () => {
 
   test("maps type correctly to type_of", () => {
     const template = generateZapTemplate(basicConfig);
-    const nodes = Object.values(template.zaps[0].nodes);
-    expect(nodes[0].type_of).toBe("read"); // trigger → read
-    expect(nodes[1].type_of).toBe("filter"); // filter → filter
-    expect(nodes[2].type_of).toBe("write"); // action → write
+    const nodes = Object.values(template.zaps[0]!.nodes);
+    expect(nodes[0]!.type_of).toBe("read"); // trigger → read
+    expect(nodes[1]!.type_of).toBe("filter"); // filter → filter
+    expect(nodes[2]!.type_of).toBe("write"); // action → write
   });
 
   test("resolves selected_api from app registry", () => {
     const template = generateZapTemplate(basicConfig);
-    const nodes = Object.values(template.zaps[0].nodes);
+    const nodes = Object.values(template.zaps[0]!.nodes);
     // Should contain CLIAPI version format
     for (const node of nodes) {
       expect(node.selected_api).toContain("@");
@@ -77,10 +77,10 @@ describe("generateZapTemplate", () => {
 
   test("sets stepTitle in meta", () => {
     const template = generateZapTemplate(basicConfig);
-    const nodes = Object.values(template.zaps[0].nodes);
-    expect(nodes[0].meta.stepTitle).toBe("New Lead in Salesforce");
-    expect(nodes[1].meta.stepTitle).toBe("Filter by Score");
-    expect(nodes[2].meta.stepTitle).toBe("Notify Rep");
+    const nodes = Object.values(template.zaps[0]!.nodes);
+    expect(nodes[0]!.meta.stepTitle).toBe("New Lead in Salesforce");
+    expect(nodes[1]!.meta.stepTitle).toBe("Filter by Score");
+    expect(nodes[2]!.meta.stepTitle).toBe("Notify Rep");
   });
 });
 
@@ -93,8 +93,8 @@ describe("generateUseCaseBundle", () => {
     const template = generateUseCaseBundle(configs);
     expect(template.metadata).toEqual({ version: 2 });
     expect(template.zaps).toBeArrayOfSize(2);
-    expect(template.zaps[0].title).toBe("Zap 1");
-    expect(template.zaps[1].title).toBe("Zap 2");
+    expect(template.zaps[0]!.title).toBe("Zap 1");
+    expect(template.zaps[1]!.title).toBe("Zap 2");
   });
 
   test("each Zap has unique sequential id", () => {
@@ -243,7 +243,7 @@ describe("pattern zapBundle integration", () => {
   test("first step of each zapBundle Zap is a trigger", () => {
     for (const pattern of ALL_PATTERNS) {
       for (const zap of pattern.zapBundle!.zaps) {
-        expect(zap.steps[0].type).toBe("trigger");
+        expect(zap.steps[0]!.type).toBe("trigger");
       }
     }
   });
@@ -285,13 +285,13 @@ describe("pattern zapBundle integration", () => {
         expect(template.metadata.version).toBe(2);
         expect(template.zaps).toBeArrayOfSize(1);
 
-        const nodes = Object.values(template.zaps[0].nodes);
+        const nodes = Object.values(template.zaps[0]!.nodes);
         expect(nodes.length).toBe(zap.steps.length);
 
         // First node is trigger
-        expect(nodes[0].type_of).toBe("read");
-        expect(nodes[0].parent_id).toBeNull();
-        expect(nodes[0].root_id).toBeNull();
+        expect(nodes[0]!.type_of).toBe("read");
+        expect(nodes[0]!.parent_id).toBeNull();
+        expect(nodes[0]!.root_id).toBeNull();
 
         // All auth is null
         for (const node of nodes) {
@@ -426,7 +426,7 @@ describe("conformance with real Zapier export format", () => {
 
   skipIfNoExport("generated nodes have same required fields as real export nodes", () => {
     const realNodes = realExport.zaps[0].nodes;
-    const realNode = realNodes[Object.keys(realNodes)[0]];
+    const realNode = realNodes[Object.keys(realNodes)[0]!];
     const realNodeKeys = new Set(Object.keys(realNode));
 
     const config: ZapBundleConfig = {
@@ -438,8 +438,8 @@ describe("conformance with real Zapier export format", () => {
       ],
     };
     const generated = generateZapTemplate(config);
-    const genNodes = generated.zaps[0].nodes;
-    const genNode = genNodes[Object.keys(genNodes)[0]];
+    const genNodes = generated.zaps[0]!.nodes;
+    const genNode = genNodes[Object.keys(genNodes)[0]!]!;
     const genNodeKeys = new Set(Object.keys(genNode));
 
     // Generated template must have all these essential fields from real exports
@@ -482,7 +482,7 @@ describe("conformance with real Zapier export format", () => {
         ...config.steps,
       ],
     });
-    const genNodes = generated.zaps[0].nodes;
+    const genNodes = generated.zaps[0]!.nodes;
 
     for (const node of Object.values(genNodes) as any[]) {
       if (node.selected_api.includes("CLIAPI@")) {
@@ -506,7 +506,7 @@ describe("conformance with real Zapier export format", () => {
       steps: [{ app: "Schedule by Zapier", action: "everyDay", stepTitle: "Daily", type: "trigger" }],
     };
     const generated = generateZapTemplate(config);
-    const genFirstNode = generated.zaps[0].nodes["1"];
+    const genFirstNode = generated.zaps[0]!.nodes["1"]!;
     expect(genFirstNode.type_of).toBe("read");
     expect(genFirstNode.parent_id).toBeNull();
     expect(genFirstNode.root_id).toBeNull();

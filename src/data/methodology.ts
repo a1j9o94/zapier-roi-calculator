@@ -48,6 +48,7 @@ const pipelineVelocity: ArchetypeEvidence = {
       year: 2026,
       title: "Speed-to-Lead Response Time Statistics",
       finding: "21x higher contact rate when responding in <5 minutes vs. 30 minutes",
+      url: "https://www.prnewswire.com/news-releases/blazeo-unveils-2026-speed-to-lead-benchmark-report-302694994.html",
       tier: "B",
     },
     {
@@ -55,6 +56,7 @@ const pipelineVelocity: ArchetypeEvidence = {
       year: 2025,
       title: "Revenue Operations Automation Benchmark",
       finding: "40% increase in lead-to-opportunity conversion with automated routing and follow-up",
+      url: "https://www.pedowitzgroup.com/ai-lead-routing-with-predictive-intent-signals",
       tier: "B",
     },
     {
@@ -96,6 +98,7 @@ const revenueCapture: ArchetypeEvidence = {
       year: 2024,
       title: "Revenue Leakage in B2B Organizations",
       finding: "50% of B2B organizations lose 7–10% of revenue to billing errors, contract mismanagement, and process gaps",
+      url: "https://www.oplacrm.com/en/post/revenue-leakage-in-b2b-is-10-of-your-revenue-evaporating-unnoticed",
       tier: "A",
     },
     {
@@ -103,6 +106,7 @@ const revenueCapture: ArchetypeEvidence = {
       year: 2025,
       title: "SaaS Revenue Leakage Analysis",
       finding: "SaaS companies typically leak 3–5% of ARR through failed charges, dunning gaps, and upgrade friction",
+      url: "https://www.ledgerup.ai/resources/revenue-leakage-saas",
       tier: "B",
     },
     {
@@ -119,6 +123,7 @@ const revenueCapture: ArchetypeEvidence = {
       year: 2025,
       title: "Arden Insurance Revenue Capture Case Study",
       finding: "Automated quote-to-bind workflow captured $150M/year in premium revenue that previously leaked through manual handoffs",
+      url: "https://zapier.com/customer-stories/arden-insurance",
       tier: "A",
     },
   ],
@@ -145,6 +150,7 @@ const revenueExpansion: ArchetypeEvidence = {
       year: 2025,
       title: "Upsell and Cross-sell Automation ROI",
       finding: "20–30% increase in upsell acceptance rate with automated trigger-based expansion campaigns",
+      url: "https://www.pedowitzgroup.com/ai-driven-upsell-cross-sell-recommendations",
       tier: "B",
     },
     {
@@ -228,6 +234,7 @@ const processAcceleration: ArchetypeEvidence = {
       year: 2025,
       title: "Business Process Automation Statistics",
       finding: "50–70% reduction in process cycle time with automation across surveyed enterprises",
+      url: "https://gitnux.org/workflow-automation-statistics/",
       tier: "B",
     },
     {
@@ -235,6 +242,7 @@ const processAcceleration: ArchetypeEvidence = {
       year: 2024,
       title: "Total Economic Impact of Process Automation",
       finding: "40% process acceleration through elimination of manual steps and approval bottlenecks",
+      url: "https://tei.forrester.com/go/Pipefy/PipefyTEI",
       tier: "A",
     },
     {
@@ -242,6 +250,7 @@ const processAcceleration: ArchetypeEvidence = {
       year: 2024,
       title: "HR Process Automation ROI",
       finding: "63–80% reduction in HR process completion time (onboarding, PTO, expense approvals)",
+      url: "https://pycm.co/4qEKiui",
       tier: "A",
     },
     {
@@ -249,6 +258,7 @@ const processAcceleration: ArchetypeEvidence = {
       year: 2023,
       title: "The Impact of AI on Knowledge Worker Productivity",
       finding: "Consultants using AI completed tasks 10% faster with higher quality output",
+      url: "https://www.bcg.com/publications/2024/gen-ai-increases-productivity-and-expands-capabilities",
       tier: "A",
     },
     {
@@ -256,6 +266,7 @@ const processAcceleration: ArchetypeEvidence = {
       year: 2024,
       title: "GitHub Copilot Productivity Study",
       finding: "26% faster task completion for developers using AI-assisted coding tools",
+      url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4945566",
       tier: "A",
     },
   ],
@@ -265,6 +276,7 @@ const processAcceleration: ArchetypeEvidence = {
       year: 2025,
       title: "Premiere Property Onboarding Automation",
       finding: "Saved 100 hours per agent onboarding through automated workflow provisioning and training sequences",
+      url: "https://zapier.com/customer-stories/premiere-property-group",
       tier: "B",
     },
   ],
@@ -304,6 +316,7 @@ const taskElimination: ArchetypeEvidence = {
       year: 2024,
       title: "The State of AI: How Organizations Are Rewiring to Capture Value",
       finding: "60–70% of worker tasks are automatable with current AI and workflow technology",
+      url: "https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-AI-the-next-productivity-frontier",
       tier: "A",
     },
     {
@@ -312,6 +325,7 @@ const taskElimination: ArchetypeEvidence = {
       title: "AI-Powered IT Service Management Impact Report",
       finding: "65.7% ticket deflection rate, saving 431,000 agent hours across customer base",
       sampleSize: "187M tickets analyzed",
+      url: "https://www.freshworks.com/freshservice/benchmark-report-2025/",
       tier: "A",
     },
     {
@@ -319,6 +333,7 @@ const taskElimination: ArchetypeEvidence = {
       year: 2024,
       title: "AI Agent Impact on Employee Productivity",
       finding: "60% higher task completion rate when employees have AI-powered task automation",
+      url: "https://www.usepylon.com/blog/ai-powered-customer-support-guide",
       tier: "A",
     },
   ],
@@ -328,6 +343,7 @@ const taskElimination: ArchetypeEvidence = {
       year: 2025,
       title: "Remote.com Automation at Scale",
       finding: "11M automated tasks saving 2,219 workdays per month across global operations",
+      url: "https://zapier.com/customer-stories/remote",
       tier: "A",
     },
     {
@@ -335,6 +351,7 @@ const taskElimination: ArchetypeEvidence = {
       year: 2025,
       title: "Arden Insurance Task Automation",
       finding: "34,000 hours per year saved through automated policy processing and claims workflows",
+      url: "https://zapier.com/customer-stories/arden-insurance",
       tier: "A",
     },
     {
@@ -342,6 +359,7 @@ const taskElimination: ArchetypeEvidence = {
       year: 2025,
       title: "Solo Business Automation ROI",
       finding: "550 hours per year saved by automating client scheduling, follow-ups, and intake forms",
+      url: "https://zapier.com/customer-stories/wellness-coach",
       tier: "B",
     },
   ],
@@ -367,6 +385,7 @@ const taskSimplification: ArchetypeEvidence = {
       year: 2023,
       title: "Navigating the Jagged Technological Frontier",
       finding: "49% faster completion on complex creative tasks when augmented with AI tools",
+      url: "https://www.bcg.com/publications/2024/gen-ai-increases-productivity-and-expands-capabilities",
       tier: "A",
     },
     {
@@ -374,6 +393,7 @@ const taskSimplification: ArchetypeEvidence = {
       year: 2024,
       title: "AI-Assisted Productivity in Enterprise Settings",
       finding: "21% reduction in task completion time for information-gathering and summarization work",
+      url: "https://arxiv.org/pdf/2410.12944",
       tier: "A",
     },
     {
@@ -381,6 +401,7 @@ const taskSimplification: ArchetypeEvidence = {
       year: 2024,
       title: "Copilot Impact on Developer Productivity",
       finding: "12–26% faster task completion depending on task complexity and developer experience",
+      url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4945566",
       tier: "A",
     },
     {
@@ -388,6 +409,7 @@ const taskSimplification: ArchetypeEvidence = {
       year: 2024,
       title: "The ROI of Workflow Simplification",
       finding: "40% reduction in task complexity and steps required when manual processes are augmented with automation",
+      url: "https://tei.forrester.com/go/Pipefy/PipefyTEI",
       tier: "B",
     },
   ],
@@ -425,6 +447,7 @@ const contextSurfacing: ArchetypeEvidence = {
       year: 2024,
       title: "AI-Powered Knowledge Management ROI",
       finding: "27–43% reduction in time spent searching for information and preparing for meetings",
+      url: "https://nucleusresearch.com/research/single/ai-powered-analytics-improves-productivity-by-27-to-43-percent/",
       tier: "A",
     },
     {
@@ -432,6 +455,7 @@ const contextSurfacing: ArchetypeEvidence = {
       year: 2024,
       title: "FP&A Transformation with AI Automation",
       finding: "5% more strategic analysis time freed up by automating data gathering and context assembly for financial planning",
+      url: "https://www.ey.com/content/dam/ey-unified-site/ey-com/en-gl/services/consulting/documents/ey-gl-how-ai-is-transforming-fpa-06-2025.pdf",
       tier: "B",
     },
   ],
@@ -459,6 +483,7 @@ const laborAvoidance: ArchetypeEvidence = {
       year: 2024,
       title: "AI Workforce Transformation Study",
       finding: "60–70% of tasks automatable, enabling headcount reallocation rather than growth",
+      url: "https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-AI-the-next-productivity-frontier",
       tier: "A",
     },
     {
@@ -467,6 +492,7 @@ const laborAvoidance: ArchetypeEvidence = {
       title: "Manufacturing AI Deployment at Scale",
       finding: "5,075 FTE equivalents of work automated across manufacturing and administrative processes",
       sampleSize: "Global operations",
+      url: "http://article.sapub.org/10.5923.j.ajis.20211101.02.html",
       tier: "A",
     },
     {
@@ -475,6 +501,7 @@ const laborAvoidance: ArchetypeEvidence = {
       title: "AI ROI Across 156 Organizations",
       finding: "3.7x average ROI on AI investments, primarily driven by labor cost avoidance",
       sampleSize: "156 companies",
+      url: "https://getathenic.com/blog/ai-automation-roi-calculator-2025-data-study",
       tier: "A",
     },
   ],
@@ -484,6 +511,7 @@ const laborAvoidance: ArchetypeEvidence = {
       year: 2025,
       title: "Remote.com Labor Avoidance",
       finding: "$500K in annual hiring costs avoided through automation handling work that would have required additional headcount",
+      url: "https://zapier.com/customer-stories/remote",
       tier: "A",
     },
     {
@@ -491,6 +519,7 @@ const laborAvoidance: ArchetypeEvidence = {
       year: 2025,
       title: "Arden Insurance Staffing Efficiency",
       finding: "$500K+ in labor costs avoided annually by automating manual insurance processing workflows",
+      url: "https://zapier.com/customer-stories/arden-insurance",
       tier: "A",
     },
     {
@@ -522,6 +551,7 @@ const toolConsolidation: ArchetypeEvidence = {
       year: 2025,
       title: "SaaS Stack Rationalization Benchmarks",
       finding: "20–30% of SaaS spend is on redundant or underutilized tools, recoverable through consolidation",
+      url: "https://gitnux.org/workflow-automation-statistics/",
       tier: "B",
     },
     {
@@ -529,6 +559,7 @@ const toolConsolidation: ArchetypeEvidence = {
       year: 2025,
       title: "Enterprise Tool Consolidation Study",
       finding: "35% reduction in SaaS costs when integration platform replaces point-to-point connectors and redundant middleware",
+      url: "https://adai.news/resources/statistics/ai-automation-statistics-2026/",
       tier: "B",
     },
   ],
@@ -538,6 +569,7 @@ const toolConsolidation: ArchetypeEvidence = {
       year: 2025,
       title: "Premiere Property Tool Consolidation",
       finding: "$115K in annual SaaS costs eliminated by replacing standalone tools with Zapier-powered workflows",
+      url: "https://zapier.com/customer-stories/premiere-property-group",
       tier: "A",
     },
   ],
@@ -563,6 +595,7 @@ const errorReworkElimination: ArchetypeEvidence = {
       year: 2024,
       title: "Robotic Process Automation Error Reduction",
       finding: "87–97% error reduction in data entry and processing tasks through automation",
+      url: "https://axis-intelligence.com/rpa-implementation-business-case-2025-guide/",
       tier: "B",
     },
     {
@@ -570,6 +603,7 @@ const errorReworkElimination: ArchetypeEvidence = {
       year: 2024,
       title: "Automated vs. Manual CRM Data Entry Quality",
       finding: "Error rates dropped from 4% to 0.5% when CRM data entry was automated (87.5% reduction)",
+      url: "https://www.cleanlist.ai/blog/2026-02-24-crm-data-quality-benchmarks",
       tier: "B",
     },
     {
@@ -577,6 +611,7 @@ const errorReworkElimination: ArchetypeEvidence = {
       year: 2024,
       title: "Quality Improvement Through AI and Automation",
       finding: "20–50% reduction in error-driven rework costs across manufacturing and service operations",
+      url: "https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-AI-the-next-productivity-frontier",
       tier: "A",
     },
     {
@@ -584,6 +619,7 @@ const errorReworkElimination: ArchetypeEvidence = {
       year: 2025,
       title: "AI Quality Inspection in Manufacturing",
       finding: "73% defect detection improvement with AI-powered quality automation vs. manual inspection",
+      url: "https://www.appitsoftware.com/blog/automotive-supplier-quality-case-study",
       tier: "B",
     },
   ],
@@ -612,6 +648,7 @@ const complianceAssurance: ArchetypeEvidence = {
       year: 2025,
       title: "AI-Driven Compliance Monitoring in Financial Services",
       finding: "89% improvement in compliance violation detection rate with automated monitoring (peer-reviewed)",
+      url: "https://eajournals.org/ejcsit/vol13-issue21-2025/",
       tier: "A",
     },
     {
@@ -619,6 +656,7 @@ const complianceAssurance: ArchetypeEvidence = {
       year: 2024,
       title: "Identity Governance and Compliance Automation",
       finding: "80% reduction in compliance audit preparation time through automated access controls and reporting",
+      url: "https://www.avatier.com/blog/compliance-automation-audit/",
       tier: "B",
     },
     {
@@ -626,6 +664,7 @@ const complianceAssurance: ArchetypeEvidence = {
       year: 2025,
       title: "Automated Cloud Security Compliance",
       finding: "72% faster compliance remediation with automated policy enforcement and drift detection",
+      url: "https://axis-intelligence.com/grc-automation-implementation-guide-2025-roi/",
       tier: "B",
     },
   ],
@@ -653,6 +692,7 @@ const dataIntegrity: ArchetypeEvidence = {
       year: 2024,
       title: "Automated Data Entry Quality Benchmarks",
       finding: "Error rates dropped from 4% to 0.5% with automated data entry (87.5% improvement)",
+      url: "https://www.recordcontext.com/resources/crm-data-quality",
       tier: "B",
     },
     {
@@ -660,6 +700,7 @@ const dataIntegrity: ArchetypeEvidence = {
       year: 2024,
       title: "Annual CRM Data Degradation Study",
       finding: "91% of CRM data decays annually without automated enrichment and validation processes",
+      url: "https://www.cleanlist.ai/blog/2026-02-24-crm-data-quality-benchmarks",
       tier: "B",
     },
     {
@@ -667,6 +708,7 @@ const dataIntegrity: ArchetypeEvidence = {
       year: 2024,
       title: "Automation vs. Human Data Processing Accuracy",
       finding: "99.5% accuracy for automated processes vs. 96% for manual data handling (3.5pp improvement)",
+      url: "https://axis-intelligence.com/rpa-implementation-business-case-2025-guide/",
       tier: "B",
     },
   ],
@@ -694,6 +736,7 @@ const incidentPrevention: ArchetypeEvidence = {
       title: "AI-Driven IT Incident Management",
       finding: "76.6% ticket auto-resolution rate across 187M tickets, preventing escalation to human agents",
       sampleSize: "187M tickets",
+      url: "https://www.freshworks.com/freshservice/benchmark-report-2025/",
       tier: "A",
     },
     {
@@ -701,6 +744,7 @@ const incidentPrevention: ArchetypeEvidence = {
       year: 2025,
       title: "Mean Time to Resolve Reduction with Automation",
       finding: "55% reduction in MTTR (Mean Time to Resolve) with automated incident triage and response",
+      url: "https://auralis.ai/case-studies/global-enterprise-reduced-mttr-by-55/",
       tier: "B",
     },
     {
@@ -717,6 +761,7 @@ const incidentPrevention: ArchetypeEvidence = {
       year: 2025,
       title: "Remote.com Incident Reduction",
       finding: "27.5% reduction in operational incidents through automated monitoring and alert workflows",
+      url: "https://zapier.com/customer-stories/remote",
       tier: "B",
     },
   ],
@@ -743,6 +788,7 @@ const processConsistency: ArchetypeEvidence = {
       year: 2025,
       title: "Process Standardization Through AI",
       finding: "73% improvement in process consistency with AI-enforced standard operating procedures",
+      url: "https://www.appitsoftware.com/blog/automotive-supplier-quality-case-study",
       tier: "B",
     },
     {
@@ -751,6 +797,7 @@ const processConsistency: ArchetypeEvidence = {
       title: "Manufacturing Process Consistency at Scale",
       finding: "5,075 FTE equivalents of standardized work achieved through automation, ensuring consistent output quality",
       sampleSize: "Global operations",
+      url: "http://article.sapub.org/10.5923.j.ajis.20211101.02.html",
       tier: "A",
     },
     {

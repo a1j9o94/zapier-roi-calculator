@@ -91,7 +91,7 @@ export function AllInputsTable({
     patch: Partial<{ value: number; confidence: ConfidenceTier; source: string }>
   ) => {
     const currentInputs = { ...(item.inputs ?? {}) };
-    currentInputs[fieldKey] = { ...currentInputs[fieldKey], ...patch };
+    currentInputs[fieldKey] = { value: 0, confidence: "C" as const, ...currentInputs[fieldKey], ...patch };
     updateItem({ id: item._id, inputs: currentInputs });
   };
 

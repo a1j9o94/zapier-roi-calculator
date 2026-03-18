@@ -108,7 +108,7 @@ export function generateUseCaseBundle(
 ): ZapTemplate {
   const zaps = configs.map((config, zapIndex) => {
     const singleTemplate = generateZapTemplate(config);
-    const zap = singleTemplate.zaps[0];
+    const zap = singleTemplate.zaps[0]!;
     return {
       ...zap,
       id: zapIndex + 1,
@@ -166,15 +166,15 @@ export function generatePrefillUrlFromTemplate(
 
   config.steps.forEach((step, i) => {
     const apiKey = resolveAppKey(step.app);
-    // Extract the CLI API key without version for the action reference
-    const cliKey = apiKey.split("@")[0];
+    const cliKey = apiKey.split("@")[0]!;
     params.set(`steps[${i}][action]`, `${cliKey}.${step.action}`);
     if (i === 0) {
       params.set(`steps[${i}][app]`, cliKey);
     }
   });
 
-  const triggerApiKey = resolveAppKey(config.steps[0].app);
-  const triggerCliKey = triggerApiKey.split("@")[0];
+  const triggerStep = config.steps[0]!;
+  const triggerApiKey = resolveAppKey(triggerStep.app);
+  const triggerCliKey = triggerApiKey.split("@")[0]!;
   return `${ZAPIER_API_BASE}/v1/embed/${encodeURIComponent(triggerCliKey)}/create?${params.toString()}`;
 }

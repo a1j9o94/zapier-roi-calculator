@@ -11,9 +11,9 @@ import {
   calculateFTEEquivalent,
   calculateSummary,
 } from "./calculations";
-import type { Archetype, ValueItem, Assumptions } from "../types/roi";
+import type { Archetype, ValueItem, Assumptions, ConfidenceTier } from "../types/roi";
 
-function createItem(archetype: Archetype, inputs: Record<string, { value: number; confidence?: string }>, overrides?: Partial<ValueItem>): ValueItem {
+function createItem(archetype: Archetype, inputs: Record<string, { value: number; confidence: ConfidenceTier }>, overrides?: Partial<ValueItem>): ValueItem {
   const DIMS: Record<string, string> = {
     pipeline_velocity: "revenue_impact", revenue_capture: "revenue_impact",
     revenue_expansion: "revenue_impact", time_to_revenue: "revenue_impact",
@@ -37,7 +37,7 @@ function createItem(archetype: Archetype, inputs: Record<string, { value: number
   };
 }
 
-function vi(key: string, value: number, confidence: string = "custom") {
+function vi(key: string, value: number, confidence: ConfidenceTier = "A") {
   return { [key]: { value, confidence } };
 }
 
@@ -290,13 +290,13 @@ describe("manual override", () => {
 describe("calculateComputedValue", () => {
   test("generates formula trace and lowest confidence", () => {
     const item = createItem("pipeline_velocity", {
-      dealsPerQuarter: { value: 100, confidence: "custom" as any },
-      avgDealValue: { value: 20000, confidence: "custom" as any },
-      conversionLift: { value: 0.10, confidence: "estimated" as any },
+      dealsPerQuarter: { value: 100, confidence: "A" },
+      avgDealValue: { value: 20000, confidence: "A" },
+      conversionLift: { value: 0.10, confidence: "C" },
     });
     const result = calculateComputedValue(item);
     expect(result.annualValue).toBe(800000);
-    expect(result.confidence).toBe("custom");
+    expect(result.confidence).toBe("C");
     expect(result.formula).toContain("$800,000");
   });
 });

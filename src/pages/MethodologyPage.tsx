@@ -58,7 +58,13 @@ function StudyCard({ study, isZapier }: { study: StudyReference; isZapier?: bool
     <div className="border rounded-lg p-3 bg-white/60">
       <div className="flex items-start justify-between gap-2 mb-1">
         <p className="text-sm font-medium text-foreground leading-tight">
-          {study.title}
+          {study.url ? (
+            <a href={study.url} target="_blank" rel="noopener noreferrer" className="hover:text-[#FF4A00] hover:underline transition-colors">
+              {study.title}
+            </a>
+          ) : (
+            study.title
+          )}
         </p>
         <TierBadge tier={study.tier} />
       </div>
@@ -66,6 +72,11 @@ function StudyCard({ study, isZapier }: { study: StudyReference; isZapier?: bool
         {study.author} ({study.year})
         {study.sampleSize && <span className="ml-1">· {study.sampleSize}</span>}
         {isZapier && <span className="ml-1 text-[#FF4A00]">· Zapier</span>}
+        {study.url && (
+          <a href={study.url} target="_blank" rel="noopener noreferrer" className="ml-1 text-[#FF4A00] hover:underline">
+            ↗
+          </a>
+        )}
       </p>
       <p className="text-sm text-foreground/80">{study.finding}</p>
     </div>
@@ -414,10 +425,21 @@ export function MethodologyPage() {
                     <div>
                       <span className="font-medium">{s.author}</span>{" "}
                       <span className="text-muted-foreground">({s.year})</span>.{" "}
-                      <span className="italic">{s.title}</span>.{" "}
+                      {s.url ? (
+                        <a href={s.url} target="_blank" rel="noopener noreferrer" className="italic hover:text-[#FF4A00] hover:underline transition-colors">
+                          {s.title}
+                        </a>
+                      ) : (
+                        <span className="italic">{s.title}</span>
+                      )}.{" "}
                       <span className="text-foreground/80">{s.finding}</span>
                       {s.sampleSize && (
                         <span className="text-muted-foreground"> [{s.sampleSize}]</span>
+                      )}
+                      {s.url && (
+                        <a href={s.url} target="_blank" rel="noopener noreferrer" className="ml-1 text-[#FF4A00] hover:underline text-xs">
+                          ↗ source
+                        </a>
                       )}
                     </div>
                   </div>

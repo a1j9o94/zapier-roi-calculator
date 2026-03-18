@@ -2,6 +2,7 @@ import { useState, lazy, Suspense } from "react";
 import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import type { Calculation, ValueItem, UseCase } from "../types/roi";
 import { Button } from "@/components/ui/button";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { AssumptionsTab } from "../components/AssumptionsTab";
@@ -78,6 +79,10 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
       </div>
     );
   }
+
+  const typedCalculation = calculation as unknown as Calculation;
+  const typedValueItems = valueItems as unknown as ValueItem[];
+  const typedUseCases = (useCases ?? []) as unknown as UseCase[];
 
   const handleStartEditName = () => {
     setIsEditingName(true);
@@ -191,32 +196,32 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
       <main className={isEmbed ? "p-4" : "container mx-auto px-4 py-6"}>
         {effectiveTab === "assumptions" && (
           <AssumptionsTab
-            calculation={calculation}
-            valueItems={valueItems}
-            useCases={useCases ?? []}
+            calculation={typedCalculation}
+            valueItems={typedValueItems}
+            useCases={typedUseCases}
             readOnly={summaryOnly}
           />
         )}
         {effectiveTab === "values" && (
           <ValueItemsTab
-            calculation={calculation}
-            valueItems={valueItems}
+            calculation={typedCalculation}
+            valueItems={typedValueItems}
             readOnly={summaryOnly}
           />
         )}
         {effectiveTab === "usecases" && (
           <UseCasesTab
-            calculation={calculation}
-            valueItems={valueItems}
-            useCases={useCases ?? []}
+            calculation={typedCalculation}
+            valueItems={typedValueItems}
+            useCases={typedUseCases}
             readOnly={summaryOnly}
           />
         )}
         {effectiveTab === "summary" && (
           <ExecutiveSummary
-            calculation={calculation}
-            valueItems={valueItems}
-            useCases={useCases ?? []}
+            calculation={typedCalculation}
+            valueItems={typedValueItems}
+            useCases={typedUseCases}
             readOnly={summaryOnly}
             obfuscated={isObfuscated}
           />
@@ -224,18 +229,18 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
         {effectiveTab === "dashboard" && (
           <Suspense fallback={loadingFallback}>
             <SlideView
-              calculation={calculation}
-              valueItems={valueItems}
-              useCases={useCases ?? []}
+              calculation={typedCalculation}
+              valueItems={typedValueItems}
+              useCases={typedUseCases}
             />
           </Suspense>
         )}
         {effectiveTab === "detail" && (
           <Suspense fallback={loadingFallback}>
             <DetailView
-              calculation={calculation}
-              valueItems={valueItems}
-              useCases={useCases ?? []}
+              calculation={typedCalculation}
+              valueItems={typedValueItems}
+              useCases={typedUseCases}
             />
           </Suspense>
         )}

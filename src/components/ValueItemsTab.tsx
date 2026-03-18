@@ -217,19 +217,15 @@ function ValueItemCard({ item, readOnly }: ValueItemCardProps) {
 
   const handleUpdateInput = (fieldKey: string, newValue: number) => {
     const currentInputs = { ...(item.inputs ?? {}) };
-    currentInputs[fieldKey] = {
-      ...currentInputs[fieldKey],
-      value: newValue,
-    };
+    const base = { value: 0, confidence: "C" as ConfidenceTier, ...currentInputs[fieldKey] };
+    currentInputs[fieldKey] = { ...base, value: newValue };
     updateItem({ id: item._id, inputs: currentInputs });
   };
 
   const handleUpdateInputConfidence = (fieldKey: string, confidence: ConfidenceTier) => {
     const currentInputs = { ...(item.inputs ?? {}) };
-    currentInputs[fieldKey] = {
-      ...currentInputs[fieldKey],
-      confidence,
-    };
+    const base = { value: 0, confidence: "C" as ConfidenceTier, ...currentInputs[fieldKey] };
+    currentInputs[fieldKey] = { ...base, confidence };
     updateItem({ id: item._id, inputs: currentInputs });
   };
 

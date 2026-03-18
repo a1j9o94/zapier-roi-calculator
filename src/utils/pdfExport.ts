@@ -1,13 +1,12 @@
 import { jsPDF } from "jspdf";
-import type { Calculation, ValueItem } from "../types/roi";
+import type { Calculation, ValueItem, YearProjection } from "../types/roi";
+import type { DimensionTotal } from "../types/roi";
 import {
   calculateTotalAnnualValue,
   calculateProjection,
   calculateROIMultiple,
-  getCategoryBreakdown,
+  getDimensionBreakdown,
   calculateTotalHoursSaved,
-  type CategoryBreakdown,
-  type YearProjection,
 } from "./calculations";
 import {
   formatCurrency,
@@ -32,7 +31,7 @@ interface PDFData {
   totalValue: number;
   proposedInvestment: number;
   roiMultiple: number | null;
-  breakdown: CategoryBreakdown[];
+  breakdown: DimensionTotal[];
   projections: YearProjection[];
   totalHoursSaved: number;
 }
@@ -41,16 +40,16 @@ export function generateExecutiveSummaryPDF(
   calculation: Calculation,
   valueItems: ValueItem[]
 ): void {
-  const totalValue = calculateTotalAnnualValue(valueItems, calculation.assumptions);
+  const totalValue = calculateTotalAnnualValue(valueItems);
   const proposedSpend = calculation.proposedSpend ?? 0;
   const roiMultiple = calculateROIMultiple(totalValue, proposedSpend);
-  const breakdown = getCategoryBreakdown(valueItems, calculation.assumptions);
+  const breakdown = getDimensionBreakdown(valueItems);
   const projections = calculateProjection(
     totalValue,
     calculation.assumptions,
     proposedSpend
   );
-  const totalHoursSaved = calculateTotalHoursSaved(valueItems, calculation.assumptions);
+  const totalHoursSaved = calculateTotalHoursSaved(valueItems);
 
   const data: PDFData = {
     calculation,
@@ -214,7 +213,7 @@ function drawValueBreakdown(doc: jsPDF, data: PDFData, y: number): number {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(COLORS.mediumGray);
     doc.text(
-      `${formatCurrency(item.value)} (${formatPercent(item.percentage / 100)})`,
+      `${formatCurrency(item.total)} (${formatPercent(item.percentage / 100)})`,
       pageWidth - 15,
       y + 3,
       { align: "right" }

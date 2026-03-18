@@ -19,13 +19,8 @@ const NewCalculatorWizard = lazy(() => import("../components/NewCalculatorWizard
 export function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showWizard, setShowWizard] = useState(false);
-  const [showNewCompany, setShowNewCompany] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [newCompanyIndustry, setNewCompanyIndustry] = useState("");
   const calculations = useQuery(api.calculations.list);
   const companies = useQuery(api.companies.list);
-  const createCalculation = useMutation(api.calculations.create);
-  const createCompany = useMutation(api.companies.create);
   const deleteCalculation = useMutation(api.calculations.remove);
   const deleteCompany = useMutation(api.companies.remove);
   const navigate = useNavigate();
@@ -56,23 +51,6 @@ export function HomePage() {
 
   const handleNewCalculation = async () => {
     setShowWizard(true);
-  };
-
-  const handleQuickCreate = async () => {
-    const result = await createCalculation({ name: "New Value Calculation" });
-    navigate(`/c/${result.shortId}`);
-  };
-
-  const handleCreateCompany = async () => {
-    if (!newCompanyName.trim()) return;
-    const result = await createCompany({
-      name: newCompanyName.trim(),
-      industry: newCompanyIndustry.trim() || undefined,
-    });
-    setNewCompanyName("");
-    setNewCompanyIndustry("");
-    setShowNewCompany(false);
-    navigate(`/company/${result.shortId}`);
   };
 
   const handleDeleteCompany = async (e: React.MouseEvent, id: Id<"companies">, name: string) => {
@@ -122,17 +100,9 @@ export function HomePage() {
             >
               Methodology & Sources
             </Link>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowNewCompany(true)}>
-                + New Company
-              </Button>
-              <Button variant="outline" onClick={handleQuickCreate}>
-                Quick Create
-              </Button>
-              <Button onClick={handleNewCalculation} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
-                + New with Wizard
-              </Button>
-            </div>
+            <Button onClick={handleNewCalculation} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
+              + New Value Assessment
+            </Button>
           </div>
         </div>
       </header>
@@ -145,41 +115,6 @@ export function HomePage() {
               Build and share value analyses powered by UVS taxonomy
             </p>
           </div>
-
-          {/* New Company inline form */}
-          {showNewCompany && (
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="flex items-end gap-3">
-                  <div className="flex-1">
-                    <label className="text-sm font-medium mb-1 block">Company Name</label>
-                    <Input
-                      value={newCompanyName}
-                      onChange={(e) => setNewCompanyName(e.target.value)}
-                      placeholder="e.g., Acme Corp"
-                      onKeyDown={(e) => e.key === "Enter" && handleCreateCompany()}
-                      autoFocus
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-sm font-medium mb-1 block">Industry (optional)</label>
-                    <Input
-                      value={newCompanyIndustry}
-                      onChange={(e) => setNewCompanyIndustry(e.target.value)}
-                      placeholder="e.g., SaaS, Healthcare"
-                      onKeyDown={(e) => e.key === "Enter" && handleCreateCompany()}
-                    />
-                  </div>
-                  <Button onClick={handleCreateCompany} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
-                    Create
-                  </Button>
-                  <Button variant="ghost" onClick={() => setShowNewCompany(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {hasContent && (
             <div className="mb-6">
@@ -199,14 +134,9 @@ export function HomePage() {
             <Card className="text-center py-12">
               <CardContent>
                 <div className="text-muted-foreground mb-4">No calculations yet</div>
-                <div className="flex gap-2 justify-center">
-                  <Button variant="outline" onClick={() => setShowNewCompany(true)}>
-                    Create a Company
-                  </Button>
-                  <Button onClick={handleNewCalculation} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
-                    Create your first value calculation
-                  </Button>
-                </div>
+                <Button onClick={handleNewCalculation} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
+                  Create your first value assessment
+                </Button>
               </CardContent>
             </Card>
           ) : (

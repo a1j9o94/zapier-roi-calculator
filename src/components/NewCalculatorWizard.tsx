@@ -79,12 +79,14 @@ export function NewCalculatorWizard({ onComplete, onCancel }: NewCalculatorWizar
 
   const goNext = () => {
     const idx = STEPS.indexOf(step);
-    if (idx < STEPS.length - 1) setStep(STEPS[idx + 1]);
+    const next = STEPS[idx + 1];
+    if (idx < STEPS.length - 1 && next) setStep(next);
   };
 
   const goBack = () => {
     const idx = STEPS.indexOf(step);
-    if (idx > 0) setStep(STEPS[idx - 1]);
+    const prev = STEPS[idx - 1];
+    if (idx > 0 && prev) setStep(prev);
   };
 
   const handleCreate = async () => {

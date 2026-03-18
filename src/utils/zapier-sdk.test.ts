@@ -64,7 +64,7 @@ describe("Zapier SDK - Apps", () => {
       expect(result.data.length).toBeLessThanOrEqual(5);
 
       // Check shape of first app
-      const app = result.data[0];
+      const app = result.data[0]!;
       expect(typeof app.title).toBe("string");
       expect(typeof app.key).toBe("string");
       expect(typeof app.slug).toBe("string");
@@ -188,7 +188,7 @@ describe("Zapier SDK - Actions", () => {
       expect(result.data.length).toBeGreaterThan(0);
 
       // Check shape of first action
-      const action = result.data[0];
+      const action = result.data[0]!;
       expect(typeof action.key).toBe("string");
       expect(typeof action.title).toBe("string");
       expect(typeof action.action_type).toBe("string");
@@ -244,7 +244,7 @@ describe("Zapier SDK - Actions", () => {
         return;
       }
 
-      const firstAction = actions[0];
+      const firstAction = actions[0]!;
       const result = await zapier.getAction({
         appKey: "slack",
         actionType: "read",
@@ -305,7 +305,7 @@ describe("Zapier SDK - Input Fields", () => {
         return;
       }
 
-      const actionKey = actions[0].key;
+      const actionKey = actions[0]!.key;
       console.log(`Getting input fields for slack.read.${actionKey}`);
 
       const result = await zapier.listInputFields({
@@ -321,7 +321,7 @@ describe("Zapier SDK - Input Fields", () => {
 
       // Check field shape if we got any
       if (result.data.length > 0) {
-        const field = result.data[0];
+        const field = result.data[0]!;
         expect(typeof field.key).toBe("string");
         expect(typeof field.type).toBe("string");
         console.log(
@@ -348,7 +348,7 @@ describe("Zapier SDK - Input Fields", () => {
         return;
       }
 
-      const actionKey = actions[0].key;
+      const actionKey = actions[0]!.key;
       console.log(`Getting input schema for slack.write.${actionKey}`);
 
       const result = await zapier.getInputFieldsSchema({
@@ -382,7 +382,7 @@ describe("Zapier SDK - Connections", () => {
       expect(Array.isArray(result.data)).toBe(true);
 
       if (result.data.length > 0) {
-        const conn = result.data[0];
+        const conn = result.data[0]!;
         expect(typeof conn.id).toBe("string");
         expect(typeof conn.account_id).toBe("string");
         expect(typeof conn.date).toBe("string");
@@ -419,7 +419,7 @@ describe("Zapier SDK - Connections", () => {
 
       console.log(`Found ${result.data.length} Slack connections owned by me`);
       if (result.data.length > 0) {
-        console.log("First Slack connection ID:", result.data[0].id);
+        console.log("First Slack connection ID:", result.data[0]!.id);
       }
     } catch (error: any) {
       console.error("listConnections slack FAILED:", error.message);
@@ -462,7 +462,7 @@ describe("Zapier SDK - Connections", () => {
         return;
       }
 
-      const connectionId = connections[0].id;
+      const connectionId = connections[0]!.id;
       console.log(`Getting details for connection: ${connectionId}`);
 
       const result = await zapier.getConnection({ connectionId });
@@ -572,7 +572,7 @@ describe("Zapier SDK - Client Credentials", () => {
 
       console.log(`Found ${result.data.length} client credentials`);
       if (result.data.length > 0) {
-        const cred = result.data[0];
+        const cred = result.data[0]!;
         console.log("First credential keys:", Object.keys(cred));
       }
     } catch (error: any) {
@@ -602,7 +602,7 @@ describe("Zapier SDK - Run Action (read-only)", () => {
         return;
       }
 
-      const connectionId = connections[0].id;
+      const connectionId = connections[0]!.id;
       console.log(`Using Slack connection: ${connectionId}`);
 
       // Find the channels read action
@@ -661,12 +661,13 @@ describe("Zapier SDK - Run Action (read-only)", () => {
         return;
       }
 
-      const connectionId = connections[0].id;
+      const connectionId = connections[0]!.id;
       console.log(
         `Using Slack connection via apps proxy: ${connectionId}`
       );
 
       // Use the apps proxy pattern
+      // @ts-expect-error - apps proxy is dynamically typed
       const result = await zapier.apps.slack.read.channels({
         connectionId,
       });

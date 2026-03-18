@@ -19,7 +19,7 @@ interface AssumptionsTabProps {
       projectionYears: number;
       realizationRamp: number[];
       annualGrowthRate: number;
-      defaultRates: Record<string, number>;
+      defaultRates: Record<RateTier, number>;
     };
     currentSpend?: number;
     proposedSpend?: number;
