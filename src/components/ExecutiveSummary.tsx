@@ -17,7 +17,7 @@ import {
 } from "../utils/formatting";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { DebouncedTextarea } from "@/components/ui/debounced-textarea";
 
 interface ExecutiveSummaryProps {
   calculation: Calculation;
@@ -74,11 +74,11 @@ export function ExecutiveSummary({
 
   const handleCopyToClipboard = async () => {
     const lines = [
-      `${calculation.name} - ROI Analysis`,
+      `${calculation.name} - Value Analysis`,
       "",
       `Total Annual Value: ${fmtFull(summary.totalAnnualValue)}`,
       `Annual Investment: ${fmtFull(totalInvestment)}`,
-      summary.roiMultiple ? `ROI Multiple: ${formatMultiple(summary.roiMultiple)}` : "",
+      "",
       "",
       "Value by Dimension:",
       ...dimensionBreakdown.map(
@@ -159,12 +159,12 @@ export function ExecutiveSummary({
 
         <Card>
           <CardContent className="pt-6">
-            <p className="text-muted-foreground text-sm font-medium">ROI Multiple</p>
+            <p className="text-muted-foreground text-sm font-medium">Hours Saved / Month</p>
             <p className="text-2xl sm:text-3xl font-bold font-mono text-[#FF4A00]">
-              {summary.roiMultiple ? formatMultiple(summary.roiMultiple) : "\u2014"}
+              {formatNumber(Math.round(summary.hoursSavedPerMonth))}
             </p>
-            {summary.roiMultiple && (
-              <p className="text-muted-foreground text-xs mt-1">X return</p>
+            {summary.fteEquivalent > 0 && (
+              <p className="text-muted-foreground text-xs mt-1">{summary.fteEquivalent.toFixed(1)} FTEs</p>
             )}
           </CardContent>
         </Card>
@@ -329,9 +329,9 @@ export function ExecutiveSummary({
                       <p className="flex-1 py-2 text-sm">{point}</p>
                     ) : (
                       <>
-                        <Textarea
+                        <DebouncedTextarea
                           value={point}
-                          onChange={(e) => handleTalkingPointChange(index, e.target.value)}
+                          onChange={(value) => handleTalkingPointChange(index, value)}
                           className="flex-1 min-h-[40px] resize-none"
                           rows={1}
                         />

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import type { ValueItem, Dimension, Archetype, ConfidenceTier } from "../types/roi";
@@ -11,6 +12,7 @@ import { formatCurrency, formatCurrencyCompact } from "../utils/formatting";
 import { Button } from "@/components/ui/button";
 import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -35,38 +37,43 @@ export function ValueItemsTab({ calculation, valueItems, readOnly = false }: Val
   const totalValue = calculateTotalAnnualValue(valueItems);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      {/* Total Annual Value Banner */}
-      <Card className="bg-gradient-to-r from-[#FF4A00] to-[#FF6B33] text-white">
-        <CardContent className="py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white/80 text-sm font-medium">Total Annual Value</p>
-              <p className="text-4xl font-bold font-mono">{formatCurrency(totalValue)}</p>
+    <TooltipProvider delayDuration={200}>
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Total Annual Value Banner */}
+        <Card className="bg-gradient-to-r from-[#FF4A00] to-[#FF6B33] text-white">
+          <CardContent className="py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-sm font-medium">Total Annual Value</p>
+                <p className="text-4xl font-bold font-mono">{formatCurrency(totalValue)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-white/80 text-sm">{valueItems.length} value items</p>
+                <p className="text-white/80 text-sm">
+                  across {new Set(valueItems.map((i) => i.dimension)).size} dimensions
+                </p>
+                <Link to="/methodology" className="text-white/70 hover:text-white text-xs hover:underline">
+                  Methodology & sources →
+                </Link>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-white/80 text-sm">{valueItems.length} value items</p>
-              <p className="text-white/80 text-sm">
-                across {new Set(valueItems.map((i) => i.dimension)).size} dimensions
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Dimension Sections */}
-      {DIMENSION_ORDER.map((dimension) => (
-        <DimensionSection
-          key={dimension}
-          dimension={dimension}
-          calculationId={calculation._id}
-          items={valueItems
-            .filter((item) => item.dimension === dimension)
-            .sort((a, b) => a.order - b.order)}
-          readOnly={readOnly}
-        />
-      ))}
-    </div>
+        {/* Dimension Sections */}
+        {DIMENSION_ORDER.map((dimension) => (
+          <DimensionSection
+            key={dimension}
+            dimension={dimension}
+            calculationId={calculation._id}
+            items={valueItems
+              .filter((item) => item.dimension === dimension)
+              .sort((a, b) => a.order - b.order)}
+            readOnly={readOnly}
+          />
+        ))}
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -382,27 +389,35 @@ function ArchetypeInput({ field, input, readOnly, onValueChange, onConfidenceCha
     <div className="space-y-1">
       <div className="flex items-center justify-between">
         <label className="text-xs text-muted-foreground">{field.label}</label>
-        {!readOnly ? (
-          <select
-            value={confidence}
-            onChange={(e) => onConfidenceChange(e.target.value as ConfidenceTier)}
-            className="text-[10px] font-bold rounded px-1 py-0 border-none cursor-pointer"
-            style={{ backgroundColor: badge.bg, color: badge.color }}
-            title={`Confidence: ${confidence}${input?.source ? ` — ${input.source}` : ""}`}
-          >
-            <option value="benchmarked">B</option>
-            <option value="estimated">E</option>
-            <option value="custom">C</option>
-          </select>
-        ) : (
-          <span
-            className="text-[10px] font-bold rounded px-1"
-            style={{ backgroundColor: badge.bg, color: badge.color }}
-            title={`Confidence: ${confidence}${input?.source ? ` — ${input.source}` : ""}`}
-          >
-            {badge.label}
-          </span>
-        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {!readOnly ? (
+              <select
+                value={confidence}
+                onChange={(e) => onConfidenceChange(e.target.value as ConfidenceTier)}
+                className="text-[10px] font-bold rounded px-1 py-0 border-none cursor-pointer"
+                style={{ backgroundColor: badge.bg, color: badge.color }}
+              >
+                <option value="benchmarked">B</option>
+                <option value="estimated">E</option>
+                <option value="custom">C</option>
+              </select>
+            ) : (
+              <span
+                className="text-[10px] font-bold rounded px-1"
+                style={{ backgroundColor: badge.bg, color: badge.color }}
+              >
+                {badge.label}
+              </span>
+            )}
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="font-semibold">Confidence: {confidence.charAt(0).toUpperCase() + confidence.slice(1)}</p>
+            <p>Source: {input?.source || field.source || "No source specified"}</p>
+            {field.guidance && <p className="mt-1 text-white/80">{field.guidance}</p>}
+            {field.range && <p className="mt-1 text-white/80">Typical range: {field.range[0]} – {field.range[1]}</p>}
+          </TooltipContent>
+        </Tooltip>
       </div>
       {readOnly ? (
         <p className="text-sm font-mono py-1">

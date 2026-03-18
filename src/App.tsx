@@ -7,6 +7,9 @@ import "./index.css";
 const CompanyPage = lazy(() =>
   import("./pages/CompanyPage").then((m) => ({ default: m.CompanyPage }))
 );
+const MethodologyPage = lazy(() =>
+  import("./pages/MethodologyPage").then((m) => ({ default: m.MethodologyPage }))
+);
 
 export function App() {
   return (
@@ -21,6 +24,7 @@ export function App() {
           <Route path="/c/:id/share" element={<CalculatorPage summaryOnly />} />
           <Route path="/c/:id/share/obfuscated" element={<CalculatorPage summaryOnly obfuscated />} />
           <Route path="/c/:id/demo" element={<CalculatorPage summaryOnly obfuscated />} />
+          <Route path="/methodology" element={<MethodologyPage />} />
         </Routes>
       </Suspense>
     </div>

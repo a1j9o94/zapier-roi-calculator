@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DebouncedInput } from "@/components/ui/debounced-input";
 import { AssumptionsTab } from "../components/AssumptionsTab";
 import { ValueItemsTab } from "../components/ValueItemsTab";
 import { UseCasesTab } from "../components/UseCasesTab";
@@ -26,7 +26,6 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>("summary");
   const [isEditingName, setIsEditingName] = useState(false);
-  const [editedName, setEditedName] = useState("");
 
   const isEmbed = searchParams.get("embed") === "true";
   const isObfuscated = obfuscated || searchParams.get("obfuscate") === "true";
@@ -81,20 +80,7 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
   }
 
   const handleStartEditName = () => {
-    setEditedName(calculation.name);
     setIsEditingName(true);
-  };
-
-  const handleSaveName = async () => {
-    if (editedName.trim() && editedName !== calculation.name) {
-      await updateName({ id: calculation._id, name: editedName.trim() });
-    }
-    setIsEditingName(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSaveName();
-    else if (e.key === "Escape") setIsEditingName(false);
   };
 
   const tabs: { id: TabId; label: string }[] = summaryOnly
@@ -108,7 +94,7 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
         { id: "dashboard", label: "Dashboard" },
         { id: "detail", label: "Detail View" },
         { id: "values", label: "Value Items" },
-        { id: "assumptions", label: "Settings" },
+        { id: "assumptions", label: "Inputs" },
       ];
 
   const displayName = isObfuscated
@@ -140,14 +126,27 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
                   </svg>
                 </div>
                 {isEditingName && !summaryOnly ? (
-                  <Input
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    onBlur={handleSaveName}
-                    onKeyDown={handleKeyDown}
-                    className="text-xl font-semibold w-80"
-                    autoFocus
-                  />
+                  <div onBlur={() => setIsEditingName(false)}>
+                    <DebouncedInput
+                      value={calculation.name}
+                      onChange={(value) => {
+                        const name = String(value).trim();
+                        if (name && name !== calculation.name) {
+                          updateName({ id: calculation._id, name });
+                        }
+                      }}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter") {
+                          (e.target as HTMLInputElement).blur();
+                        } else if (e.key === "Escape") {
+                          setIsEditingName(false);
+                        }
+                      }}
+                      debounceMs={500}
+                      className="text-xl font-semibold w-80"
+                      autoFocus
+                    />
+                  </div>
                 ) : (
                   <h1
                     className={`text-xl font-semibold ${summaryOnly ? "" : "cursor-pointer hover:text-[#FF4A00] transition-colors"}`}
@@ -191,7 +190,12 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
 
       <main className={isEmbed ? "p-4" : "container mx-auto px-4 py-6"}>
         {effectiveTab === "assumptions" && (
-          <AssumptionsTab calculation={calculation} readOnly={summaryOnly} />
+          <AssumptionsTab
+            calculation={calculation}
+            valueItems={valueItems}
+            useCases={useCases ?? []}
+            readOnly={summaryOnly}
+          />
         )}
         {effectiveTab === "values" && (
           <ValueItemsTab

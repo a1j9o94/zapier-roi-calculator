@@ -1,6 +1,6 @@
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { RateTier } from "../types/roi";
+import type { RateTier, ValueItem, UseCase } from "../types/roi";
 import {
   Card,
   CardContent,
@@ -8,8 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { DebouncedInput } from "@/components/ui/debounced-input";
 import { Label } from "@/components/ui/label";
+import { AllInputsTable } from "./AllInputsTable";
 
 interface AssumptionsTabProps {
   calculation: {
@@ -24,6 +25,8 @@ interface AssumptionsTabProps {
     proposedSpend?: number;
     obfuscation?: { companyDescriptor?: string; hideNotes?: boolean; roundValues?: boolean };
   };
+  valueItems: ValueItem[];
+  useCases: UseCase[];
   readOnly?: boolean;
 }
 
@@ -36,15 +39,15 @@ const RATE_TIERS: { key: RateTier; label: string; description: string }[] = [
   { key: "executive", label: "Executive", description: "$200K+ loaded" },
 ];
 
-export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTabProps) {
+export function AssumptionsTab({ calculation, valueItems, useCases, readOnly = false }: AssumptionsTabProps) {
   const updateAssumptions = useMutation(api.calculations.updateAssumptions);
   const updateInvestment = useMutation(api.calculations.updateInvestment);
   const updateObfuscation = useMutation(api.calculations.updateObfuscation);
 
   const { assumptions } = calculation;
 
-  const handleRateChange = (tier: RateTier, value: string) => {
-    const numValue = parseFloat(value) || 0;
+  const handleRateChange = (tier: RateTier, value: string | number) => {
+    const numValue = Number(value) || 0;
     updateAssumptions({
       id: calculation._id,
       assumptions: {
@@ -57,8 +60,8 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
     });
   };
 
-  const handleProjectionChange = (field: "projectionYears" | "annualGrowthRate", value: string) => {
-    const numValue = parseFloat(value) || 0;
+  const handleProjectionChange = (field: "projectionYears" | "annualGrowthRate", value: string | number) => {
+    const numValue = Number(value) || 0;
     updateAssumptions({
       id: calculation._id,
       assumptions: {
@@ -68,8 +71,8 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
     });
   };
 
-  const handleRealizationChange = (yearIndex: number, value: string) => {
-    const numValue = (parseFloat(value) || 0) / 100;
+  const handleRealizationChange = (yearIndex: number, value: string | number) => {
+    const numValue = (Number(value) || 0) / 100;
     const newRamp = [...assumptions.realizationRamp];
     newRamp[yearIndex] = numValue;
     updateAssumptions({
@@ -78,13 +81,21 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
     });
   };
 
-  const handleInvestmentChange = (field: "currentSpend" | "proposedSpend", value: string) => {
-    const numValue = parseFloat(value) || 0;
+  const handleInvestmentChange = (field: "currentSpend" | "proposedSpend", value: string | number) => {
+    const numValue = Number(value) || 0;
     updateInvestment({ id: calculation._id, [field]: numValue });
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* All Value Assumptions */}
+      <AllInputsTable
+        valueItems={valueItems}
+        useCases={useCases}
+        calculationId={calculation._id}
+        readOnly={readOnly}
+      />
+
       {/* Default Hourly Rates */}
       <Card>
         <CardHeader>
@@ -103,11 +114,12 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                 {readOnly ? (
                   <span className="font-mono py-2">{assumptions.defaultRates[key]}</span>
                 ) : (
-                  <Input
+                  <DebouncedInput
                     id={`rate-${key}`}
                     type="number"
                     value={assumptions.defaultRates[key]}
-                    onChange={(e) => handleRateChange(key, e.target.value)}
+                    onChange={(value) => handleRateChange(key, value)}
+                    debounceMs={300}
                     className="font-mono"
                   />
                 )}
@@ -132,13 +144,14 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                 {readOnly ? (
                   <span className="font-mono py-2">{assumptions.projectionYears}</span>
                 ) : (
-                  <Input
+                  <DebouncedInput
                     id="projection-years"
                     type="number"
                     min="1"
                     max="10"
                     value={assumptions.projectionYears}
-                    onChange={(e) => handleProjectionChange("projectionYears", e.target.value)}
+                    onChange={(value) => handleProjectionChange("projectionYears", value)}
+                    debounceMs={300}
                     className="font-mono"
                   />
                 )}
@@ -151,11 +164,12 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                 {readOnly ? (
                   <span className="font-mono py-2">{Math.round(assumptions.annualGrowthRate * 100)}</span>
                 ) : (
-                  <Input
+                  <DebouncedInput
                     id="growth-rate"
                     type="number"
                     value={Math.round(assumptions.annualGrowthRate * 100)}
-                    onChange={(e) => handleProjectionChange("annualGrowthRate", e.target.value)}
+                    onChange={(value) => handleProjectionChange("annualGrowthRate", value)}
+                    debounceMs={300}
                     className="font-mono"
                   />
                 )}
@@ -177,12 +191,13 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
                     {readOnly ? (
                       <span className="font-mono py-2 w-20">{Math.round(rate * 100)}</span>
                     ) : (
-                      <Input
+                      <DebouncedInput
                         type="number"
                         min="0"
                         max="100"
                         value={Math.round(rate * 100)}
-                        onChange={(e) => handleRealizationChange(index, e.target.value)}
+                        onChange={(value) => handleRealizationChange(index, value)}
+                        debounceMs={300}
                         className="font-mono w-20"
                       />
                     )}
@@ -199,7 +214,7 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
       <Card>
         <CardHeader>
           <CardTitle>Proposed Investment</CardTitle>
-          <CardDescription>Annual Zapier investment used as the denominator for ROI</CardDescription>
+          <CardDescription>Annual Zapier investment for this engagement</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2 max-w-xs">
@@ -209,11 +224,12 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
               {readOnly ? (
                 <span className="font-mono py-2">{(calculation.proposedSpend ?? 0).toLocaleString()}</span>
               ) : (
-                <Input
+                <DebouncedInput
                   id="proposed-spend"
                   type="number"
                   value={calculation.proposedSpend ?? ""}
-                  onChange={(e) => handleInvestmentChange("proposedSpend", e.target.value)}
+                  onChange={(value) => handleInvestmentChange("proposedSpend", value)}
+                  debounceMs={300}
                   className="font-mono"
                   placeholder="0"
                 />
@@ -238,18 +254,19 @@ export function AssumptionsTab({ calculation, readOnly = false }: AssumptionsTab
             {readOnly ? (
               <span className="font-mono py-2">{calculation.obfuscation?.companyDescriptor || "Enterprise Customer"}</span>
             ) : (
-              <Input
+              <DebouncedInput
                 id="company-descriptor"
                 value={calculation.obfuscation?.companyDescriptor ?? ""}
-                onChange={(e) =>
+                onChange={(value) =>
                   updateObfuscation({
                     id: calculation._id,
                     obfuscation: {
                       ...calculation.obfuscation,
-                      companyDescriptor: e.target.value,
+                      companyDescriptor: String(value),
                     },
                   })
                 }
+                debounceMs={500}
                 placeholder="e.g., Fortune 500 Shipping & Logistics Company"
               />
             )}

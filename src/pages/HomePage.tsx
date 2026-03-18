@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ export function HomePage() {
   };
 
   const handleQuickCreate = async () => {
-    const result = await createCalculation({ name: "New ROI Calculation" });
+    const result = await createCalculation({ name: "New Value Calculation" });
     navigate(`/c/${result.shortId}`);
   };
 
@@ -112,19 +112,27 @@ export function HomePage() {
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </div>
-            <span className="font-semibold text-lg">Zapier ROI Calculator</span>
+            <span className="font-semibold text-lg">Zapier Value Calculator</span>
             <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">v2</span>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowNewCompany(true)}>
-              + New Company
-            </Button>
-            <Button variant="outline" onClick={handleQuickCreate}>
-              Quick Create
-            </Button>
-            <Button onClick={handleNewCalculation} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
-              + New with Wizard
-            </Button>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/methodology"
+              className="text-sm text-muted-foreground hover:text-[#FF4A00] transition-colors"
+            >
+              Methodology & Sources
+            </Link>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowNewCompany(true)}>
+                + New Company
+              </Button>
+              <Button variant="outline" onClick={handleQuickCreate}>
+                Quick Create
+              </Button>
+              <Button onClick={handleNewCalculation} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
+                + New with Wizard
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -134,7 +142,7 @@ export function HomePage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Value Engineering</h1>
             <p className="text-muted-foreground">
-              Build and share ROI analyses powered by UVS taxonomy
+              Build and share value analyses powered by UVS taxonomy
             </p>
           </div>
 
@@ -196,7 +204,7 @@ export function HomePage() {
                     Create a Company
                   </Button>
                   <Button onClick={handleNewCalculation} className="bg-[#FF4A00] hover:bg-[#CC3B00] text-white">
-                    Create your first ROI calculation
+                    Create your first value calculation
                   </Button>
                 </div>
               </CardContent>
