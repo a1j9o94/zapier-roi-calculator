@@ -1,6 +1,8 @@
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { RateTier, ValueItem, UseCase } from "../types/roi";
+import { calculateTotalAnnualValue, calculateTotalHoursSaved, calculateFTEEquivalent } from "../utils/calculations";
+import { formatCurrencyCompact } from "../utils/formatting";
 import {
   Card,
   CardContent,
@@ -86,8 +88,43 @@ export function AssumptionsTab({ calculation, valueItems, useCases, readOnly = f
     updateInvestment({ id: calculation._id, [field]: numValue });
   };
 
+  const totalValue = calculateTotalAnnualValue(valueItems);
+  const hoursSaved = calculateTotalHoursSaved(valueItems);
+  const fteEquiv = calculateFTEEquivalent(hoursSaved);
+  const investment = calculation.proposedSpend ?? 0;
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Live Total Value Banner */}
+      <div className="sticky top-[57px] z-10">
+        <Card className="bg-gradient-to-r from-[#FF4A00] to-[#FF6B33] text-white shadow-lg border-0">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/70 text-xs font-medium">Total Annual Value</p>
+                <p className="text-3xl font-bold font-mono">{formatCurrencyCompact(totalValue)}</p>
+              </div>
+              <div className="flex gap-8 text-right">
+                <div>
+                  <p className="text-white/70 text-xs">Hours saved/mo</p>
+                  <p className="text-lg font-semibold font-mono">{Math.round(hoursSaved).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-white/70 text-xs">FTE equiv</p>
+                  <p className="text-lg font-semibold font-mono">{fteEquiv.toFixed(1)}</p>
+                </div>
+                {investment > 0 && (
+                  <div>
+                    <p className="text-white/70 text-xs">Investment</p>
+                    <p className="text-lg font-semibold font-mono">{formatCurrencyCompact(investment)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* All Value Assumptions */}
       <AllInputsTable
         valueItems={valueItems}
