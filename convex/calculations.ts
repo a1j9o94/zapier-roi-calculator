@@ -217,6 +217,17 @@ export const updateCompanyId = mutation({
       companyId: args.companyId,
       updatedAt: Date.now(),
     });
+
+    // Backfill companyId on all use cases belonging to this calculator
+    const useCases = await ctx.db
+      .query("useCases")
+      .withIndex("by_calculationId", (q) => q.eq("calculationId", args.id))
+      .collect();
+    for (const uc of useCases) {
+      if (uc.companyId !== args.companyId) {
+        await ctx.db.patch(uc._id, { companyId: args.companyId });
+      }
+    }
   },
 });
 

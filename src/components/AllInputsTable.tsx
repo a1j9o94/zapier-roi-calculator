@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import type { ValueItem, UseCase, ConfidenceTier } from "../types/roi";
+import { normalizeConfidence } from "../types/roi";
 import { ARCHETYPE_FIELDS } from "../types/archetypes";
 import type { ArchetypeFieldDef } from "../types/archetypes";
 import { DebouncedInput } from "@/components/ui/debounced-input";
@@ -16,16 +17,18 @@ interface AllInputsTableProps {
   readOnly?: boolean;
 }
 
-const CONFIDENCE_BADGE: Record<ConfidenceTier, { label: string; color: string; bg: string }> = {
-  benchmarked: { label: "B", color: "#059669", bg: "#D1FAE5" },
-  estimated: { label: "E", color: "#D97706", bg: "#FEF3C7" },
-  custom: { label: "C", color: "#6B7280", bg: "#F3F4F6" },
+const CONFIDENCE_BADGE: Record<ConfidenceTier, { label: string; color: string; bg: string; title: string }> = {
+  A: { label: "A", color: "#059669", bg: "#D1FAE5", title: "Customer Provided" },
+  B: { label: "B", color: "#2563EB", bg: "#DBEAFE", title: "Published Benchmark" },
+  C: { label: "C", color: "#D97706", bg: "#FEF3C7", title: "Estimated" },
+  D: { label: "D", color: "#6B7280", bg: "#F3F4F6", title: "Unsourced" },
 };
 
 const CONFIDENCE_OPTIONS: { value: ConfidenceTier; label: string }[] = [
-  { value: "benchmarked", label: "B" },
-  { value: "estimated", label: "E" },
-  { value: "custom", label: "C" },
+  { value: "A", label: "A" },
+  { value: "B", label: "B" },
+  { value: "C", label: "C" },
+  { value: "D", label: "D" },
 ];
 
 interface GroupedItems {
@@ -186,7 +189,7 @@ function ItemRows({
       {fields.map((field, idx) => {
         const input = item.inputs?.[field.key];
         const value = input?.value ?? field.defaultValue ?? 0;
-        const confidence = input?.confidence ?? field.defaultConfidence;
+        const confidence = normalizeConfidence(input?.confidence ?? field.defaultConfidence);
         const source = input?.source ?? field.source ?? "";
         const badge = CONFIDENCE_BADGE[confidence];
 
@@ -269,7 +272,7 @@ function ItemRows({
                   )}
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p className="font-semibold">Confidence: {confidence.charAt(0).toUpperCase() + confidence.slice(1)}</p>
+                  <p className="font-semibold">Confidence: {CONFIDENCE_BADGE[confidence].title}</p>
                   <p>Source: {source || field.source || "No source specified"}</p>
                   {field.guidance && <p className="mt-1 text-white/80">{field.guidance}</p>}
                   {field.range && <p className="mt-1 text-white/80">Typical range: {field.range[0]} – {field.range[1]}</p>}

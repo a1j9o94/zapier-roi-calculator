@@ -36,11 +36,21 @@ export type Archetype =
   | "incident_prevention"
   | "process_consistency";
 
-// Input confidence tiers (from value driver tree)
-// [B] = Case-study-backed real data (benchmarked)
-// [E] = Industry research + Zapier internal data (estimated)
-// [C] = No reasonable basis — customer fills inputs (custom)
-export type ConfidenceTier = "benchmarked" | "estimated" | "custom";
+// Evidence confidence tiers (Andre's 4-tier taxonomy)
+// [A] = Customer-provided data — highest credibility
+// [B] = Published benchmark with named study and methodology
+// [C] = Estimated from industry patterns — validate with customer
+// [D] = Unsourced — no published basis, flag for validation
+export type ConfidenceTier = "A" | "B" | "C" | "D";
+
+// Backward compatibility: normalize old tier names from existing database records
+export function normalizeConfidence(raw: string): ConfidenceTier {
+  if (raw === "custom") return "A";
+  if (raw === "benchmarked") return "B";
+  if (raw === "estimated") return "C";
+  if (raw === "A" || raw === "B" || raw === "C" || raw === "D") return raw;
+  return "D"; // Unknown tier defaults to unsourced
+}
 
 // Each value item input tracks its source
 export interface ValueInput {

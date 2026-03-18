@@ -120,7 +120,7 @@ export function NewCalculatorWizard({ onComplete, onCancel }: NewCalculatorWizar
           const inputs: Record<string, { value: number; confidence: string }> = {};
           if (pattern) {
             for (const [key, val] of Object.entries(pattern.defaultInputs)) {
-              inputs[key] = { value: val, confidence: "estimated" };
+              inputs[key] = { value: val, confidence: "C" };
             }
           }
           return {

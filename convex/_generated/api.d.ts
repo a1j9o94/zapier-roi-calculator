@@ -14,6 +14,7 @@ import type * as http from "../http.js";
 import type * as migrations from "../migrations.js";
 import type * as useCases from "../useCases.js";
 import type * as valueItems from "../valueItems.js";
+import type * as zapActions from "../zapActions.js";
 import type * as zapRunCache from "../zapRunCache.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   useCases: typeof useCases;
   valueItems: typeof valueItems;
+  zapActions: typeof zapActions;
   zapRunCache: typeof zapRunCache;
 }>;
 

@@ -95,7 +95,7 @@ export function generateExecutiveSummaryPDF(
   drawFooter(doc);
 
   // Save the PDF
-  const filename = `${calculation.name.replace(/[^a-z0-9]/gi, "_")}_ROI_Summary.pdf`;
+  const filename = `${calculation.name.replace(/[^a-z0-9]/gi, "_")}_Value_Summary.pdf`;
   doc.save(filename);
 }
 
@@ -116,7 +116,7 @@ function drawHeader(doc: jsPDF, data: PDFData, y: number): number {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(COLORS.mediumGray);
-  doc.text("ROI Analysis", 15, y + 16);
+  doc.text("Value Analysis", 15, y + 16);
 
   // Date
   doc.setFontSize(8);
@@ -168,7 +168,7 @@ function drawKPISummary(doc: jsPDF, data: PDFData, y: number): number {
     { align: "center" }
   );
 
-  // ROI Multiple box
+  // Hours Saved box
   const box3X = box2X + boxWidth + 10;
   doc.setFillColor(COLORS.background);
   doc.roundedRect(box3X, y, boxWidth, boxHeight, 2, 2, "F");
@@ -176,13 +176,13 @@ function drawKPISummary(doc: jsPDF, data: PDFData, y: number): number {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(COLORS.mediumGray);
-  doc.text("ROI Multiple", box3X + boxWidth / 2, y + 7, { align: "center" });
+  doc.text("Hours Saved / Month", box3X + boxWidth / 2, y + 7, { align: "center" });
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(COLORS.orange);
   doc.text(
-    data.roiMultiple ? formatMultiple(data.roiMultiple) : "—",
+    data.totalHoursSaved > 0 ? Math.round(data.totalHoursSaved).toLocaleString() : "—",
     box3X + boxWidth / 2,
     y + 16,
     { align: "center" }

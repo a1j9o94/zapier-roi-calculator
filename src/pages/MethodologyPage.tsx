@@ -45,9 +45,6 @@ function TierBadge({ tier }: { tier: string }) {
     B: "bg-blue-100 text-blue-800",
     C: "bg-amber-100 text-amber-800",
     D: "bg-gray-100 text-gray-500",
-    benchmarked: "bg-emerald-100 text-emerald-800",
-    estimated: "bg-amber-100 text-amber-800",
-    custom: "bg-gray-100 text-gray-600",
   };
   return (
     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${styles[tier] ?? "bg-gray-100 text-gray-500"}`}>
@@ -282,18 +279,32 @@ export function MethodologyPage() {
         {/* Confidence Tiers */}
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Confidence Tiers</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <span className="inline-block w-3 h-3 rounded-full bg-emerald-500" />
-                  Benchmarked
+                  A — Customer Provided
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Backed by published research, large-sample studies, or validated customer data.
-                  Highest confidence — defensible in executive conversations.
+                  Data provided directly by the customer. Highest credibility — they
+                  can't argue with their own numbers.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <span className="inline-block w-3 h-3 rounded-full bg-blue-500" />
+                  B — Published Benchmark
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Backed by a named study with sample size and methodology. Defensible
+                  in executive conversations.
                 </p>
               </CardContent>
             </Card>
@@ -301,13 +312,13 @@ export function MethodologyPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <span className="inline-block w-3 h-3 rounded-full bg-amber-500" />
-                  Estimated
+                  C — Estimated
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Reasonable assumptions based on industry patterns and analyst reports.
-                  Should be validated with the customer during discovery.
+                  Reasonable assumption based on industry patterns. Should be validated
+                  with the customer during discovery.
                 </p>
               </CardContent>
             </Card>
@@ -315,13 +326,13 @@ export function MethodologyPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <span className="inline-block w-3 h-3 rounded-full bg-gray-400" />
-                  Custom
+                  D — Unsourced
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Customer-provided values specific to their business. Most credible when
-                  sourced directly from the buyer during a live conversation.
+                  No published basis. Directional only — flag for validation before
+                  presenting externally.
                 </p>
               </CardContent>
             </Card>

@@ -8,7 +8,7 @@ import type {
   YearProjection,
   ConfidenceTier,
 } from "../types/roi";
-import { ARCHETYPE_DIMENSION, DIMENSION_INFO, DIMENSION_ORDER } from "../types/roi";
+import { ARCHETYPE_DIMENSION, DIMENSION_INFO, DIMENSION_ORDER, normalizeConfidence } from "../types/roi";
 
 // ============================================================
 // Archetype-specific calculation functions
@@ -236,26 +236,26 @@ export function calculateComputedValue(item: ValueItem): ComputedValue {
 /**
  * Get the lowest confidence tier across all inputs
  */
-function getLowestConfidence(inputs: Record<string, { value: number; confidence?: ConfidenceTier }>): ConfidenceTier {
+function getLowestConfidence(inputs: Record<string, { value: number; confidence?: ConfidenceTier | string }>): ConfidenceTier {
   const tiers: ConfidenceTier[] = Object.values(inputs)
-    .map((i) => i.confidence ?? "custom")
+    .map((i) => normalizeConfidence(i.confidence ?? "D"))
     .filter(Boolean) as ConfidenceTier[];
 
-  if (tiers.length === 0) return "custom";
+  if (tiers.length === 0) return "D";
 
   const priority: Record<ConfidenceTier, number> = {
-    custom: 0,
-    estimated: 1,
-    benchmarked: 2,
+    D: 0,
+    C: 1,
+    B: 2,
+    A: 3,
   };
 
-  let lowest: ConfidenceTier = "benchmarked";
+  let lowest: ConfidenceTier = "A";
   for (const tier of tiers) {
     if (priority[tier] < priority[lowest]) {
       lowest = tier;
     }
   }
-
   return lowest;
 }
 

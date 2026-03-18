@@ -293,9 +293,11 @@ export function CompanyDashboard({ company, summaryOnly = false }: CompanyDashbo
             </Card>
             <Card>
               <CardContent className="pt-6">
-                <div className="text-sm text-muted-foreground">Total ROI</div>
+                <div className="text-sm text-muted-foreground">Annual Investment</div>
                 <div className="text-3xl font-bold">
-                  {aggregate.totalROI ? `${aggregate.totalROI}x` : "N/A"}
+                  {aggregate.calculators.reduce((sum, c) => sum + (c.proposedSpend ?? 0), 0) > 0
+                    ? formatCurrencyCompact(aggregate.calculators.reduce((sum, c) => sum + (c.proposedSpend ?? 0), 0))
+                    : "N/A"}
                 </div>
               </CardContent>
             </Card>
@@ -405,10 +407,10 @@ export function CompanyDashboard({ company, summaryOnly = false }: CompanyDashbo
                             <span className="text-muted-foreground">Value: </span>
                             <span className="font-semibold">{formatCurrencyCompact(calc.totalAnnualValue)}</span>
                           </div>
-                          {calc.roiMultiple && (
+                          {(calc.proposedSpend ?? 0) > 0 && (
                             <div>
-                              <span className="text-muted-foreground">ROI: </span>
-                              <span className="font-semibold">{calc.roiMultiple}x</span>
+                              <span className="text-muted-foreground">Investment: </span>
+                              <span className="font-semibold">{formatCurrencyCompact(calc.proposedSpend!)}</span>
                             </div>
                           )}
                           {calc.hoursSavedPerMonth > 0 && (

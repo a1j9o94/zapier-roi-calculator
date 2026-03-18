@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import type { ValueItem, Dimension, Archetype, ConfidenceTier } from "../types/roi";
-import { DIMENSION_INFO, DIMENSION_ORDER, ARCHETYPE_INFO, ARCHETYPE_DIMENSION } from "../types/roi";
+import { DIMENSION_INFO, DIMENSION_ORDER, ARCHETYPE_INFO, ARCHETYPE_DIMENSION, normalizeConfidence } from "../types/roi";
 import { ARCHETYPE_FIELDS } from "../types/archetypes";
 import type { ArchetypeFieldDef } from "../types/archetypes";
 import { calculateItemAnnualValue, calculateComputedValue, calculateTotalAnnualValue } from "../utils/calculations";
@@ -27,10 +27,11 @@ interface ValueItemsTabProps {
   readOnly?: boolean;
 }
 
-const CONFIDENCE_BADGE: Record<ConfidenceTier, { label: string; color: string; bg: string }> = {
-  benchmarked: { label: "B", color: "#059669", bg: "#D1FAE5" },
-  estimated: { label: "E", color: "#D97706", bg: "#FEF3C7" },
-  custom: { label: "C", color: "#6B7280", bg: "#F3F4F6" },
+const CONFIDENCE_BADGE: Record<ConfidenceTier, { label: string; color: string; bg: string; title: string }> = {
+  A: { label: "A", color: "#059669", bg: "#D1FAE5", title: "Customer Provided" },
+  B: { label: "B", color: "#2563EB", bg: "#DBEAFE", title: "Published Benchmark" },
+  C: { label: "C", color: "#D97706", bg: "#FEF3C7", title: "Estimated" },
+  D: { label: "D", color: "#6B7280", bg: "#F3F4F6", title: "Unsourced" },
 };
 
 export function ValueItemsTab({ calculation, valueItems, readOnly = false }: ValueItemsTabProps) {
@@ -212,7 +213,7 @@ function ValueItemCard({ item, readOnly }: ValueItemCardProps) {
   const computed = calculateComputedValue(item);
   const archetypeInfo = ARCHETYPE_INFO[item.archetype];
   const fields = ARCHETYPE_FIELDS[item.archetype] ?? [];
-  const confidenceBadge = CONFIDENCE_BADGE[computed.confidence];
+  const confidenceBadge = CONFIDENCE_BADGE[normalizeConfidence(computed.confidence)];
 
   const handleUpdateInput = (fieldKey: string, newValue: number) => {
     const currentInputs = { ...(item.inputs ?? {}) };
@@ -262,7 +263,7 @@ function ValueItemCard({ item, readOnly }: ValueItemCardProps) {
           <span
             className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
             style={{ backgroundColor: confidenceBadge.bg, color: confidenceBadge.color }}
-            title={`Overall confidence: ${computed.confidence}`}
+            title={`Overall confidence: ${CONFIDENCE_BADGE[normalizeConfidence(computed.confidence)].title}`}
           >
             {confidenceBadge.label}
           </span>
@@ -371,7 +372,7 @@ interface ArchetypeInputProps {
 
 function ArchetypeInput({ field, input, readOnly, onValueChange, onConfidenceChange }: ArchetypeInputProps) {
   const value = input?.value ?? field.defaultValue ?? 0;
-  const confidence = input?.confidence ?? field.defaultConfidence;
+  const confidence = normalizeConfidence(input?.confidence ?? field.defaultConfidence);
   const badge = CONFIDENCE_BADGE[confidence];
 
   // Display value: percentages stored as decimals, show as whole numbers
@@ -398,9 +399,10 @@ function ArchetypeInput({ field, input, readOnly, onValueChange, onConfidenceCha
                 className="text-[10px] font-bold rounded px-1 py-0 border-none cursor-pointer"
                 style={{ backgroundColor: badge.bg, color: badge.color }}
               >
-                <option value="benchmarked">B</option>
-                <option value="estimated">E</option>
-                <option value="custom">C</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
               </select>
             ) : (
               <span
@@ -412,7 +414,7 @@ function ArchetypeInput({ field, input, readOnly, onValueChange, onConfidenceCha
             )}
           </TooltipTrigger>
           <TooltipContent side="top">
-            <p className="font-semibold">Confidence: {confidence.charAt(0).toUpperCase() + confidence.slice(1)}</p>
+            <p className="font-semibold">Confidence: {CONFIDENCE_BADGE[confidence].title}</p>
             <p>Source: {input?.source || field.source || "No source specified"}</p>
             {field.guidance && <p className="mt-1 text-white/80">{field.guidance}</p>}
             {field.range && <p className="mt-1 text-white/80">Typical range: {field.range[0]} – {field.range[1]}</p>}

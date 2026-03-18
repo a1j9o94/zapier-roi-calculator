@@ -97,14 +97,12 @@ export function SlideView({ calculation, valueItems, useCases }: SlideViewProps)
 
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-sm text-muted-foreground mb-1">ROI Multiple</p>
+            <p className="text-sm text-muted-foreground mb-1">Hours Saved / Month</p>
             <p className="text-3xl font-bold tracking-tight">
-              {summary.roiMultiple != null
-                ? `${summary.roiMultiple.toFixed(1)}x`
-                : "--"}
+              {Math.round(summary.hoursSavedPerMonth).toLocaleString()}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              return on investment
+              {summary.fteEquivalent.toFixed(1)} FTE equivalent
             </p>
           </CardContent>
         </Card>

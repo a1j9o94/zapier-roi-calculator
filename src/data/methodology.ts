@@ -38,9 +38,9 @@ const pipelineVelocity: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Revenue,
   formula: "deals/quarter × avg_deal_value × conversion_lift × 4",
   category2Inputs: [
-    { field: "dealsPerQuarter", defaultValue: "200", range: "50–1,000", tier: "estimated" },
-    { field: "avgDealValue", defaultValue: "$25,000", range: "$5K–$500K", tier: "custom" },
-    { field: "conversionLift", defaultValue: "10%", range: "5–25%", tier: "estimated" },
+    { field: "dealsPerQuarter", defaultValue: "200", range: "50–1,000", tier: "C" },
+    { field: "avgDealValue", defaultValue: "$25,000", range: "$5K–$500K", tier: "A" },
+    { field: "conversionLift", defaultValue: "10%", range: "5–25%", tier: "C" },
   ],
   externalStudies: [
     {
@@ -86,9 +86,9 @@ const revenueCapture: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Revenue,
   formula: "annual_revenue × leakage_rate × capture_improvement",
   category2Inputs: [
-    { field: "annualRevenue", defaultValue: "$10,000,000", range: "$1M–$1B", tier: "custom" },
-    { field: "leakageRate", defaultValue: "5%", range: "3–10%", tier: "estimated" },
-    { field: "captureImprovement", defaultValue: "30%", range: "10–50%", tier: "estimated" },
+    { field: "annualRevenue", defaultValue: "$10,000,000", range: "$1M–$1B", tier: "A" },
+    { field: "leakageRate", defaultValue: "5%", range: "3–10%", tier: "C" },
+    { field: "captureImprovement", defaultValue: "30%", range: "10–50%", tier: "C" },
   ],
   externalStudies: [
     {
@@ -134,10 +134,10 @@ const revenueExpansion: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Revenue,
   formula: "customer_base × expansion_rate × avg_value × lift",
   category2Inputs: [
-    { field: "customerBase", defaultValue: "500", range: "50–50,000", tier: "custom" },
-    { field: "expansionRate", defaultValue: "15%", range: "5–40%", tier: "estimated" },
-    { field: "avgExpansionValue", defaultValue: "$5,000", range: "$500–$100K", tier: "custom" },
-    { field: "lift", defaultValue: "20%", range: "10–40%", tier: "estimated" },
+    { field: "customerBase", defaultValue: "500", range: "50–50,000", tier: "A" },
+    { field: "expansionRate", defaultValue: "15%", range: "5–40%", tier: "C" },
+    { field: "avgExpansionValue", defaultValue: "$5,000", range: "$500–$100K", tier: "A" },
+    { field: "lift", defaultValue: "20%", range: "10–40%", tier: "C" },
   ],
   externalStudies: [
     {
@@ -168,9 +168,9 @@ const timeToRevenue: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Revenue,
   formula: "customers/yr × revenue/customer × days_accelerated / 365",
   category2Inputs: [
-    { field: "customersPerYear", defaultValue: "100", range: "10–10,000", tier: "custom" },
-    { field: "revenuePerCustomer", defaultValue: "$50,000", range: "$1K–$1M", tier: "custom" },
-    { field: "daysAccelerated", defaultValue: "14", range: "5–90", tier: "estimated" },
+    { field: "customersPerYear", defaultValue: "100", range: "10–10,000", tier: "A" },
+    { field: "revenuePerCustomer", defaultValue: "$50,000", range: "$1K–$1M", tier: "A" },
+    { field: "daysAccelerated", defaultValue: "14", range: "5–90", tier: "C" },
   ],
   externalStudies: [
     {
@@ -217,10 +217,10 @@ const processAcceleration: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Productivity,
   formula: "processes/mo × (time_before - time_after) × hourly_rate × 12",
   category2Inputs: [
-    { field: "processesPerMonth", defaultValue: "200", range: "20–5,000", tier: "custom" },
-    { field: "timeBefore", defaultValue: "60 min", range: "10–480 min", tier: "estimated" },
-    { field: "timeAfter", defaultValue: "15 min", range: "1–120 min", tier: "estimated" },
-    { field: "hourlyRate", defaultValue: "$50", range: "$25–$200", tier: "estimated" },
+    { field: "processesPerMonth", defaultValue: "200", range: "20–5,000", tier: "A" },
+    { field: "timeBefore", defaultValue: "60 min", range: "10–480 min", tier: "C" },
+    { field: "timeAfter", defaultValue: "15 min", range: "1–120 min", tier: "C" },
+    { field: "hourlyRate", defaultValue: "$50", range: "$25–$200", tier: "C" },
   ],
   externalStudies: [
     {
@@ -294,9 +294,9 @@ const taskElimination: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Productivity,
   formula: "tasks/mo × minutes/task × (hourly_rate/60) × 12",
   category2Inputs: [
-    { field: "tasksPerMonth", defaultValue: "3,000", range: "100–100,000", tier: "benchmarked" },
-    { field: "minutesPerTask", defaultValue: "8", range: "2–60", tier: "estimated" },
-    { field: "hourlyRate", defaultValue: "$50", range: "$25–$200", tier: "estimated" },
+    { field: "tasksPerMonth", defaultValue: "3,000", range: "100–100,000", tier: "B" },
+    { field: "minutesPerTask", defaultValue: "8", range: "2–60", tier: "C" },
+    { field: "hourlyRate", defaultValue: "$50", range: "$25–$200", tier: "C" },
   ],
   externalStudies: [
     {
@@ -357,9 +357,9 @@ const taskSimplification: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Productivity,
   formula: "tasks/mo × minutes_saved × (hourly_rate/60) × 12",
   category2Inputs: [
-    { field: "tasksPerMonth", defaultValue: "1,000", range: "100–50,000", tier: "estimated" },
-    { field: "minutesSaved", defaultValue: "5", range: "1–30", tier: "estimated" },
-    { field: "hourlyRate", defaultValue: "$50", range: "$25–$200", tier: "estimated" },
+    { field: "tasksPerMonth", defaultValue: "1,000", range: "100–50,000", tier: "C" },
+    { field: "minutesSaved", defaultValue: "5", range: "1–30", tier: "C" },
+    { field: "hourlyRate", defaultValue: "$50", range: "$25–$200", tier: "C" },
   ],
   externalStudies: [
     {
@@ -412,12 +412,12 @@ const contextSurfacing: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Productivity,
   formula: "(meetings × attendees × duration × rate × 12) + (searches × time × rate × 12)",
   category2Inputs: [
-    { field: "meetingsPerMonth", defaultValue: "40", range: "10–200", tier: "estimated" },
-    { field: "avgAttendees", defaultValue: "4", range: "2–20", tier: "estimated" },
-    { field: "meetingDuration", defaultValue: "0.5 hrs", range: "0.25–2 hrs", tier: "estimated" },
-    { field: "searchesPerMonth", defaultValue: "200", range: "50–1,000", tier: "estimated" },
-    { field: "searchTime", defaultValue: "10 min", range: "3–30 min", tier: "estimated" },
-    { field: "hourlyRate", defaultValue: "$75", range: "$25–$200", tier: "estimated" },
+    { field: "meetingsPerMonth", defaultValue: "40", range: "10–200", tier: "C" },
+    { field: "avgAttendees", defaultValue: "4", range: "2–20", tier: "C" },
+    { field: "meetingDuration", defaultValue: "0.5 hrs", range: "0.25–2 hrs", tier: "C" },
+    { field: "searchesPerMonth", defaultValue: "200", range: "50–1,000", tier: "C" },
+    { field: "searchTime", defaultValue: "10 min", range: "3–30 min", tier: "C" },
+    { field: "hourlyRate", defaultValue: "$75", range: "$25–$200", tier: "C" },
   ],
   externalStudies: [
     {
@@ -450,8 +450,8 @@ const laborAvoidance: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Cost,
   formula: "FTEs_avoided × loaded_annual_cost",
   category2Inputs: [
-    { field: "ftesAvoided", defaultValue: "2", range: "0.5–20", tier: "estimated" },
-    { field: "loadedAnnualCost", defaultValue: "$150,000", range: "$60K–$300K", tier: "custom" },
+    { field: "ftesAvoided", defaultValue: "2", range: "0.5–20", tier: "C" },
+    { field: "loadedAnnualCost", defaultValue: "$150,000", range: "$60K–$300K", tier: "A" },
   ],
   externalStudies: [
     {
@@ -513,8 +513,8 @@ const toolConsolidation: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Cost,
   formula: "tools × annual_cost/tool",
   category2Inputs: [
-    { field: "toolsConsolidated", defaultValue: "3", range: "1–20", tier: "custom" },
-    { field: "annualCostPerTool", defaultValue: "$12,000", range: "$1K–$100K", tier: "custom" },
+    { field: "toolsConsolidated", defaultValue: "3", range: "1–20", tier: "A" },
+    { field: "annualCostPerTool", defaultValue: "$12,000", range: "$1K–$100K", tier: "A" },
   ],
   externalStudies: [
     {
@@ -553,9 +553,9 @@ const errorReworkElimination: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Cost,
   formula: "errors/mo × cost/error × reduction × 12",
   category2Inputs: [
-    { field: "errorsPerMonth", defaultValue: "50", range: "5–500", tier: "estimated" },
-    { field: "costPerError", defaultValue: "$200", range: "$10–$5,000", tier: "estimated" },
-    { field: "reductionRate", defaultValue: "70%", range: "50–97%", tier: "estimated" },
+    { field: "errorsPerMonth", defaultValue: "50", range: "5–500", tier: "C" },
+    { field: "costPerError", defaultValue: "$200", range: "$10–$5,000", tier: "C" },
+    { field: "reductionRate", defaultValue: "70%", range: "50–97%", tier: "C" },
   ],
   externalStudies: [
     {
@@ -602,9 +602,9 @@ const complianceAssurance: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Risk,
   formula: "violations/yr × penalty × reduction",
   category2Inputs: [
-    { field: "violationsPerYear", defaultValue: "5", range: "1–50", tier: "estimated" },
-    { field: "avgPenalty", defaultValue: "$50,000", range: "$1K–$10M", tier: "estimated" },
-    { field: "reductionRate", defaultValue: "70%", range: "50–90%", tier: "estimated" },
+    { field: "violationsPerYear", defaultValue: "5", range: "1–50", tier: "C" },
+    { field: "avgPenalty", defaultValue: "$50,000", range: "$1K–$10M", tier: "C" },
+    { field: "reductionRate", defaultValue: "70%", range: "50–90%", tier: "C" },
   ],
   externalStudies: [
     {
@@ -642,10 +642,10 @@ const dataIntegrity: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Risk,
   formula: "records/mo × error_rate × cost/error × reduction × 12",
   category2Inputs: [
-    { field: "recordsPerMonth", defaultValue: "10,000", range: "500–1,000,000", tier: "custom" },
-    { field: "errorRate", defaultValue: "4%", range: "1–15%", tier: "estimated" },
-    { field: "costPerError", defaultValue: "$50", range: "$5–$1,000", tier: "estimated" },
-    { field: "reductionRate", defaultValue: "80%", range: "50–99%", tier: "estimated" },
+    { field: "recordsPerMonth", defaultValue: "10,000", range: "500–1,000,000", tier: "A" },
+    { field: "errorRate", defaultValue: "4%", range: "1–15%", tier: "C" },
+    { field: "costPerError", defaultValue: "$50", range: "$5–$1,000", tier: "C" },
+    { field: "reductionRate", defaultValue: "80%", range: "50–99%", tier: "C" },
   ],
   externalStudies: [
     {
@@ -683,9 +683,9 @@ const incidentPrevention: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Risk,
   formula: "incidents/yr × cost/incident × reduction",
   category2Inputs: [
-    { field: "incidentsPerYear", defaultValue: "24", range: "5–200", tier: "estimated" },
-    { field: "costPerIncident", defaultValue: "$10,000", range: "$500–$500K", tier: "estimated" },
-    { field: "reductionRate", defaultValue: "50%", range: "25–80%", tier: "estimated" },
+    { field: "incidentsPerYear", defaultValue: "24", range: "5–200", tier: "C" },
+    { field: "costPerIncident", defaultValue: "$10,000", range: "$500–$500K", tier: "C" },
+    { field: "reductionRate", defaultValue: "50%", range: "25–80%", tier: "C" },
   ],
   externalStudies: [
     {
@@ -732,10 +732,10 @@ const processConsistency: ArchetypeEvidence = {
   dimensionColor: DIMENSION_COLORS.Risk,
   formula: "processes/mo × defect_rate × cost/defect × reduction × 12",
   category2Inputs: [
-    { field: "processesPerMonth", defaultValue: "500", range: "50–10,000", tier: "estimated" },
-    { field: "defectRate", defaultValue: "5%", range: "1–20%", tier: "estimated" },
-    { field: "costPerDefect", defaultValue: "$100", range: "$10–$5,000", tier: "estimated" },
-    { field: "reductionRate", defaultValue: "60%", range: "40–80%", tier: "estimated" },
+    { field: "processesPerMonth", defaultValue: "500", range: "50–10,000", tier: "C" },
+    { field: "defectRate", defaultValue: "5%", range: "1–20%", tier: "C" },
+    { field: "costPerDefect", defaultValue: "$100", range: "$10–$5,000", tier: "C" },
+    { field: "reductionRate", defaultValue: "60%", range: "40–80%", tier: "C" },
   ],
   externalStudies: [
     {
