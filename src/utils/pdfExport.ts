@@ -94,7 +94,13 @@ export function generateExecutiveSummaryPDF(
   drawFooter(doc);
 
   // Save the PDF
-  const filename = `${calculation.name.replace(/[^a-z0-9]/gi, "_")}_Value_Summary.pdf`;
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const yy = String(now.getFullYear()).slice(-2);
+  const companyName = calculation.name.replace(/\s*(Value Assessment|ROI|Enterprise|Analysis).*$/i, "").trim();
+  const safeName = companyName.replace(/[^a-z0-9 ]/gi, "").replace(/\s+/g, " ").trim();
+  const filename = `Zapier Value Assessment for ${safeName} ${dd}${mm}${yy}.pdf`;
   doc.save(filename);
 }
 
