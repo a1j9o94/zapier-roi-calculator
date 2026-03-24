@@ -8,6 +8,7 @@ import {
   calculateItemAnnualValue,
   getDimensionBreakdown,
 } from "../utils/calculations";
+import { generateExecutiveSummaryPDF } from "../utils/pdfExport";
 import {
   formatCurrency,
   formatCurrencyCompact,
@@ -128,7 +129,11 @@ export function ExecutiveSummary({
           <Button variant="outline" size="sm" onClick={handleCopyToClipboard}>
             {copied ? "Copied!" : "Copy Summary"}
           </Button>
-          <Button variant="outline" size="sm" disabled>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => generateExecutiveSummaryPDF(calculation, valueItems)}
+          >
             Export PDF
           </Button>
         </div>
