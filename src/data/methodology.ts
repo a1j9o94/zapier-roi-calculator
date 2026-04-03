@@ -362,10 +362,18 @@ const taskElimination: ArchetypeEvidence = {
       url: "https://zapier.com/customer-stories/wellness-coach",
       tier: "B",
     },
+    {
+      author: "Zapier — Internal Impact Survey",
+      year: 2026,
+      title: "Zap Impact Survey: Personal Productivity Baseline",
+      finding: "70% of Zapier users report individual productivity improvement. Top tasks eliminated: manual data entry (45%), copy/pasting between tools (38%). 66% save <30 min/Zap/week, 22% save 1–3 hours",
+      sampleSize: "116 respondents",
+      tier: "B",
+    },
   ],
   coverageStatus: "GREEN",
-  coverageExplanation: "Strongest evidence base across all archetypes. McKinsey, Freshservice (187M tickets), and three Zapier customer stories.",
-  sourcePageDraft: "Task elimination is the foundation of automation ROI. McKinsey estimates 60–70% of tasks are automatable. Zapier customers validate this at scale.",
+  coverageExplanation: "Strongest evidence base across all archetypes. McKinsey, Freshservice (187M tickets), three Zapier customer stories, and internal impact survey (n=116).",
+  sourcePageDraft: "Task elimination is the foundation of automation ROI. McKinsey estimates 60–70% of tasks are automatable. Zapier customers validate this at scale. Internal survey shows 70% of users report productivity gains.",
 };
 
 const taskSimplification: ArchetypeEvidence = {
@@ -421,10 +429,18 @@ const taskSimplification: ArchetypeEvidence = {
       finding: "Task time reduced from 12.27 to 6.62 minutes (46% improvement) through AI-augmented workflow steps",
       tier: "B",
     },
+    {
+      author: "Zapier — Internal Impact Survey",
+      year: 2026,
+      title: "Zap Impact Survey: Productivity Improvements",
+      finding: "60% cite reduced mental load, 39% report less work falling through the cracks, 32% report more consistent execution. 70% confirm individual productivity improvement",
+      sampleSize: "116 respondents",
+      tier: "B",
+    },
   ],
   coverageStatus: "GREEN",
-  coverageExplanation: "Strong evidence from BCG/HBS, Google, GitHub, and a Zapier customer measurement showing 46% task time reduction.",
-  sourcePageDraft: "Task simplification captures the partial time savings when tasks aren't fully eliminated but are made faster through automation and AI augmentation.",
+  coverageExplanation: "Strong evidence from BCG/HBS, Google, GitHub, Zapier customer measurement (46% reduction), and internal impact survey (n=116).",
+  sourcePageDraft: "Task simplification captures the partial time savings when tasks aren't fully eliminated but are made faster through automation and AI augmentation. Internal survey confirms 70% of users see productivity gains.",
 };
 
 const contextSurfacing: ArchetypeEvidence = {
@@ -459,10 +475,19 @@ const contextSurfacing: ArchetypeEvidence = {
       tier: "B",
     },
   ],
-  zapierStudies: [],
+  zapierStudies: [
+    {
+      author: "Zapier — Internal Impact Survey",
+      year: 2026,
+      title: "Zap Impact Survey: Context & Information Flow",
+      finding: "32% of respondents cite 'looking things up / checking status' as the work most reduced by automation. 20% cite less context switching as a key improvement",
+      sampleSize: "116 respondents",
+      tier: "B",
+    },
+  ],
   coverageStatus: "YELLOW",
-  coverageExplanation: "Moderate external evidence. Context surfacing is a newer category — need Zapier customer stories showing meeting reduction or faster information access.",
-  sourcePageDraft: "Knowledge workers spend 27–43% of their time searching for information. Automation that surfaces context proactively eliminates this waste.",
+  coverageExplanation: "Moderate external evidence plus internal survey data. Context surfacing is a newer category — customer stories would strengthen further.",
+  sourcePageDraft: "Knowledge workers spend 27–43% of their time searching for information. Automation that surfaces context proactively eliminates this waste. Internal survey: 32% cite reduced lookup time.",
 };
 
 // ── Cost Archetypes ─────────────────────────────────────────────────

@@ -382,10 +382,25 @@ function ArchetypeInput({ field, input, readOnly, onValueChange, onConfidenceCha
   const prefix = field.type === "currency" ? "$" : undefined;
   const suffix = field.type === "percentage" ? "%" : field.type === "hours" ? "hrs" : undefined;
 
+  const sourceText = input?.source || field.source;
+
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <label className="text-xs text-muted-foreground">{field.label}</label>
+        {sourceText ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <label className="text-xs text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/40">{field.label}</label>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="font-semibold text-xs">Source</p>
+              <p className="text-xs text-white/80">{sourceText}</p>
+              {field.range && <p className="text-xs text-white/60 mt-1">Range: {field.range[0]} – {field.range[1]}</p>}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <label className="text-xs text-muted-foreground">{field.label}</label>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             {!readOnly ? (

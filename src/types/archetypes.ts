@@ -157,6 +157,7 @@ export interface ArchetypeFieldDef {
   prompt: string;         // Question to ask customer
   defaultConfidence: "A" | "B" | "C" | "D";
   source?: string;        // Default source label
+  sourceUrl?: string;     // URL to primary reference source
   defaultValue?: number;
   range?: [number, number];
   guidance?: string;      // Help text
@@ -166,28 +167,28 @@ export const ARCHETYPE_FIELDS: Record<Archetype, ArchetypeFieldDef[]> = {
   pipeline_velocity: [
     { key: "dealsPerQuarter", label: "Deals per quarter", type: "number", prompt: "How many deals enter your pipeline per quarter?", defaultConfidence: "A" },
     { key: "avgDealValue", label: "Avg deal value ($)", type: "currency", prompt: "What's your average deal size?", defaultConfidence: "A" },
-    { key: "conversionLift", label: "Conversion lift (%)", type: "percentage", prompt: "Expected conversion rate improvement?", defaultConfidence: "C", source: "Revenue Velocity Lab (47,832 deals): 14% close rate improvement. Blazeo 2026: 21x qualification at <5min response", defaultValue: 0.10, range: [0.05, 0.15] },
+    { key: "conversionLift", label: "Conversion lift (%)", type: "percentage", prompt: "Expected conversion rate improvement?", defaultConfidence: "C", source: "Revenue Velocity Lab (47,832 deals): 14% close rate improvement. Blazeo 2026: 21x qualification at <5min response", sourceUrl: "https://www.prnewswire.com/news-releases/blazeo-unveils-2026-speed-to-lead-benchmark-report-302694994.html", defaultValue: 0.10, range: [0.05, 0.15] },
   ],
   revenue_capture: [
     { key: "annualRevenue", label: "Annual revenue ($)", type: "currency", prompt: "What's your total annual revenue?", defaultConfidence: "A" },
-    { key: "leakageRate", label: "Revenue leakage rate (%)", type: "percentage", prompt: "Estimated revenue leakage rate?", defaultConfidence: "C", source: "Gartner 2024: 50% of B2B orgs lose 7-10% to leakage. LedgerUp SaaS: 3-5% ARR", defaultValue: 0.05, range: [0.03, 0.10] },
-    { key: "captureImprovement", label: "Capture improvement (%)", type: "percentage", prompt: "Expected improvement in capturing leaked revenue?", defaultConfidence: "C", source: "LedgerUp: contract-to-cash automation reduces leakage below 1%. Arden Insurance (Zapier): $150M/yr collected", defaultValue: 0.50, range: [0.30, 0.80] },
+    { key: "leakageRate", label: "Revenue leakage rate (%)", type: "percentage", prompt: "Estimated revenue leakage rate?", defaultConfidence: "C", source: "Gartner 2024: 50% of B2B orgs lose 7-10% to leakage. LedgerUp SaaS: 3-5% ARR", sourceUrl: "https://www.oplacrm.com/en/post/revenue-leakage-in-b2b-is-10-of-your-revenue-evaporating-unnoticed", defaultValue: 0.05, range: [0.03, 0.10] },
+    { key: "captureImprovement", label: "Capture improvement (%)", type: "percentage", prompt: "Expected improvement in capturing leaked revenue?", defaultConfidence: "C", source: "LedgerUp: contract-to-cash automation reduces leakage below 1%. Arden Insurance (Zapier): $150M/yr collected", sourceUrl: "https://zapier.com/customer-stories/arden-insurance", defaultValue: 0.50, range: [0.30, 0.80] },
   ],
   revenue_expansion: [
     { key: "customerBase", label: "Active customers", type: "number", prompt: "How many active customers do you have?", defaultConfidence: "A" },
     { key: "expansionRate", label: "Current expansion rate (%)", type: "percentage", prompt: "Current upsell/cross-sell rate?", defaultConfidence: "A" },
     { key: "avgExpansionValue", label: "Avg expansion value ($)", type: "currency", prompt: "Average expansion deal value?", defaultConfidence: "A" },
-    { key: "lift", label: "Expansion lift (%)", type: "percentage", prompt: "Expected lift in expansion rate?", defaultConfidence: "C", source: "Pedowitz Group 2025: 20-30% upsell lift. Growth Suite 2026: 2.4x AI recommendation acceptance", defaultValue: 0.15, range: [0.10, 0.30] },
+    { key: "lift", label: "Expansion lift (%)", type: "percentage", prompt: "Expected lift in expansion rate?", defaultConfidence: "C", source: "Pedowitz Group 2025: 20-30% upsell lift. Growth Suite 2026: 2.4x AI recommendation acceptance", sourceUrl: "https://www.pedowitzgroup.com/ai-driven-upsell-cross-sell-recommendations", defaultValue: 0.15, range: [0.10, 0.30] },
   ],
   time_to_revenue: [
     { key: "newCustomersPerYear", label: "New customers/year", type: "number", prompt: "How many new customers per year?", defaultConfidence: "A" },
     { key: "revenuePerCustomer", label: "Revenue per customer ($)", type: "currency", prompt: "Average first-year revenue per customer?", defaultConfidence: "A" },
-    { key: "daysAccelerated", label: "Days accelerated", type: "number", prompt: "How many days faster could onboarding be?", defaultConfidence: "C", source: "SDLC Corp: quote-to-cash 20→8 days. Revenue Velocity Lab: 14.8 days saved per deal (47,832 deals)", defaultValue: 10, range: [5, 15] },
+    { key: "daysAccelerated", label: "Days accelerated", type: "number", prompt: "How many days faster could onboarding be?", defaultConfidence: "C", source: "SDLC Corp: quote-to-cash 20→8 days. Revenue Velocity Lab: 14.8 days saved per deal (47,832 deals)", sourceUrl: "https://zapier.com/customer-stories/remote", defaultValue: 10, range: [5, 15] },
   ],
   process_acceleration: [
     { key: "processesPerMonth", label: "Processes/month", type: "number", prompt: "How many processes run per month?", defaultConfidence: "A" },
     { key: "timeBeforeHrs", label: "Time before (hours)", type: "hours", prompt: "Current time per process (hours)?", defaultConfidence: "A" },
-    { key: "timeAfterHrs", label: "Time after (hours)", type: "hours", prompt: "Expected time after automation (hours)?", defaultConfidence: "C", source: "Forrester TEI 2024: 40% process time reduction. Nucleus Research: 63-80% improvement", guidance: "Typically 50-80% reduction from current time" },
+    { key: "timeAfterHrs", label: "Time after (hours)", type: "hours", prompt: "Expected time after automation (hours)?", defaultConfidence: "C", source: "Forrester TEI 2024: 40% process time reduction. Nucleus Research: 63-80% improvement", sourceUrl: "https://tei.forrester.com/go/Pipefy/PipefyTEI", guidance: "Typically 50-80% reduction from current time" },
     { key: "hourlyRate", label: "Hourly rate ($)", type: "currency", prompt: "Loaded cost per hour of person running this process?", defaultConfidence: "A" },
   ],
   handoff_elimination: [
@@ -196,13 +197,13 @@ export const ARCHETYPE_FIELDS: Record<Archetype, ArchetypeFieldDef[]> = {
     { key: "hourlyRateOfWaitingParty", label: "Hourly rate ($)", type: "currency", prompt: "Loaded cost of the person waiting?", defaultConfidence: "A" },
   ],
   task_elimination: [
-    { key: "tasksPerMonth", label: "Tasks/month", type: "number", prompt: "How many tasks are completed per month?", defaultConfidence: "A", guidance: "Check Zapier task data. Remote: 11M tasks/yr. Arden Insurance: 34,000+ hrs/yr automated" },
-    { key: "minutesPerTask", label: "Minutes/task", type: "number", prompt: "How long did this take manually (minutes)?", defaultConfidence: "A" },
-    { key: "hourlyRate", label: "Hourly rate ($)", type: "currency", prompt: "Loaded cost per hour of person doing this task?", defaultConfidence: "A" },
+    { key: "tasksPerMonth", label: "Tasks/month", type: "number", prompt: "How many tasks are completed per month?", defaultConfidence: "A", guidance: "Check Zapier task data. Remote: 11M tasks/yr. Arden Insurance: 34,000+ hrs/yr automated", sourceUrl: "https://zapier.com/customer-stories/remote" },
+    { key: "minutesPerTask", label: "Minutes/task", type: "number", prompt: "How long did this take manually (minutes)?", defaultConfidence: "A", source: "Zapier Impact Survey 2026 (n=116): 45% eliminate manual data entry, 38% eliminate copy/pasting. 66% save <30 min/Zap/week, 22% save 1-3 hrs", sourceUrl: "https://zapier.com/customer-stories/arden-insurance", guidance: "Most individual Zaps save <30 min/week. High-value Zaps save 1-3+ hours." },
+    { key: "hourlyRate", label: "Hourly rate ($)", type: "currency", prompt: "Loaded cost per hour of person doing this task?", defaultConfidence: "A", source: "BLS 2025: Admin $35/hr, Ops $50/hr, SalesOps $60/hr, Eng $85/hr" },
   ],
   task_simplification: [
     { key: "tasksPerMonth", label: "Tasks/month", type: "number", prompt: "How many tasks per month?", defaultConfidence: "A" },
-    { key: "minutesSavedPerTask", label: "Minutes saved/task", type: "number", prompt: "Minutes saved per task through automation?", defaultConfidence: "A", source: "BCG 2024 (480 consultants): 49% improvement. Brandon Sammut (Zapier): 46% reduction (12.27→6.62 min)" },
+    { key: "minutesSavedPerTask", label: "Minutes saved/task", type: "number", prompt: "Minutes saved per task through automation?", defaultConfidence: "A", source: "BCG 2024 (480 consultants): 49% improvement. Brandon Sammut (Zapier): 46% reduction (12.27→6.62 min). Zapier Impact Survey 2026 (n=116): 70% report productivity gains, 60% cite reduced mental load", sourceUrl: "https://www.bcg.com/publications/2024/gen-ai-increases-productivity-and-expands-capabilities" },
     { key: "hourlyRate", label: "Hourly rate ($)", type: "currency", prompt: "Loaded cost per hour?", defaultConfidence: "A" },
   ],
   context_surfacing: [
@@ -211,12 +212,12 @@ export const ARCHETYPE_FIELDS: Record<Archetype, ArchetypeFieldDef[]> = {
     { key: "meetingDurationHrs", label: "Meeting duration (hrs)", type: "hours", prompt: "Average meeting duration (hours)?", defaultConfidence: "A" },
     { key: "meetingHourlyRate", label: "Meeting hourly rate ($)", type: "currency", prompt: "Average hourly rate of meeting attendees?", defaultConfidence: "A" },
     { key: "searchesAvoidedPerMonth", label: "Searches avoided/month", type: "number", prompt: "Information searches avoided per month?", defaultConfidence: "A" },
-    { key: "avgSearchTimeMin", label: "Avg search time (min)", type: "number", prompt: "Average time spent searching for information (minutes)?", defaultConfidence: "C", source: "Nucleus Research: 27-43% productivity improvement from AI analytics. EY: 5% more strategic time", defaultValue: 20, range: [15, 30] },
+    { key: "avgSearchTimeMin", label: "Avg search time (min)", type: "number", prompt: "Average time spent searching for information (minutes)?", defaultConfidence: "C", source: "Nucleus Research: 27-43% productivity improvement from AI analytics. EY: 5% more strategic time. Zapier Impact Survey 2026: 32% cite looking things up as reduced work", sourceUrl: "https://nucleusresearch.com/research/single/ai-powered-analytics-improves-productivity-by-27-to-43-percent/", defaultValue: 20, range: [15, 30] },
     { key: "searchHourlyRate", label: "Search hourly rate ($)", type: "currency", prompt: "Hourly rate of person searching?", defaultConfidence: "A" },
   ],
   labor_avoidance: [
     { key: "ftesAvoided", label: "FTEs avoided", type: "number", prompt: "How many FTEs would need to be hired without automation?", defaultConfidence: "A" },
-    { key: "fullyLoadedAnnualCost", label: "Fully loaded annual cost ($)", type: "currency", prompt: "Fully loaded annual cost per FTE?", defaultConfidence: "C", source: "BLS 2025: Admin $70K, Ops $100K, SalesOps $120K, Eng $175K, Mgr $160K, Exec $200K+", defaultValue: 100000 },
+    { key: "fullyLoadedAnnualCost", label: "Fully loaded annual cost ($)", type: "currency", prompt: "Fully loaded annual cost per FTE?", defaultConfidence: "C", source: "BLS 2025: Admin $70K, Ops $100K, SalesOps $120K, Eng $175K, Mgr $160K, Exec $200K+", sourceUrl: "https://www.bls.gov/oes/current/oes_nat.htm", defaultValue: 100000 },
   ],
   tool_consolidation: [
     { key: "toolsEliminated", label: "Tools eliminated", type: "number", prompt: "How many tools can be eliminated?", defaultConfidence: "A" },
@@ -224,30 +225,30 @@ export const ARCHETYPE_FIELDS: Record<Archetype, ArchetypeFieldDef[]> = {
   ],
   error_rework_elimination: [
     { key: "errorsPerMonth", label: "Errors/month", type: "number", prompt: "How many errors occur per month?", defaultConfidence: "A" },
-    { key: "avgCostPerError", label: "Avg cost/error ($)", type: "currency", prompt: "Average cost to fix each error?", defaultConfidence: "C", source: "Operational errors $50-500. Strategic data errors $1K-50K (Nucleus Research)", defaultValue: 150, range: [50, 500] },
-    { key: "reductionRate", label: "Error reduction (%)", type: "percentage", prompt: "Expected error reduction rate?", defaultConfidence: "C", source: "RPA industry: 87-97% error reduction. CRM automation: 4%→0.5% error rate. McKinsey: 20-50% for complex", defaultValue: 0.70, range: [0.30, 0.90] },
+    { key: "avgCostPerError", label: "Avg cost/error ($)", type: "currency", prompt: "Average cost to fix each error?", defaultConfidence: "C", source: "Operational errors $50-500. Strategic data errors $1K-50K (Nucleus Research)", sourceUrl: "https://axis-intelligence.com/rpa-implementation-business-case-2025-guide/", defaultValue: 150, range: [50, 500] },
+    { key: "reductionRate", label: "Error reduction (%)", type: "percentage", prompt: "Expected error reduction rate?", defaultConfidence: "C", source: "RPA industry: 87-97% error reduction. CRM automation: 4%→0.5% error rate. McKinsey: 20-50% for complex", sourceUrl: "https://www.cleanlist.ai/blog/2026-02-24-crm-data-quality-benchmarks", defaultValue: 0.70, range: [0.30, 0.90] },
   ],
   compliance_assurance: [
     { key: "expectedViolationsPerYear", label: "Expected violations/year", type: "number", prompt: "Expected compliance violations per year?", defaultConfidence: "C" },
     { key: "avgPenaltyPerViolation", label: "Avg penalty ($)", type: "currency", prompt: "Average penalty per violation?", defaultConfidence: "B", source: "GDPR $20K-500K, SOX $5M+, HIPAA $100-50K, PCI $5K-100K/mo" },
-    { key: "reductionRate", label: "Violation reduction (%)", type: "percentage", prompt: "Expected reduction in violations?", defaultConfidence: "C", source: "European Journal CSIT 2025: 89% violation decrease. Avatier: 80% audit prep reduction. Cloud compliance: 72% detection", defaultValue: 0.60, range: [0.40, 0.80] },
+    { key: "reductionRate", label: "Violation reduction (%)", type: "percentage", prompt: "Expected reduction in violations?", defaultConfidence: "C", source: "European Journal CSIT 2025: 89% violation decrease. Avatier: 80% audit prep reduction. Cloud compliance: 72% detection", sourceUrl: "https://eajournals.org/ejcsit/vol13-issue21-2025/", defaultValue: 0.60, range: [0.40, 0.80] },
   ],
   data_integrity: [
     { key: "recordsPerMonth", label: "Records/month", type: "number", prompt: "How many records processed per month?", defaultConfidence: "A" },
     { key: "errorRate", label: "Error rate (%)", type: "percentage", prompt: "Current data error rate?", defaultConfidence: "A" },
-    { key: "costPerError", label: "Cost/error ($)", type: "currency", prompt: "Cost per data error?", defaultConfidence: "C", source: "Operational: $10-100, Strategic: $1K-50K", defaultValue: 50, range: [10, 50000] },
-    { key: "reductionRate", label: "Error reduction (%)", type: "percentage", prompt: "Expected error reduction?", defaultConfidence: "C", source: "CRM quality: manual 4%→automated 0.5% (87.5% reduction). RPA: 99.5% vs 96% human accuracy", defaultValue: 0.80, range: [0.40, 0.90] },
+    { key: "costPerError", label: "Cost/error ($)", type: "currency", prompt: "Cost per data error?", defaultConfidence: "C", source: "Operational: $10-100, Strategic: $1K-50K", sourceUrl: "https://www.recordcontext.com/resources/crm-data-quality", defaultValue: 50, range: [10, 50000] },
+    { key: "reductionRate", label: "Error reduction (%)", type: "percentage", prompt: "Expected error reduction?", defaultConfidence: "C", source: "CRM quality: manual 4%→automated 0.5% (87.5% reduction). RPA: 99.5% vs 96% human accuracy", sourceUrl: "https://www.cleanlist.ai/blog/2026-02-24-crm-data-quality-benchmarks", defaultValue: 0.80, range: [0.40, 0.90] },
   ],
   incident_prevention: [
     { key: "incidentsPerYear", label: "Incidents/year", type: "number", prompt: "How many incidents per year?", defaultConfidence: "A" },
-    { key: "avgCostPerIncident", label: "Avg cost/incident ($)", type: "currency", prompt: "Average cost per incident?", defaultConfidence: "C", source: "App downtime $5-10K/hr (Gartner). Data breach $165/record (IBM). Infra incidents $10-50K", defaultValue: 10000 },
-    { key: "reductionRate", label: "Incident reduction (%)", type: "percentage", prompt: "Expected incident reduction?", defaultConfidence: "C", source: "Freshservice (187M tickets, 10,551 orgs): 76.6% resolution reduction. Remote (Zapier): 27.5% auto-resolved", defaultValue: 0.35, range: [0.20, 0.50] },
+    { key: "avgCostPerIncident", label: "Avg cost/incident ($)", type: "currency", prompt: "Average cost per incident?", defaultConfidence: "C", source: "App downtime $5-10K/hr (Gartner). Data breach $165/record (IBM). Infra incidents $10-50K", sourceUrl: "https://www.freshworks.com/freshservice/benchmark-report-2025/", defaultValue: 10000 },
+    { key: "reductionRate", label: "Incident reduction (%)", type: "percentage", prompt: "Expected incident reduction?", defaultConfidence: "C", source: "Freshservice (187M tickets, 10,551 orgs): 76.6% resolution reduction. Remote (Zapier): 27.5% auto-resolved", sourceUrl: "https://www.freshworks.com/freshservice/benchmark-report-2025/", defaultValue: 0.35, range: [0.20, 0.50] },
   ],
   process_consistency: [
     { key: "processesPerMonth", label: "Processes/month", type: "number", prompt: "How many processes executed per month?", defaultConfidence: "A" },
     { key: "defectRate", label: "Defect rate (%)", type: "percentage", prompt: "Current process defect rate?", defaultConfidence: "A" },
     { key: "costPerDefect", label: "Cost/defect ($)", type: "currency", prompt: "Cost per process defect?", defaultConfidence: "A" },
-    { key: "reductionRate", label: "Defect reduction (%)", type: "percentage", prompt: "Expected defect reduction?", defaultConfidence: "C", source: "Automotive AI: 73% defect reduction. Packaging PDCA: 64.3% variability reduction. Conservative for knowledge work", defaultValue: 0.50, range: [0.30, 0.70] },
+    { key: "reductionRate", label: "Defect reduction (%)", type: "percentage", prompt: "Expected defect reduction?", defaultConfidence: "C", source: "Automotive AI: 73% defect reduction. Packaging PDCA: 64.3% variability reduction. Conservative for knowledge work", sourceUrl: "https://www.appitsoftware.com/blog/automotive-supplier-quality-case-study", defaultValue: 0.50, range: [0.30, 0.70] },
   ],
 };
 

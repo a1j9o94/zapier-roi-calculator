@@ -282,29 +282,40 @@ function ItemRows({
 
             {/* Source */}
             <td className="px-3 py-1.5">
-              {readOnly ? (
+              {field.sourceUrl ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href={field.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#FF4A00] hover:underline truncate block max-w-xs"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {source || "View source →"}
+                    </a>
+                  </TooltipTrigger>
+                  {source && source.length > 30 && (
+                    <TooltipContent side="top" className="max-w-sm">
+                      <p>{source}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              ) : source ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="text-xs text-muted-foreground truncate block max-w-xs cursor-default">
                       {source}
                     </span>
                   </TooltipTrigger>
-                  {source && source.length > 30 && (
-                    <TooltipContent side="top">
+                  {source.length > 30 && (
+                    <TooltipContent side="top" className="max-w-sm">
                       <p>{source}</p>
                     </TooltipContent>
                   )}
                 </Tooltip>
               ) : (
-                <DebouncedInput
-                  value={source}
-                  onChange={(v) =>
-                    onUpdateInput(item, field.key, { source: String(v) })
-                  }
-                  debounceMs={300}
-                  className="h-7 text-xs text-muted-foreground w-full min-w-[120px]"
-                  placeholder="Source..."
-                />
+                <span className="text-xs text-muted-foreground/50">—</span>
               )}
             </td>
           </tr>
