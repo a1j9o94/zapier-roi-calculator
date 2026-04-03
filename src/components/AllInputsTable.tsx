@@ -190,7 +190,9 @@ function ItemRows({
         const input = item.inputs?.[field.key];
         const value = input?.value ?? field.defaultValue ?? 0;
         const confidence = normalizeConfidence(input?.confidence ?? field.defaultConfidence);
+        const hasCustomSource = !!input?.source && input.source !== field.source;
         const source = input?.source ?? field.source ?? "";
+        const sourceUrl = hasCustomSource ? undefined : field.sourceUrl;
         const badge = CONFIDENCE_BADGE[confidence];
 
         const displayValue = field.type === "percentage" ? Math.round(value * 100) : value;
@@ -282,11 +284,11 @@ function ItemRows({
 
             {/* Source */}
             <td className="px-3 py-1.5">
-              {field.sourceUrl ? (
+              {sourceUrl ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <a
-                      href={field.sourceUrl}
+                      href={sourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-[#FF4A00] hover:underline truncate block max-w-xs"
