@@ -1,6 +1,10 @@
 import { describe, test, expect } from "bun:test";
 import { createZapierSdk } from "@zapier/zapier-sdk";
 
+/** Live Zapier API tests need CLI login or ZAPIER_CREDENTIALS* — skip in CI by default. */
+const zapierIntegration =
+  process.env.RUN_ZAPIER_SDK_INTEGRATION === "1" ? describe : describe.skip;
+
 // Increase default timeout for all tests (real API calls need time)
 const T = 30_000; // 30 seconds per test
 
@@ -20,7 +24,7 @@ function logResponse(label: string, data: unknown) {
 // ============================================================
 // Auth & Profile
 // ============================================================
-describe("Zapier SDK - Auth & Profile", () => {
+zapierIntegration("Zapier SDK - Auth & Profile", () => {
   test("getProfile returns user data with expected fields", async () => {
     try {
       const result = await zapier.getProfile();
@@ -51,7 +55,7 @@ describe("Zapier SDK - Auth & Profile", () => {
 // ============================================================
 // Apps - Discovery
 // ============================================================
-describe("Zapier SDK - Apps", () => {
+zapierIntegration("Zapier SDK - Apps", () => {
   test("listApps returns first page of apps with pagination", async () => {
     try {
       const result = await zapier.listApps({ pageSize: 5 });
@@ -176,7 +180,7 @@ describe("Zapier SDK - Apps", () => {
 // ============================================================
 // Actions
 // ============================================================
-describe("Zapier SDK - Actions", () => {
+zapierIntegration("Zapier SDK - Actions", () => {
   test("listActions returns actions for Slack", async () => {
     try {
       const result = await zapier.listActions({ appKey: "slack", pageSize: 10 });
@@ -290,7 +294,7 @@ describe("Zapier SDK - Actions", () => {
 // ============================================================
 // Input Fields
 // ============================================================
-describe("Zapier SDK - Input Fields", () => {
+zapierIntegration("Zapier SDK - Input Fields", () => {
   test("listInputFields returns fields for a Slack read action", async () => {
     try {
       // Discover a read action first
@@ -371,7 +375,7 @@ describe("Zapier SDK - Input Fields", () => {
 // ============================================================
 // Connections
 // ============================================================
-describe("Zapier SDK - Connections", () => {
+zapierIntegration("Zapier SDK - Connections", () => {
   test("listConnections returns user connections", async () => {
     try {
       const result = await zapier.listConnections({ pageSize: 10 });
@@ -481,7 +485,7 @@ describe("Zapier SDK - Connections", () => {
 // ============================================================
 // Fetch (authenticated HTTP)
 // ============================================================
-describe("Zapier SDK - Fetch", () => {
+zapierIntegration("Zapier SDK - Fetch", () => {
   test("fetch can hit Zapier API v2 zaps endpoint (may be scope-limited)", async () => {
     try {
       const response = await zapier.fetch(
@@ -560,7 +564,7 @@ describe("Zapier SDK - Fetch", () => {
 // ============================================================
 // Client Credentials
 // ============================================================
-describe("Zapier SDK - Client Credentials", () => {
+zapierIntegration("Zapier SDK - Client Credentials", () => {
   test("listClientCredentials returns credentials list", async () => {
     try {
       const result = await zapier.listClientCredentials();
@@ -585,7 +589,7 @@ describe("Zapier SDK - Client Credentials", () => {
 // ============================================================
 // Run Action (read-only)
 // ============================================================
-describe("Zapier SDK - Run Action (read-only)", () => {
+zapierIntegration("Zapier SDK - Run Action (read-only)", () => {
   test("runAction can execute a Slack read action (channels)", async () => {
     try {
       // First, find a Slack connection
