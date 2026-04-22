@@ -1,4 +1,5 @@
 import type { Archetype, ValueInput } from "./roi";
+import { BLAZEO_SPEED_TO_LEAD_2026_URL } from "../constants/sources";
 
 // ============================================================
 // Archetype-Specific Input Schemas
@@ -16,8 +17,8 @@ export interface PipelineVelocityInputs {
 // 1.2 Revenue Capture
 export interface RevenueCaptureInputs {
   annualRevenue: ValueInput;        // [C] "What's your total annual revenue?"
-  leakageRate: ValueInput;          // [E] Industry benchmark: 1-3%
-  captureImprovement: ValueInput;   // [E] Zapier benchmark: 30-60%
+  leakageRate: ValueInput;          // [E] B2B leakage narratives 3–10%; SaaS often lower — see range
+  captureImprovement: ValueInput;   // [E] Contract-to-cash automation — see range
 }
 
 // 1.3 Revenue Expansion
@@ -167,7 +168,7 @@ export const ARCHETYPE_FIELDS: Record<Archetype, ArchetypeFieldDef[]> = {
   pipeline_velocity: [
     { key: "dealsPerQuarter", label: "Deals per quarter", type: "number", prompt: "How many deals enter your pipeline per quarter?", defaultConfidence: "A" },
     { key: "avgDealValue", label: "Avg deal value ($)", type: "currency", prompt: "What's your average deal size?", defaultConfidence: "A" },
-    { key: "conversionLift", label: "Conversion lift (%)", type: "percentage", prompt: "Expected conversion rate improvement?", defaultConfidence: "C", source: "Revenue Velocity Lab (47,832 deals): 14% close rate improvement. Blazeo 2026: 21x qualification at <5min response", sourceUrl: "https://www.prnewswire.com/news-releases/blazeo-unveils-2026-speed-to-lead-benchmark-report-302694994.html", defaultValue: 0.10, range: [0.05, 0.15] },
+    { key: "conversionLift", label: "Conversion lift (%)", type: "percentage", prompt: "Expected conversion rate improvement?", defaultConfidence: "C", source: "Revenue Velocity Lab (47,832 deals): 14% close rate improvement. Blazeo 2026: 21x qualification at <5min response", sourceUrl: BLAZEO_SPEED_TO_LEAD_2026_URL, defaultValue: 0.10, range: [0.05, 0.15] },
   ],
   revenue_capture: [
     { key: "annualRevenue", label: "Annual revenue ($)", type: "currency", prompt: "What's your total annual revenue?", defaultConfidence: "A" },
@@ -178,12 +179,12 @@ export const ARCHETYPE_FIELDS: Record<Archetype, ArchetypeFieldDef[]> = {
     { key: "customerBase", label: "Active customers", type: "number", prompt: "How many active customers do you have?", defaultConfidence: "A" },
     { key: "expansionRate", label: "Current expansion rate (%)", type: "percentage", prompt: "Current upsell/cross-sell rate?", defaultConfidence: "A" },
     { key: "avgExpansionValue", label: "Avg expansion value ($)", type: "currency", prompt: "Average expansion deal value?", defaultConfidence: "A" },
-    { key: "lift", label: "Expansion lift (%)", type: "percentage", prompt: "Expected lift in expansion rate?", defaultConfidence: "C", source: "Pedowitz Group 2025: 20-30% upsell lift. Growth Suite 2026: 2.4x AI recommendation acceptance", sourceUrl: "https://www.pedowitzgroup.com/ai-driven-upsell-cross-sell-recommendations", defaultValue: 0.15, range: [0.10, 0.30] },
+    { key: "lift", label: "Expansion lift (%)", type: "percentage", prompt: "Expected lift in expansion rate?", defaultConfidence: "C", source: "Pedowitz Group 2025: 20-30% upsell lift. Growth Suite 2026: 2.4x AI recommendation acceptance", sourceUrl: "https://www.pedowitzgroup.com/ai-driven-upsell-cross-sell-recommendations", defaultValue: 0.10, range: [0.05, 0.15] },
   ],
   time_to_revenue: [
     { key: "newCustomersPerYear", label: "New customers/year", type: "number", prompt: "How many new customers per year?", defaultConfidence: "A" },
     { key: "revenuePerCustomer", label: "Revenue per customer ($)", type: "currency", prompt: "Average first-year revenue per customer?", defaultConfidence: "A" },
-    { key: "daysAccelerated", label: "Days accelerated", type: "number", prompt: "How many days faster could onboarding be?", defaultConfidence: "C", source: "SDLC Corp: quote-to-cash 20→8 days. Revenue Velocity Lab: 14.8 days saved per deal (47,832 deals)", sourceUrl: "https://zapier.com/customer-stories/remote", defaultValue: 10, range: [5, 15] },
+    { key: "daysAccelerated", label: "Days accelerated", type: "number", prompt: "How many days faster could onboarding or quote-to-cash be?", defaultConfidence: "C", source: "SDLC Corp: quote-to-cash 20→8 days. Revenue Velocity Lab: 14.8 days saved per deal (47,832 deals)", sourceUrl: "https://zapier.com/customer-stories/remote", defaultValue: 10, range: [5, 45] },
   ],
   process_acceleration: [
     { key: "processesPerMonth", label: "Processes/month", type: "number", prompt: "How many processes run per month?", defaultConfidence: "A" },
@@ -258,7 +259,7 @@ export const ARCHETYPE_FIELDS: Record<Archetype, ArchetypeFieldDef[]> = {
 
 export const ARCHETYPE_SCENARIOS: Record<Archetype, string> = {
   pipeline_velocity: "A sales team processes 200 deals/quarter with $25K average value. A 10% conversion lift from automated lead routing yields 200 x $25K x 10% x 4 = $200K/year.",
-  revenue_capture: "A company with $50M revenue has 2% leakage ($1M). Capturing 45% more through automated dunning/renewals recovers $50M x 2% x 45% = $450K/year.",
+  revenue_capture: "A company with $50M revenue has 5% leakage ($2.5M). Capturing 50% more through automated dunning/renewals recovers $50M x 5% x 50% = $1.25M/year.",
   revenue_expansion: "With 500 customers, 15% expansion rate, $10K avg expansion, and 10% lift: 500 x 15% x $10K x 10% = $75K/year additional expansion revenue.",
   time_to_revenue: "Onboarding 200 customers/year at $50K each. Accelerating by 10 days: 200 x $50K x 10/365 = $274K/year in accelerated revenue.",
   process_acceleration: "100 monthly close processes taking 8 hours each, reduced to 3 hours at $80/hr: 100 x 5hrs x $80 x 12 = $480K/year.",

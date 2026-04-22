@@ -8,6 +8,8 @@ export interface StudyReference {
   tier: "A" | "B" | "C" | "D";
 }
 
+import { BLAZEO_SPEED_TO_LEAD_2026_URL } from "../constants/sources";
+
 export interface ArchetypeEvidence {
   archetype: string;
   label: string;
@@ -48,7 +50,7 @@ const pipelineVelocity: ArchetypeEvidence = {
       year: 2026,
       title: "Speed-to-Lead Response Time Statistics",
       finding: "21x higher contact rate when responding in <5 minutes vs. 30 minutes",
-      url: "https://www.prnewswire.com/news-releases/blazeo-unveils-2026-speed-to-lead-benchmark-report-302694994.html",
+      url: BLAZEO_SPEED_TO_LEAD_2026_URL,
       tier: "B",
     },
     {
@@ -359,7 +361,7 @@ const taskElimination: ArchetypeEvidence = {
       year: 2025,
       title: "Solo Business Automation ROI",
       finding: "550 hours per year saved by automating client scheduling, follow-ups, and intake forms",
-      url: "https://zapier.com/customer-stories/wellness-coach",
+      url: "https://zapier.com/blog/how-wellness-coach-scales-with-automation-and-ai/",
       tier: "B",
     },
     {

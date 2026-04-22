@@ -9,6 +9,7 @@ import { AssumptionsTab } from "../components/AssumptionsTab";
 import { ValueItemsTab } from "../components/ValueItemsTab";
 import { UseCasesTab } from "../components/UseCasesTab";
 import { ExecutiveSummary } from "../components/ExecutiveSummary";
+import { MethodologyLedgerTab } from "../components/MethodologyLedgerTab";
 
 // Lazy load heavier view components
 const SlideView = lazy(() => import("../components/SlideView").then(m => ({ default: m.SlideView })));
@@ -19,7 +20,7 @@ interface CalculatorPageProps {
   obfuscated?: boolean;
 }
 
-type TabId = "assumptions" | "values" | "usecases" | "summary" | "dashboard" | "detail";
+type TabId = "assumptions" | "values" | "usecases" | "summary" | "dashboard" | "detail" | "methodology";
 
 export function CalculatorPage({ summaryOnly = false, obfuscated = false }: CalculatorPageProps) {
   const { id: shortId } = useParams<{ id: string }>();
@@ -33,9 +34,11 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
   const tabParam = searchParams.get("tab");
 
   // Override active tab from URL param
-  const effectiveTab = tabParam && ["assumptions", "values", "usecases", "summary", "dashboard", "detail"].includes(tabParam)
-    ? tabParam as TabId
-    : activeTab;
+  const effectiveTab =
+    tabParam &&
+    ["assumptions", "values", "usecases", "summary", "dashboard", "detail", "methodology"].includes(tabParam)
+      ? (tabParam as TabId)
+      : activeTab;
 
   const calculation = useQuery(
     api.calculations.getByShortId,
@@ -91,10 +94,12 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
   const tabs: { id: TabId; label: string }[] = summaryOnly
     ? [
         { id: "summary", label: "Executive Summary" },
+        { id: "methodology", label: "Methodology" },
         { id: "dashboard", label: "Dashboard" },
       ]
     : [
         { id: "summary", label: "Summary" },
+        { id: "methodology", label: "Methodology" },
         { id: "usecases", label: "Use Cases" },
         { id: "dashboard", label: "Dashboard" },
         { id: "detail", label: "Detail View" },
@@ -178,6 +183,7 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     effectiveTab === tab.id
@@ -225,6 +231,9 @@ export function CalculatorPage({ summaryOnly = false, obfuscated = false }: Calc
             readOnly={summaryOnly}
             obfuscated={isObfuscated}
           />
+        )}
+        {effectiveTab === "methodology" && (
+          <MethodologyLedgerTab calculation={typedCalculation} valueItems={typedValueItems} />
         )}
         {effectiveTab === "dashboard" && (
           <Suspense fallback={loadingFallback}>

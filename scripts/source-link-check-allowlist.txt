@@ -1,0 +1,16 @@
+# One URL per line. Use only for documented bot-walls where HEAD/GET from CI returns 4xx/5xx
+# but the link is valid in a browser (e.g. some analyst paywalls).
+
+# SSRN abstract pages often return 403 to non-browser / datacenter clients.
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4945566
+
+# BCG / BLS / Freshworks block or throttle automated requests from cloud IPs.
+https://www.bcg.com/publications/2024/gen-ai-increases-productivity-and-expands-capabilities
+https://www.bls.gov/oes/current/oes_nat.htm
+https://www.freshworks.com/freshservice/benchmark-report-2025/
+
+# McKinsey long-form insights URLs often time out or block datacenter fetches.
+https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-AI-the-next-productivity-frontier
+
+# Intermittent connect timeouts from cloud runners (curl often succeeds).
+https://www.appitsoftware.com/blog/automotive-supplier-quality-case-study

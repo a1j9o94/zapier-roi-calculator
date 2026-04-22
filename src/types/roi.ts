@@ -203,6 +203,7 @@ export interface Calculation {
   _creationTime: number;
   name: string;
   shortId: string;
+  companyId?: Id<"companies">;
   createdAt: number;
   updatedAt: number;
   obfuscation?: ObfuscationSettings;
@@ -212,6 +213,8 @@ export interface Calculation {
   talkingPoints?: string[];
   role?: Role;
   priorityOrder?: Dimension[];
+  /** Benchmark pack pinned at creation for reproducible defaults. */
+  benchmarkPackId?: string;
 }
 
 // ============================================================

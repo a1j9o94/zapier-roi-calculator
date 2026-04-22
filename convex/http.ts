@@ -1,6 +1,12 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api } from "./_generated/api";
+import {
+  buildRoiSchemaDimensions,
+  ROI_BENCHMARK_PACK_ID,
+  ROI_SCHEMA_UPDATED_AT,
+  ROI_SCHEMA_VERSION,
+} from "../src/data/schemaResponse";
 
 const http = httpRouter();
 
@@ -190,200 +196,10 @@ function computeSummary(
 // ============================================================
 
 const SCHEMA_RESPONSE = {
-  version: "2.0",
-  dimensions: [
-    {
-      id: "revenue_impact", label: "Revenue Impact", description: "How automation increases top-line revenue",
-      archetypes: [
-        {
-          id: "pipeline_velocity", label: "Pipeline Velocity",
-          description: "Automation increases deal flow rate through pipeline",
-          formula: "dealsPerQuarter x avgDealValue x conversionLift x 4",
-          inputs: [
-            { key: "dealsPerQuarter", label: "Deals per quarter", type: "number", source: "customer", prompt: "How many deals enter your pipeline per quarter?", confidence: "A" },
-            { key: "avgDealValue", label: "Avg deal value ($)", type: "currency", source: "customer", prompt: "What's your average deal size?", confidence: "A" },
-            { key: "conversionLift", label: "Conversion lift (%)", type: "percentage", source: "zapier_benchmark", prompt: "Expected conversion rate improvement?", confidence: "C", default: 0.10, range: [0.05, 0.15] },
-          ],
-        },
-        {
-          id: "revenue_capture", label: "Revenue Capture",
-          description: "Automation catches revenue that would otherwise leak",
-          formula: "annualRevenue x leakageRate x captureImprovement",
-          inputs: [
-            { key: "annualRevenue", label: "Annual revenue ($)", type: "currency", source: "customer", prompt: "What's your total annual revenue?", confidence: "A" },
-            { key: "leakageRate", label: "Leakage rate (%)", type: "percentage", source: "industry_benchmark", prompt: "Estimated revenue leakage rate?", confidence: "C", default: 0.02, range: [0.01, 0.03] },
-            { key: "captureImprovement", label: "Capture improvement (%)", type: "percentage", source: "zapier_benchmark", prompt: "Expected improvement?", confidence: "C", default: 0.45, range: [0.30, 0.60] },
-          ],
-        },
-        {
-          id: "revenue_expansion", label: "Revenue Expansion",
-          description: "Automation drives upsell/cross-sell at scale",
-          formula: "customerBase x expansionRate x avgExpansionValue x lift",
-          inputs: [
-            { key: "customerBase", label: "Active customers", type: "number", source: "customer", confidence: "A" },
-            { key: "expansionRate", label: "Expansion rate (%)", type: "percentage", source: "customer", confidence: "A" },
-            { key: "avgExpansionValue", label: "Avg expansion value ($)", type: "currency", source: "customer", confidence: "A" },
-            { key: "lift", label: "Expansion lift (%)", type: "percentage", source: "zapier_benchmark", confidence: "C", default: 0.10, range: [0.05, 0.15] },
-          ],
-        },
-        {
-          id: "time_to_revenue", label: "Time-to-Revenue",
-          description: "Automation accelerates revenue recognition",
-          formula: "newCustomersPerYear x revenuePerCustomer x daysAccelerated / 365",
-          inputs: [
-            { key: "newCustomersPerYear", label: "New customers/year", type: "number", source: "customer", confidence: "A" },
-            { key: "revenuePerCustomer", label: "Revenue per customer ($)", type: "currency", source: "customer", confidence: "A" },
-            { key: "daysAccelerated", label: "Days accelerated", type: "number", source: "zapier_benchmark", confidence: "C", default: 10, range: [5, 15] },
-          ],
-        },
-      ],
-    },
-    {
-      id: "speed_cycle_time", label: "Speed / Cycle Time", description: "How automation accelerates business processes",
-      archetypes: [
-        {
-          id: "process_acceleration", label: "Process Acceleration",
-          description: "Reduces end-to-end cycle time for a process",
-          formula: "processesPerMonth x (timeBeforeHrs - timeAfterHrs) x hourlyRate x 12",
-          inputs: [
-            { key: "processesPerMonth", label: "Processes/month", type: "number", source: "customer", confidence: "A" },
-            { key: "timeBeforeHrs", label: "Time before (hours)", type: "hours", source: "customer", confidence: "A" },
-            { key: "timeAfterHrs", label: "Time after (hours)", type: "hours", source: "zapier_benchmark", confidence: "C" },
-            { key: "hourlyRate", label: "Hourly rate ($)", type: "currency", source: "customer", confidence: "A" },
-          ],
-        },
-        {
-          id: "handoff_elimination", label: "Handoff Elimination",
-          description: "Removes manual handoff delays",
-          formula: "handoffsPerMonth x avgQueueTimeHrs x hourlyRateOfWaitingParty x 12",
-          inputs: [
-            { key: "handoffsPerMonth", label: "Handoffs/month", type: "number", source: "customer", confidence: "A" },
-            { key: "avgQueueTimeHrs", label: "Avg queue time (hours)", type: "hours", source: "customer", confidence: "A" },
-            { key: "hourlyRateOfWaitingParty", label: "Hourly rate ($)", type: "currency", source: "customer", confidence: "A" },
-          ],
-        },
-      ],
-    },
-    {
-      id: "productivity", label: "Productivity", description: "How automation eliminates or simplifies manual work",
-      archetypes: [
-        {
-          id: "task_elimination", label: "Task Elimination",
-          description: "Fully replaces manual tasks",
-          formula: "tasksPerMonth x minutesPerTask x (hourlyRate / 60) x 12",
-          inputs: [
-            { key: "tasksPerMonth", label: "Tasks/month", type: "number", source: "customer_or_zapier", confidence: "A", guidance: "Check Zapier task data if available [B]" },
-            { key: "minutesPerTask", label: "Minutes/task", type: "number", source: "customer", confidence: "A" },
-            { key: "hourlyRate", label: "Hourly rate ($)", type: "currency", source: "customer", confidence: "A" },
-          ],
-        },
-        {
-          id: "task_simplification", label: "Task Simplification",
-          description: "Reduces time per task",
-          formula: "tasksPerMonth x minutesSavedPerTask x (hourlyRate / 60) x 12",
-          inputs: [
-            { key: "tasksPerMonth", label: "Tasks/month", type: "number", source: "customer", confidence: "A" },
-            { key: "minutesSavedPerTask", label: "Minutes saved/task", type: "number", source: "customer", confidence: "A" },
-            { key: "hourlyRate", label: "Hourly rate ($)", type: "currency", source: "customer", confidence: "A" },
-          ],
-        },
-        {
-          id: "context_surfacing", label: "Context Surfacing",
-          description: "Delivers information proactively",
-          formula: "(meetings x attendees x hours x rate x 12) + (searches x minutes x rate/60 x 12)",
-          inputs: [
-            { key: "meetingsAvoidedPerMonth", label: "Meetings avoided/month", type: "number", source: "customer", confidence: "A" },
-            { key: "attendeesPerMeeting", label: "Attendees", type: "number", source: "customer", confidence: "A" },
-            { key: "meetingDurationHrs", label: "Duration (hours)", type: "hours", source: "customer", confidence: "A" },
-            { key: "meetingHourlyRate", label: "Meeting rate ($)", type: "currency", source: "customer", confidence: "A" },
-            { key: "searchesAvoidedPerMonth", label: "Searches avoided/month", type: "number", source: "customer", confidence: "A" },
-            { key: "avgSearchTimeMin", label: "Search time (min)", type: "number", source: "zapier_benchmark", confidence: "C", default: 20, range: [15, 30] },
-            { key: "searchHourlyRate", label: "Search rate ($)", type: "currency", source: "customer", confidence: "A" },
-          ],
-        },
-      ],
-    },
-    {
-      id: "cost_avoidance", label: "Cost Avoidance", description: "How automation prevents unnecessary spending",
-      archetypes: [
-        {
-          id: "labor_avoidance", label: "Labor Avoidance",
-          description: "Prevents need for additional headcount",
-          formula: "ftesAvoided x fullyLoadedAnnualCost",
-          inputs: [
-            { key: "ftesAvoided", label: "FTEs avoided", type: "number", source: "customer", confidence: "A" },
-            { key: "fullyLoadedAnnualCost", label: "Annual cost ($)", type: "currency", source: "industry_benchmark", confidence: "C", default: 100000 },
-          ],
-        },
-        {
-          id: "tool_consolidation", label: "Tool Consolidation",
-          description: "Eliminates redundant software tools",
-          formula: "toolsEliminated x annualLicenseCostPerTool",
-          inputs: [
-            { key: "toolsEliminated", label: "Tools eliminated", type: "number", source: "customer", confidence: "A" },
-            { key: "annualLicenseCostPerTool", label: "Annual cost/tool ($)", type: "currency", source: "customer", confidence: "A" },
-          ],
-        },
-        {
-          id: "error_rework_elimination", label: "Error/Rework Elimination",
-          description: "Prevents costly rework from errors",
-          formula: "errorsPerMonth x avgCostPerError x reductionRate x 12",
-          inputs: [
-            { key: "errorsPerMonth", label: "Errors/month", type: "number", source: "customer", confidence: "A" },
-            { key: "avgCostPerError", label: "Cost/error ($)", type: "currency", source: "industry_benchmark", confidence: "C", default: 150, range: [50, 500] },
-            { key: "reductionRate", label: "Reduction (%)", type: "percentage", source: "zapier_benchmark", confidence: "C", default: 0.70, range: [0.30, 0.90] },
-          ],
-        },
-      ],
-    },
-    {
-      id: "risk_quality", label: "Risk & Quality", description: "How automation reduces errors and ensures compliance",
-      archetypes: [
-        {
-          id: "compliance_assurance", label: "Compliance Assurance",
-          description: "Reduces compliance violations",
-          formula: "expectedViolationsPerYear x avgPenaltyPerViolation x reductionRate",
-          inputs: [
-            { key: "expectedViolationsPerYear", label: "Violations/year", type: "number", source: "industry_benchmark", confidence: "C" },
-            { key: "avgPenaltyPerViolation", label: "Penalty ($)", type: "currency", source: "regulatory", confidence: "B" },
-            { key: "reductionRate", label: "Reduction (%)", type: "percentage", source: "zapier_benchmark", confidence: "C", default: 0.55, range: [0.40, 0.70] },
-          ],
-        },
-        {
-          id: "data_integrity", label: "Data Integrity",
-          description: "Ensures data consistency across systems",
-          formula: "recordsPerMonth x errorRate x costPerError x reductionRate x 12",
-          inputs: [
-            { key: "recordsPerMonth", label: "Records/month", type: "number", source: "customer", confidence: "A" },
-            { key: "errorRate", label: "Error rate (%)", type: "percentage", source: "customer", confidence: "A" },
-            { key: "costPerError", label: "Cost/error ($)", type: "currency", source: "industry_benchmark", confidence: "C", default: 50, range: [10, 50000] },
-            { key: "reductionRate", label: "Reduction (%)", type: "percentage", source: "zapier_benchmark", confidence: "C", default: 0.75, range: [0.40, 0.90] },
-          ],
-        },
-        {
-          id: "incident_prevention", label: "Incident Prevention",
-          description: "Prevents or reduces operational incidents",
-          formula: "incidentsPerYear x avgCostPerIncident x reductionRate",
-          inputs: [
-            { key: "incidentsPerYear", label: "Incidents/year", type: "number", source: "customer", confidence: "A" },
-            { key: "avgCostPerIncident", label: "Cost/incident ($)", type: "currency", source: "industry_benchmark", confidence: "C", default: 10000 },
-            { key: "reductionRate", label: "Reduction (%)", type: "percentage", source: "zapier_benchmark", confidence: "C", default: 0.30, range: [0.20, 0.50] },
-          ],
-        },
-        {
-          id: "process_consistency", label: "Process Consistency",
-          description: "Ensures consistent process execution",
-          formula: "processesPerMonth x defectRate x costPerDefect x reductionRate x 12",
-          inputs: [
-            { key: "processesPerMonth", label: "Processes/month", type: "number", source: "customer", confidence: "A" },
-            { key: "defectRate", label: "Defect rate (%)", type: "percentage", source: "customer", confidence: "A" },
-            { key: "costPerDefect", label: "Cost/defect ($)", type: "currency", source: "customer", confidence: "A" },
-            { key: "reductionRate", label: "Reduction (%)", type: "percentage", source: "zapier_benchmark", confidence: "C", default: 0.65, range: [0.50, 0.80] },
-          ],
-        },
-      ],
-    },
-  ],
+  version: ROI_SCHEMA_VERSION,
+  schemaUpdatedAt: ROI_SCHEMA_UPDATED_AT,
+  benchmarkPackId: ROI_BENCHMARK_PACK_ID,
+  dimensions: buildRoiSchemaDimensions(),
   validStatuses: VALID_STATUSES,
   validEffortLevels: VALID_EFFORTS,
   architectureTypes: ["zap", "interface", "table", "agent"],
@@ -534,9 +350,12 @@ http.route({
             confidence: input.confidence,
             prompt: input.prompt ?? `Enter ${input.label}`,
           };
+          if (input.sourceCategory) entry.sourceCategory = input.sourceCategory;
           if (input.source) entry.source = input.source;
+          if (input.sourceUrl) entry.sourceUrl = input.sourceUrl;
           if (input.range) entry.range = input.range;
           if (input.guidance) entry.guidance = input.guidance;
+          if (input.coverageNote) entry.coverageNote = input.coverageNote;
           inputs[input.key as string] = entry;
         }
         return jsonResponse({
@@ -583,6 +402,7 @@ http.route({
       priorityOrder?: string[];
       currentSpend?: number;
       proposedSpend?: number;
+      benchmarkPackId?: string;
       assumptions?: Record<string, unknown>;
       importUseCaseIds?: string[];
       valueItems?: Array<{
@@ -622,6 +442,7 @@ http.route({
       name: body.name,
       role: body.role,
       priorityOrder: body.priorityOrder,
+      benchmarkPackId: body.benchmarkPackId ?? ROI_BENCHMARK_PACK_ID,
       currentSpend: body.currentSpend,
       proposedSpend: body.proposedSpend,
       ...(resolvedCompanyId && { companyId: resolvedCompanyId as any }),

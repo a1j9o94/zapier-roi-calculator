@@ -47,6 +47,9 @@ export default defineSchema({
     role: v.optional(v.string()),
     priorityOrder: v.optional(v.array(v.string())),
 
+    /** UVS benchmark pack used when this calculator was created (reproducible defaults). */
+    benchmarkPackId: v.optional(v.string()),
+
     // Referenced use case IDs (company-scoped sharing)
     useCaseIds: v.optional(v.array(v.id("useCases"))),
   }).index("by_shortId", ["shortId"]),
